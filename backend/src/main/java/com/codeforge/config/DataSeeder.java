@@ -2,7 +2,6 @@ package com.codeforge.config;
 
 import com.codeforge.entity.*;
 import com.codeforge.repository.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -30,7 +29,6 @@ public class DataSeeder implements CommandLineRunner {
     private final ActivityRepository activityRepository;
     private final DailyActivityRepository dailyActivityRepository;
     private final PasswordEncoder passwordEncoder;
-    private final ObjectMapper objectMapper;
 
     @Override
     @Transactional

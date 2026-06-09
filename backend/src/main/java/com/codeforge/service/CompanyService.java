@@ -15,7 +15,6 @@ public class CompanyService {
 
     private final CompanyRepository companyRepository;
     private final CompanyProblemRepository companyProblemRepository;
-    private final ProblemRepository problemRepository;
     private final SubmissionRepository submissionRepository;
 
     public List<CompanyDto.CompanyListItem> getAllCompanies() {

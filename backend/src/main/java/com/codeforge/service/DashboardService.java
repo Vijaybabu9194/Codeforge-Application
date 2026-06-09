@@ -16,13 +16,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class DashboardService {
 
-    private final UserRepository userRepository;
-    private final SubmissionRepository submissionRepository;
     private final BookmarkRepository bookmarkRepository;
     private final DailyActivityRepository dailyActivityRepository;
     private final ActivityRepository activityRepository;
     private final TopicRepository topicRepository;
-    private final ProblemRepository problemRepository;
 
     public DashboardDto.StatsResponse getStats(User user) {
         long bookmarkCount = bookmarkRepository.findByUserId(user.getId()).size();
