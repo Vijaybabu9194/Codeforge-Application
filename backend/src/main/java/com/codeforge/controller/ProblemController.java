@@ -1,0 +1,50 @@
+package com.codeforge.controller;
+
+import com.codeforge.dto.ProblemDto;
+import com.codeforge.entity.User;
+import com.codeforge.service.ProblemService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/problems")
+@RequiredArgsConstructor
+public class ProblemController {
+
+    private final ProblemService problemService;
+
+    @GetMapping
+    public ResponseEntity<ProblemDto.ProblemListResponse> getProblems(
+            Authentication auth,
+            @RequestParam(required = false) Long topicId,
+            @RequestParam(required = false) String difficulty,
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        User user = (User) auth.getPrincipal();
+        return ResponseEntity.ok(problemService.getProblems(user, topicId, difficulty, search, page, size));
+    }
+
+    @GetMapping("/topics")
+    public ResponseEntity<List<ProblemDto.TopicResponse>> getTopics() {
+        return ResponseEntity.ok(problemService.getTopics());
+    }
+
+    @PostMapping("/{id}/bookmark")
+    public ResponseEntity<Void> toggleBookmark(Authentication auth, @PathVariable Long id) {
+        User user = (User) auth.getPrincipal();
+        problemService.toggleBookmark(user, id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{id}/solve")
+    public ResponseEntity<Void> markSolved(Authentication auth, @PathVariable Long id) {
+        User user = (User) auth.getPrincipal();
+        problemService.markSolved(user, id);
+        return ResponseEntity.ok().build();
+    }
+}
