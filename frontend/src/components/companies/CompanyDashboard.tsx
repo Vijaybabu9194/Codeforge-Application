@@ -1,124 +1,121 @@
-import { TrendingUp } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
-
-const COLORS = { EASY: '#22C55E', MEDIUM: '#F59E0B', HARD: '#EF4444' };
+import React from 'react';
+import { TrendingUp, BarChart3, Target } from 'lucide-react';
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip as RechartsTooltip, 
+  ResponsiveContainer,
+  Cell
+} from 'recharts';
 
 interface CompanyDetail {
+  id: number;
   name: string;
+  logoUrl: string;
   totalQuestions: number;
-  interviewFrequency: number;
   hiringTrend: string;
+  interviewFrequency: number;
   difficultyDistribution: Record<string, number>;
   topTopics: { topic: string; count: number }[];
 }
 
 interface CompanyDashboardProps {
-  detail: CompanyDetail | null;
-  loading: boolean;
+  companyDetail: CompanyDetail;
 }
 
-export default function CompanyDashboard({ detail, loading }: CompanyDashboardProps) {
-  if (loading) {
-    return (
-      <div className="animate-pulse space-y-6">
-        <div className="h-32 bg-bg-secondary rounded-2xl" />
-        <div className="grid grid-cols-2 gap-6">
-          <div className="h-64 bg-bg-secondary rounded-2xl" />
-          <div className="h-64 bg-bg-secondary rounded-2xl" />
-        </div>
-      </div>
-    );
-  }
+export const CompanyDashboard: React.FC<CompanyDashboardProps> = ({ companyDetail }) => {
+  const getChartData = () => {
+    if (!companyDetail.difficultyDistribution) return [];
+    return Object.entries(companyDetail.difficultyDistribution).map(([name, value]) => ({
+      name,
+      value
+    }));
+  };
 
-  if (!detail) return null;
-
-  const pieData = Object.entries(detail.difficultyDistribution || {}).map(([k, v]) => ({
-    name: k,
-    value: v,
-  }));
+  const getDifficultyColor = (diff: string) => {
+    switch (diff.toUpperCase()) {
+      case 'EASY': return '#22C55E';
+      case 'MEDIUM': return '#F59E0B';
+      case 'HARD': return '#EF4444';
+      default: return '#6366F1';
+    }
+  };
 
   return (
-    <div className="space-y-6">
-      {/* Company Header */}
-      <div className="bg-surface rounded-2xl p-6 card-shadow">
-        <div className="flex items-center justify-between">
+    <div className="space-y-8">
+      {/* COMPANY OVERVIEW HEADER */}
+      <div className="bg-white border border-border rounded-premium p-6 shadow-card flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center space-x-4">
+          <div className="w-16 h-16 rounded-premium border border-border bg-[#FAFBFC] flex items-center justify-center text-3xl">
+            {companyDetail.logoUrl ? companyDetail.logoUrl : '🏢'}
+          </div>
           <div>
-            <h2 className="text-2xl font-bold text-text">{detail.name}</h2>
-            <p className="text-text-secondary text-sm mt-1">
-              {detail.totalQuestions} questions · Interview frequency: {detail.interviewFrequency}/10
+            <h1 className="text-2xl font-bold text-[#111827]">{companyDetail.name} Questions</h1>
+            <p className="text-sm text-secondaryText mt-1 flex items-center gap-1.5">
+              <TrendingUp className="w-4 h-4 text-primary" />
+              <span>Hiring Status: <span className="font-semibold text-text">{companyDetail.hiringTrend}</span></span>
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-success" />
-            <span className="text-sm font-medium text-success">{detail.hiringTrend}</span>
+        </div>
+
+        {/* Stats Counters */}
+        <div className="flex gap-8">
+          <div>
+            <span className="text-[10px] font-bold text-secondaryText tracking-wide uppercase">TOTAL QUESTIONS</span>
+            <span className="text-2xl font-bold text-text block mt-0.5">{companyDetail.totalQuestions}</span>
+          </div>
+          <div>
+            <span className="text-[10px] font-bold text-secondaryText tracking-wide uppercase">INTERVIEW REQ</span>
+            <span className="text-2xl font-bold text-primary block mt-0.5">{companyDetail.interviewFrequency}%</span>
           </div>
         </div>
       </div>
 
-      {/* Analytics */}
-      <div className="grid md:grid-cols-2 gap-6">
-        {/* Difficulty Distribution */}
-        <div className="bg-surface rounded-2xl p-6 card-shadow">
-          <h3 className="text-base font-semibold text-text mb-4">Difficulty Distribution</h3>
-          <div className="flex items-center gap-8">
-            <div className="w-[160px] h-[160px] relative">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={45}
-                    outerRadius={70}
-                    dataKey="value"
-                    strokeWidth={0}
-                  >
-                    {pieData.map((entry) => (
-                      <Cell key={entry.name} fill={COLORS[entry.name as keyof typeof COLORS]} />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="space-y-3">
-              {pieData.map((d) => (
-                <div key={d.name} className="flex items-center gap-3">
-                  <div
-                    className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: COLORS[d.name as keyof typeof COLORS] }}
-                  />
-                  <span className="text-sm text-text-secondary">
-                    {d.name.charAt(0) + d.name.slice(1).toLowerCase()}
-                  </span>
-                  <span className="text-sm font-semibold text-text">{d.value}</span>
-                </div>
-              ))}
-            </div>
+      {/* DASHBOARD CHARTS */}
+      <div className="grid md:grid-cols-3 gap-6">
+        {/* Difficulty Distribution Bar Chart */}
+        <div className="bg-white border border-border rounded-premium p-5 shadow-card md:col-span-2 space-y-4">
+          <h2 className="text-sm font-bold text-text flex items-center gap-2">
+            <BarChart3 className="w-4 h-4 text-primary" />
+            <span>Difficulty Distribution</span>
+          </h2>
+          <div className="h-40 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={getChartData()} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#F3F4F6" />
+                <XAxis type="number" stroke="#94A3B8" fontSize={10} tickLine={false} />
+                <YAxis type="category" dataKey="name" stroke="#94A3B8" fontSize={10} tickLine={false} />
+                <RechartsTooltip />
+                <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={16}>
+                  {getChartData().map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={getDifficultyColor(entry.name)} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Top Topics */}
-        <div className="bg-surface rounded-2xl p-6 card-shadow">
-          <h3 className="text-base font-semibold text-text mb-4">Most Asked Topics</h3>
-          <div className="h-[160px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={detail.topTopics} layout="vertical">
-                <XAxis type="number" hide />
-                <YAxis
-                  type="category"
-                  dataKey="topic"
-                  tick={{ fontSize: 11, fill: '#6B7280' }}
-                  width={110}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <Tooltip />
-                <Bar dataKey="count" fill="#6366F1" radius={[0, 6, 6, 0]} barSize={14} />
-              </BarChart>
-            </ResponsiveContainer>
+        {/* Most Asked Topics */}
+        <div className="bg-white border border-border rounded-premium p-5 shadow-card space-y-4 flex flex-col">
+          <h2 className="text-sm font-bold text-text flex items-center gap-2">
+            <Target className="w-4 h-4 text-primary" />
+            <span>Most Asked Topics</span>
+          </h2>
+          <div className="flex-1 overflow-y-auto space-y-2">
+            {companyDetail.topTopics?.map((topic, i) => (
+              <div key={i} className="flex justify-between items-center bg-[#F5F7FA] border border-border p-2.5 rounded-premium text-xs">
+                <span className="font-semibold text-text">{topic.topic}</span>
+                <span className="bg-indigo-50 text-primary font-bold px-2 py-0.5 rounded-full">{topic.count} questions</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
     </div>
   );
-}
+};
+export default CompanyDashboard;

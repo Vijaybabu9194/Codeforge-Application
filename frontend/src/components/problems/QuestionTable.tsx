@@ -1,130 +1,123 @@
-import { Bookmark, BookmarkCheck, CheckCircle2, Circle, ChevronLeft, ChevronRight } from 'lucide-react';
-
-const difficultyColor: Record<string, { text: string; bg: string }> = {
-  EASY: { text: '#22C55E', bg: '#22C55E10' },
-  MEDIUM: { text: '#F59E0B', bg: '#F59E0B10' },
-  HARD: { text: '#EF4444', bg: '#EF444410' },
-};
+import React from 'react';
+import { Bookmark, CheckCircle, HelpCircle } from 'lucide-react';
 
 interface Problem {
   id: number;
   title: string;
-  difficulty: 'EASY' | 'MEDIUM' | 'HARD';
+  slug: string;
+  difficulty: string;
   acceptanceRate: number;
+  topics: string[];
   companies: string[];
   solved: boolean;
   bookmarked: boolean;
 }
 
 interface QuestionTableProps {
-  problems: {
-    problems: Problem[];
-    totalPages: number;
-    totalElements: number;
-  } | null;
+  problems: Problem[];
   loading: boolean;
-  page: number;
-  setPage: (page: number) => void;
-  onBookmark: (id: number) => void;
-  onSolve: (id: number) => void;
+  onSolveToggle: (id: number) => void;
+  onBookmarkToggle: (id: number) => void;
 }
 
-export default function QuestionTable({
+export const QuestionTable: React.FC<QuestionTableProps> = ({
   problems,
   loading,
-  page,
-  setPage,
-  onBookmark,
-  onSolve,
-}: QuestionTableProps) {
+  onSolveToggle,
+  onBookmarkToggle,
+}) => {
   return (
-    <div>
-      <div className="bg-surface rounded-2xl card-shadow overflow-hidden">
-        <table className="w-full border-collapse">
+    <div className="bg-white border border-[#E5E7EB] rounded-premium shadow-card overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="border-b border-border">
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-text-secondary uppercase tracking-wider w-10">Status</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-text-secondary uppercase tracking-wider">Problem</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-text-secondary uppercase tracking-wider w-24">Difficulty</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-text-secondary uppercase tracking-wider w-28">Acceptance</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-text-secondary uppercase tracking-wider">Companies</th>
-              <th className="px-5 py-3.5 text-xs font-semibold text-text-secondary uppercase tracking-wider w-10"></th>
+            <tr className="border-b border-[#E5E7EB] bg-[#F5F7FA] text-xs font-bold text-secondaryText uppercase tracking-wider">
+              <th className="py-4 px-6 w-16 text-center">Status</th>
+              <th className="py-4 px-6">Problem Name</th>
+              <th className="py-4 px-6 w-32">Difficulty</th>
+              <th className="py-4 px-6 w-32">Acceptance</th>
+              <th className="py-4 px-6">Company Tags</th>
+              <th className="py-4 px-6 w-20 text-center">Save</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-[#E5E7EB] text-sm text-[#111827]">
             {loading ? (
-              [...Array(10)].map((_, i) => (
-                <tr key={i} className="border-b border-border/50">
-                  <td colSpan={6} className="px-5 py-4">
-                    <div className="h-4 bg-bg-secondary rounded-lg animate-pulse" />
-                  </td>
+              [...Array(6)].map((_, i) => (
+                <tr key={i} className="animate-pulse">
+                  <td className="py-4 px-6 text-center"><div className="w-5 h-5 bg-gray-100 rounded-full mx-auto" /></td>
+                  <td className="py-4 px-6"><div className="h-4 bg-gray-100 rounded w-2/3" /></td>
+                  <td className="py-4 px-6"><div className="h-6 bg-gray-100 rounded-premium w-16" /></td>
+                  <td className="py-4 px-6"><div className="h-4 bg-gray-100 rounded w-12" /></td>
+                  <td className="py-4 px-6 flex gap-1.5"><div className="h-6 bg-gray-100 rounded-premium w-16" /><div className="h-6 bg-gray-100 rounded-premium w-16" /></td>
+                  <td className="py-4 px-6 text-center"><div className="w-4 h-4 bg-gray-100 rounded mx-auto" /></td>
                 </tr>
               ))
-            ) : problems?.problems?.length === 0 ? (
+            ) : problems.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-5 py-12 text-center text-text-secondary">
-                  No problems found.
+                <td colSpan={6} className="py-12 text-center text-[#6B7280]">
+                  <HelpCircle className="w-12 h-12 text-muted mx-auto mb-3" />
+                  <p className="font-bold text-base text-text">No Problems Found</p>
+                  <p className="text-xs mt-1">Try adjusting your filters or search keywords.</p>
                 </td>
               </tr>
             ) : (
-              problems?.problems?.map((p) => (
-                <tr key={p.id} className="border-b border-border/50 hover:bg-bg/50 transition-colors group">
-                  <td className="px-5 py-3.5">
+              problems.map((prob) => (
+                <tr key={prob.id} className="hover:bg-[#FAFBFC] transition group">
+                  <td className="py-4 px-6 text-center">
                     <button
-                      onClick={() => onSolve(p.id)}
-                      className="bg-transparent border-none cursor-pointer p-0 flex items-center justify-center"
+                      onClick={() => onSolveToggle(prob.id)}
+                      className={`focus:outline-none transition hover:scale-110 ${
+                        prob.solved ? 'text-success' : 'text-[#94A3B8] hover:text-[#22C55E]'
+                      }`}
                     >
-                      {p.solved ? (
-                        <CheckCircle2 className="w-5 h-5 text-success" />
-                      ) : (
-                        <Circle className="w-5 h-5 text-muted group-hover:text-text-secondary transition-colors" />
-                      )}
+                      <CheckCircle className={`w-5 h-5 ${prob.solved ? 'fill-green-50' : ''}`} />
                     </button>
                   </td>
-                  <td className="px-5 py-3.5">
-                    <span className="text-sm font-medium text-text">{p.title}</span>
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <span
-                      className="text-xs font-semibold px-2.5 py-1 rounded-lg inline-block"
-                      style={{
-                        color: difficultyColor[p.difficulty]?.text,
-                        backgroundColor: difficultyColor[p.difficulty]?.bg,
-                      }}
+                  <td className="py-4 px-6 font-semibold text-text">
+                    <a 
+                      href={`https://leetcode.com/problems/${prob.slug}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="hover:text-primary hover:underline transition"
                     >
-                      {p.difficulty.charAt(0) + p.difficulty.slice(1).toLowerCase()}
+                      {prob.title}
+                    </a>
+                  </td>
+                  <td className="py-4 px-6">
+                    <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                      prob.difficulty === 'EASY' ? 'bg-green-50 text-success' :
+                      prob.difficulty === 'MEDIUM' ? 'bg-amber-50 text-warning' :
+                      'bg-red-50 text-danger'
+                    }`}>
+                      {prob.difficulty}
                     </span>
                   </td>
-                  <td className="px-5 py-3.5">
-                    <span className="text-sm text-text-secondary">{p.acceptanceRate?.toFixed(1)}%</span>
+                  <td className="py-4 px-6 text-secondaryText">
+                    {prob.acceptanceRate?.toFixed(1)}%
                   </td>
-                  <td className="px-5 py-3.5">
-                    <div className="flex flex-wrap gap-1">
-                      {p.companies?.slice(0, 3).map((c) => (
-                        <span
-                          key={c}
-                          className="text-xs px-2 py-0.5 rounded-md bg-bg-secondary text-text-secondary font-medium"
+                  <td className="py-4 px-6">
+                    <div className="flex flex-wrap gap-1.5">
+                      {prob.companies?.slice(0, 3).map((c, i) => (
+                        <span 
+                          key={i} 
+                          className="text-[10px] bg-secondaryBg text-secondaryText px-2 py-0.5 rounded-premium border border-border"
                         >
                           {c}
                         </span>
                       ))}
-                      {p.companies?.length > 3 && (
-                        <span className="text-xs px-2 py-0.5 rounded-md bg-bg-secondary text-muted">
-                          +{p.companies.length - 3}
-                        </span>
+                      {prob.companies?.length > 3 && (
+                        <span className="text-[10px] text-muted px-1.5 py-0.5">+{prob.companies.length - 3}</span>
                       )}
                     </div>
                   </td>
-                  <td className="px-5 py-3.5">
+                  <td className="py-4 px-6 text-center">
                     <button
-                      onClick={() => onBookmark(p.id)}
-                      className="bg-transparent border-none cursor-pointer p-0 flex items-center justify-center"
+                      onClick={() => onBookmarkToggle(prob.id)}
+                      className={`focus:outline-none transition hover:scale-110 ${
+                        prob.bookmarked ? 'text-danger' : 'text-[#94A3B8] hover:text-[#EF4444]'
+                      }`}
                     >
-                      {p.bookmarked ? (
-                        <BookmarkCheck className="w-4.5 h-4.5 text-primary" />
-                      ) : (
-                        <Bookmark className="w-4.5 h-4.5 text-muted group-hover:text-text-secondary transition-colors" />
-                      )}
+                      <Bookmark className={`w-4 h-4 ${prob.bookmarked ? 'fill-danger text-danger' : ''}`} />
                     </button>
                   </td>
                 </tr>
@@ -133,31 +126,7 @@ export default function QuestionTable({
           </tbody>
         </table>
       </div>
-
-      {/* Pagination */}
-      {problems && problems.totalPages > 1 && (
-        <div className="flex items-center justify-between mt-5">
-          <p className="text-sm text-text-secondary">
-            Showing {page * 20 + 1}–{Math.min((page + 1) * 20, problems.totalElements)} of {problems.totalElements}
-          </p>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setPage(Math.max(0, page - 1))}
-              disabled={page === 0}
-              className="p-2 rounded-xl border border-border bg-surface hover:bg-bg-secondary disabled:opacity-40 transition-all cursor-pointer"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => setPage(Math.min(problems.totalPages - 1, page + 1))}
-              disabled={page >= problems.totalPages - 1}
-              className="p-2 rounded-xl border border-border bg-surface hover:bg-bg-secondary disabled:opacity-40 transition-all cursor-pointer"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
-}
+};
+export default QuestionTable;

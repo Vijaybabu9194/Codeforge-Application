@@ -1,24 +1,23 @@
-import { Code2 } from 'lucide-react';
+import React from 'react';
 
-export default function LandingFooter() {
+export const LandingFooter: React.FC = () => {
   return (
-    <footer className="border-t border-[#E2E8F0] bg-white py-12 px-6">
-      <div className="max-w-[1400px] mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg gradient-primary flex items-center justify-center">
-            <Code2 className="w-4 h-4 text-white" />
+    <footer className="bg-white border-t border-[#E5E7EB] py-12">
+      <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6 text-sm text-secondaryText">
+        <div className="flex items-center space-x-2">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-glow">
+            CF
           </div>
-          <span className="text-base font-bold text-[#0F172A]">Codeforge</span>
+          <span className="font-bold text-text">Codeforge</span>
         </div>
-        <div className="flex items-center gap-8">
-          {['Features', 'Pricing', 'Roadmap', 'About', 'Contact'].map((link) => (
-            <a key={link} href="#" className="text-sm text-[#64748B] hover:text-[#0F172A] transition-colors">
-              {link}
-            </a>
-          ))}
+        <p>© {new Date().getFullYear()} Codeforge Inc. All rights reserved.</p>
+        <div className="flex items-center space-x-6">
+          <a href="#privacy" className="hover:text-text transition">Privacy Policy</a>
+          <a href="#terms" className="hover:text-text transition">Terms of Service</a>
+          <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="hover:text-text transition">GitHub</a>
         </div>
-        <p className="text-sm text-[#94A3B8]">© 2025 Codeforge. All rights reserved.</p>
       </div>
     </footer>
   );
-}
+};
+export default LandingFooter;

@@ -1,176 +1,188 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
-import LandingNavbar from '@/components/landing/LandingNavbar';
-import HeroSection from '@/components/landing/HeroSection';
-import FeaturesSection from '@/components/landing/FeaturesSection';
-import LandingFooter from '@/components/landing/LandingFooter';
-import { X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
+import LandingNavbar from '../components/landing/LandingNavbar';
+import HeroSection from '../components/landing/HeroSection';
+import FeaturesSection from '../components/landing/FeaturesSection';
+import LandingFooter from '../components/landing/LandingFooter';
 
-export default function LandingPage() {
-  const [showLogin, setShowLogin] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(false);
-  const [name, setName] = useState('');
+export const LandingPage: React.FC = () => {
+  const { login, register, loading } = useAuth();
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState<'login' | 'signup' | null>(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const { login, register } = useAuth();
-  const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
     try {
-      if (isSignUp) {
-        await register(name, email, password);
-      } else {
+      if (showAuthModal === 'login') {
         await login(email, password);
+      } else {
+        await register(name, email, password);
       }
-      navigate('/home');
+      setShowAuthModal(null);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Something went wrong. Make sure the backend is running.');
-    } finally {
-      setLoading(false);
+      setError(err.response?.data?.message || 'Authentication failed. Please check your inputs.');
     }
   };
 
-  const inputStyle = {
-    width: '100%',
-    padding: '10px 16px',
-    borderRadius: '12px',
-    border: '1.5px solid #E2E8F0',
-    background: '#F8F9FC',
-    color: '#0F172A',
-    fontSize: '14px',
-    fontFamily: 'inherit',
-    transition: 'all 0.15s ease',
-    outline: 'none',
-  } as React.CSSProperties;
-
-  const labelStyle = {
-    display: 'block',
-    fontSize: '13px',
-    fontWeight: 500,
-    color: '#0F172A',
-    marginBottom: '6px',
-  } as React.CSSProperties;
+  const autofillDemo = () => {
+    setEmail('vijay@codeforge.dev');
+    setPassword('password123');
+  };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#F8F9FC' }}>
-      <LandingNavbar onLogin={() => { setShowLogin(true); setIsSignUp(false); }} onSignUp={() => { setShowLogin(true); setIsSignUp(true); }} />
-      <HeroSection onGetStarted={() => { setShowLogin(true); setIsSignUp(true); }} />
+    <div className="min-h-screen bg-[#FAFBFC] text-[#111827] relative overflow-hidden select-none">
+      {/* BACKGROUND DECORATIVE GLOW */}
+      <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-indigo-50 blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-purple-50 blur-[100px] pointer-events-none" />
+
+      {/* NAVBAR */}
+      <LandingNavbar
+        isScrolled={isScrolled}
+        onLoginClick={() => setShowAuthModal('login')}
+        onSignupClick={() => setShowAuthModal('signup')}
+      />
+
+      {/* HERO SECTION */}
+      <HeroSection
+        onSignupClick={() => setShowAuthModal('signup')}
+        onDemoClick={() => {
+          setShowAuthModal('login');
+          autofillDemo();
+        }}
+      />
+
+      {/* FEATURES SECTION */}
       <FeaturesSection />
+
+      {/* FOOTER */}
       <LandingFooter />
 
-      {/* Auth Modal */}
-      {showLogin && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
-          onClick={() => setShowLogin(false)}
-        >
-          {/* Backdrop */}
-          <div className="absolute inset-0" style={{ backgroundColor: 'rgba(15,23,42,0.4)', backdropFilter: 'blur(8px)' }} />
-
-          {/* Modal card */}
-          <div
-            className="relative bg-white rounded-2xl p-8 w-full max-w-md animate-scale-in"
-            style={{ boxShadow: '0 24px 64px rgba(15,23,42,0.18), 0 2px 8px rgba(15,23,42,0.08)' }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Close */}
-            <button
-              onClick={() => setShowLogin(false)}
-              className="absolute top-4 right-4 p-1.5 rounded-lg transition-colors cursor-pointer border-none bg-transparent"
-              onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#F1F4F9')}
-              onMouseLeave={e => (e.currentTarget.style.backgroundColor = '')}
+      {/* AUTH MODAL OVERLAY */}
+      {showAuthModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-premium border border-border p-8 w-full max-w-md shadow-card relative mx-4 animate-float" style={{ animationIterationCount: 1, animationDuration: '0.4s' }}>
+            <button 
+              onClick={() => setShowAuthModal(null)} 
+              className="absolute top-4 right-4 text-secondaryText hover:text-text font-bold text-lg"
             >
-              <X className="w-4 h-4 text-[#64748B]" />
+              &times;
             </button>
-
-            {/* Header */}
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-[#0F172A] mb-1">
-                {isSignUp ? 'Create your account' : 'Welcome back'}
-              </h2>
-              <p className="text-sm text-[#64748B]">
-                {isSignUp ? 'Start your DSA journey today' : 'Sign in to continue your progress'}
+            <div className="text-center mb-6">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-2xl mx-auto mb-4 shadow-glow">
+                CF
+              </div>
+              <h3 className="text-2xl font-bold text-text">
+                {showAuthModal === 'login' ? 'Welcome Back' : 'Create Account'}
+              </h3>
+              <p className="text-sm text-secondaryText mt-1">
+                {showAuthModal === 'login' ? 'Login to continue your preparation' : 'Start your prep journey with Codeforge'}
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {isSignUp && (
+            {error && (
+              <div className="bg-red-50 text-danger border border-red-100 p-3 rounded-premium text-xs mb-4 text-center">
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleAuthSubmit} className="space-y-4">
+              {showAuthModal === 'signup' && (
                 <div>
-                  <label style={labelStyle}>Name</label>
-                  <input
-                    type="text"
+                  <label className="block text-xs font-semibold text-secondaryText mb-1.5">FULL NAME</label>
+                  <input 
+                    type="text" 
+                    required 
+                    placeholder="Vijay Babu"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    style={inputStyle}
-                    placeholder="Your name"
-                    required
-                    onFocus={e => { e.target.style.borderColor = '#6366F1'; e.target.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.12)'; }}
-                    onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none'; }}
+                    className="w-full px-4 py-3 bg-[#F5F7FA] border border-transparent focus:bg-white focus:border-primary focus:ring-0 rounded-premium text-sm outline-none transition"
                   />
                 </div>
               )}
               <div>
-                <label style={labelStyle}>Email</label>
-                <input
-                  type="email"
+                <label className="block text-xs font-semibold text-secondaryText mb-1.5">EMAIL ADDRESS</label>
+                <input 
+                  type="email" 
+                  required 
+                  placeholder="vijay@codeforge.dev"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  style={inputStyle}
-                  placeholder="you@example.com"
-                  required
-                  onFocus={e => { e.target.style.borderColor = '#6366F1'; e.target.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.12)'; }}
-                  onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none'; }}
+                  className="w-full px-4 py-3 bg-[#F5F7FA] border border-transparent focus:bg-white focus:border-primary focus:ring-0 rounded-premium text-sm outline-none transition"
                 />
               </div>
               <div>
-                <label style={labelStyle}>Password</label>
-                <input
-                  type="password"
+                <label className="block text-xs font-semibold text-secondaryText mb-1.5">PASSWORD</label>
+                <input 
+                  type="password" 
+                  required 
+                  placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  style={inputStyle}
-                  placeholder="••••••••"
-                  required
-                  minLength={6}
-                  onFocus={e => { e.target.style.borderColor = '#6366F1'; e.target.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.12)'; }}
-                  onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none'; }}
+                  className="w-full px-4 py-3 bg-[#F5F7FA] border border-transparent focus:bg-white focus:border-primary focus:ring-0 rounded-premium text-sm outline-none transition"
                 />
               </div>
 
-              {error && (
-                <div style={{ padding: '10px 14px', borderRadius: '10px', backgroundColor: '#FEF2F2', border: '1px solid #FECACA' }}>
-                  <p style={{ fontSize: '13px', color: '#EF4444' }}>{error}</p>
-                </div>
-              )}
-
-              <button
-                type="submit"
+              <button 
+                type="submit" 
                 disabled={loading}
-                className="w-full py-3 rounded-xl text-white font-semibold text-sm transition-all cursor-pointer border-none gradient-primary hover:scale-[1.01] active:scale-[0.99] shadow-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-3 bg-primary hover:bg-primary-hover text-white font-medium rounded-premium shadow-glow hover:scale-[1.01] active:scale-[0.99] transition duration-200 mt-2 flex items-center justify-center"
               >
-                {loading ? 'Please wait...' : isSignUp ? 'Create Account' : 'Sign In'}
+                {loading ? 'Processing...' : (showAuthModal === 'login' ? 'Login' : 'Sign Up')}
               </button>
             </form>
 
-            <p className="text-center text-sm mt-5" style={{ color: '#64748B' }}>
-              {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
-              <button
-                onClick={() => { setIsSignUp(!isSignUp); setError(''); }}
-                className="font-semibold cursor-pointer bg-transparent border-none"
-                style={{ color: '#6366F1' }}
-              >
-                {isSignUp ? 'Sign In' : 'Sign Up'}
-              </button>
-            </p>
+            <div className="mt-6 pt-6 border-t border-[#E5E7EB] text-center text-xs text-secondaryText">
+              {showAuthModal === 'login' ? (
+                <p>
+                  New to Codeforge?{' '}
+                  <button 
+                    onClick={() => { setShowAuthModal('signup'); setError(''); }} 
+                    className="text-primary font-semibold hover:underline"
+                  >
+                    Create an account
+                  </button>
+                </p>
+              ) : (
+                <p>
+                  Already have an account?{' '}
+                  <button 
+                    onClick={() => { setShowAuthModal('login'); setError(''); }} 
+                    className="text-primary font-semibold hover:underline"
+                  >
+                    Login here
+                  </button>
+                </p>
+              )}
+            </div>
+
+            {showAuthModal === 'login' && (
+              <div className="mt-3 text-center">
+                <button 
+                  onClick={autofillDemo}
+                  className="text-xs text-primary font-medium hover:underline"
+                  type="button"
+                >
+                  Autofill Demo Account credentials
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
     </div>
   );
-}
+};
+export default LandingPage;

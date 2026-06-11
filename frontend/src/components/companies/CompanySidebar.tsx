@@ -1,63 +1,77 @@
+import React from 'react';
 import { Search } from 'lucide-react';
 
-interface Company {
+interface CompanyListItem {
   id: number;
   name: string;
+  logoUrl: string;
   totalQuestions: number;
+  hiringTrend: string;
 }
 
 interface CompanySidebarProps {
-  companies: Company[];
-  selectedId: number | null;
-  setSelectedId: (id: number) => void;
-  companySearch: string;
-  setCompanySearch: (search: string) => void;
+  companies: CompanyListItem[];
+  selectedCompanyId: number | null;
+  onCompanySelect: (id: number) => void;
+  searchQuery: string;
+  onSearchChange: (val: string) => void;
+  loadingList: boolean;
 }
 
-export default function CompanySidebar({
+export const CompanySidebar: React.FC<CompanySidebarProps> = ({
   companies,
-  selectedId,
-  setSelectedId,
-  companySearch,
-  setCompanySearch,
-}: CompanySidebarProps) {
-  const filtered = companies.filter((c) =>
-    c.name.toLowerCase().includes(companySearch.toLowerCase())
-  );
-
+  selectedCompanyId,
+  onCompanySelect,
+  searchQuery,
+  onSearchChange,
+  loadingList,
+}) => {
   return (
-    <aside className="w-64 shrink-0 bg-surface border-r border-border p-5">
-      <h3 className="text-sm font-semibold text-text uppercase tracking-wide mb-4">Companies</h3>
-      <div className="relative mb-4">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
-        <input
-          type="text"
-          placeholder="Search..."
-          value={companySearch}
-          onChange={(e) => setCompanySearch(e.target.value)}
-          className="w-full pl-9 pr-3 py-2 bg-bg border border-border rounded-xl text-sm text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-        />
+    <aside className="w-64 border-r border-[#E5E7EB] bg-white flex flex-col">
+      <div className="p-4 border-b border-border">
+        <span className="text-xs font-bold text-secondaryText tracking-wide block mb-3">COMPANIES</span>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted w-3.5 h-3.5" />
+          <input
+            type="text"
+            placeholder="Search company..."
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className="w-full pl-9 pr-3 py-2 bg-[#F5F7FA] border border-transparent focus:bg-white focus:border-primary rounded-premium text-xs outline-none transition"
+          />
+        </div>
       </div>
-      <div className="space-y-0.5 max-h-[calc(100vh-220px)] overflow-y-auto pr-1 custom-scrollbar">
-        {filtered.length === 0 ? (
-          <p className="text-xs text-text-secondary text-center py-4">No companies found</p>
+
+      <div className="flex-1 overflow-y-auto p-2 space-y-1">
+        {loadingList ? (
+          [...Array(6)].map((_, i) => (
+            <div key={i} className="h-10 bg-gray-100 rounded-premium animate-pulse m-1" />
+          ))
+        ) : companies.length === 0 ? (
+          <p className="text-xs text-secondaryText text-center mt-6">No companies found</p>
         ) : (
-          filtered.map((c) => (
+          companies.map((c) => (
             <button
               key={c.id}
-              onClick={() => setSelectedId(c.id)}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer border-none text-left ${
-                selectedId === c.id
-                  ? 'bg-primary/5 text-primary'
-                  : 'text-text-secondary hover:bg-bg-secondary hover:text-text'
+              onClick={() => onCompanySelect(c.id)}
+              className={`w-full text-left px-3 py-2.5 rounded-premium text-sm font-semibold flex items-center justify-between transition ${
+                selectedCompanyId === c.id 
+                  ? 'bg-indigo-50 text-primary' 
+                  : 'text-secondaryText hover:bg-secondaryBg hover:text-text'
               }`}
             >
-              <span>{c.name}</span>
-              <span className="text-xs text-muted">{c.totalQuestions}</span>
+              <div className="flex items-center space-x-2.5 min-w-0">
+                <span className="text-base">{c.logoUrl ? c.logoUrl : '🏢'}</span>
+                <span className="truncate">{c.name}</span>
+              </div>
+              <span className="text-[10px] bg-secondaryBg text-muted px-2 py-0.5 rounded-full font-medium">
+                {c.totalQuestions}
+              </span>
             </button>
           ))
         )}
       </div>
     </aside>
   );
-}
+};
+export default CompanySidebar;

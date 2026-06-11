@@ -1,59 +1,71 @@
-import { CheckCircle2 } from 'lucide-react';
+import React from 'react';
 
-const PLATFORM_ICONS: Record<string, string> = {
-  LEETCODE: '🟡',
-  GEEKSFORGEEKS: '🟢',
-  CODECHEF: '⭐',
-  HACKERRANK: '🟩',
-  CODEFORCES: '🔵',
-};
-
-const PLATFORM_NAMES: Record<string, string> = {
-  LEETCODE: 'LeetCode',
-  GEEKSFORGEEKS: 'GeeksForGeeks',
-  CODECHEF: 'CodeChef',
-  HACKERRANK: 'HackerRank',
-  CODEFORCES: 'Codeforces',
-};
-
-interface Platform {
+interface PlatformItem {
   platform: string;
+  username: string;
+  problemsSolved: number;
+  contestRating: number;
   connected: boolean;
 }
 
 interface PlatformSidebarProps {
-  platforms: Platform[];
-  selected: string;
-  setSelected: (platform: string) => void;
+  platforms: PlatformItem[];
+  selectedPlatform: string;
+  onPlatformSelect: (name: string) => void;
+  loadingList: boolean;
 }
 
-export default function PlatformSidebar({
+export const PlatformSidebar: React.FC<PlatformSidebarProps> = ({
   platforms,
-  selected,
-  setSelected,
-}: PlatformSidebarProps) {
+  selectedPlatform,
+  onPlatformSelect,
+  loadingList,
+}) => {
+  const getPlatformIcon = (name: string) => {
+    switch (name) {
+      case 'LeetCode': return '🟡';
+      case 'Codeforces': return '🔴';
+      case 'CodeChef': return '🟤';
+      case 'GeeksForGeeks': return '🟢';
+      default: return '💻';
+    }
+  };
+
   return (
-    <aside className="w-64 shrink-0 bg-surface border-r border-border p-5">
-      <h3 className="text-sm font-semibold text-text uppercase tracking-wide mb-4">Platforms</h3>
-      <div className="space-y-0.5">
-        {platforms.map((p) => (
-          <button
-            key={p.platform}
-            onClick={() => setSelected(p.platform)}
-            className={`w-full flex items-center justify-between px-3 py-3 rounded-xl text-sm font-medium transition-all cursor-pointer border-none text-left ${
-              selected === p.platform
-                ? 'bg-primary/5 text-primary'
-                : 'text-text-secondary hover:bg-bg-secondary hover:text-text'
-            }`}
-          >
-            <span className="flex items-center gap-3">
-              <span className="text-lg">{PLATFORM_ICONS[p.platform] || '💻'}</span>
-              {PLATFORM_NAMES[p.platform] || p.platform}
-            </span>
-            {p.connected && <CheckCircle2 className="w-4 h-4 text-success" />}
-          </button>
-        ))}
+    <aside className="w-64 border-r border-[#E5E7EB] bg-white p-4 space-y-4">
+      <div>
+        <span className="text-xs font-bold text-secondaryText tracking-wide block mb-3">CODING PLATFORMS</span>
+        <div className="space-y-1.5">
+          {loadingList ? (
+            [...Array(4)].map((_, i) => (
+              <div key={i} className="h-10 bg-gray-100 rounded-premium animate-pulse" />
+            ))
+          ) : (
+            platforms.map((p) => (
+              <button
+                key={p.platform}
+                onClick={() => onPlatformSelect(p.platform)}
+                className={`w-full text-left px-3 py-2.5 rounded-premium text-sm font-semibold flex items-center justify-between border transition ${
+                  selectedPlatform === p.platform 
+                    ? 'bg-indigo-50 border-indigo-100 text-primary' 
+                    : 'bg-white border-transparent text-secondaryText hover:bg-secondaryBg hover:text-text'
+                }`}
+              >
+                <div className="flex items-center space-x-2.5 min-w-0">
+                  <span className="text-lg">{getPlatformIcon(p.platform)}</span>
+                  <span className="truncate">{p.platform}</span>
+                </div>
+                {p.connected ? (
+                  <span className="w-1.5 h-1.5 rounded-full bg-success" />
+                ) : (
+                  <span className="text-[10px] text-muted">Disconnect</span>
+                )}
+              </button>
+            ))
+          )}
+        </div>
       </div>
     </aside>
   );
-}
+};
+export default PlatformSidebar;

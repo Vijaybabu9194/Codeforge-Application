@@ -1,154 +1,88 @@
-import { useMemo, useState } from 'react';
+import React from 'react';
+import { Calendar } from 'lucide-react';
 
-interface HeatmapEntry {
+interface HeatmapItem {
   date: string;
   count: number;
 }
 
-const CELL_SIZE = 13;
-const CELL_GAP = 3;
-const DAYS_OF_WEEK = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-function getColor(count: number): string {
-  if (count === 0) return '#EBEDF0';
-  if (count <= 2) return '#C7D2FE';
-  if (count <= 4) return '#A5B4FC';
-  if (count <= 6) return '#818CF8';
-  return '#6366F1';
+interface ActivityHeatmapProps {
+  heatmapData: HeatmapItem[];
 }
 
-export default function ActivityHeatmap({ data }: { data: HeatmapEntry[] }) {
-  const [tooltip, setTooltip] = useState<{ x: number; y: number; date: string; count: number } | null>(null);
+export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ heatmapData }) => {
+  if (heatmapData.length === 0) return null;
 
-  const { grid, monthLabels, totalContributions } = useMemo(() => {
-    const map = new Map(data.map((d) => [d.date, d.count]));
-    const today = new Date();
-    const startDate = new Date(today);
-    startDate.setDate(startDate.getDate() - 364);
+  // Take the last 371 elements to display exactly 53 weeks of grid
+  const last365 = heatmapData.slice(-371);
+  const weeks: HeatmapItem[][] = [];
+  let currentWeek: HeatmapItem[] = [];
 
-    // Align to Sunday
-    const dayOfWeek = startDate.getDay();
-    startDate.setDate(startDate.getDate() - dayOfWeek);
-
-    const weeks: { date: Date; count: number }[][] = [];
-    const labels: { label: string; week: number }[] = [];
-    let total = 0;
-    let currentMonth = -1;
-
-    const cursor = new Date(startDate);
-    let weekIdx = 0;
-
-    while (cursor <= today || weeks.length === 0 || weeks[weeks.length - 1].length < 7) {
-      if (!weeks[weekIdx]) weeks[weekIdx] = [];
-      const dateStr = cursor.toISOString().split('T')[0];
-      const count = map.get(dateStr) || 0;
-      total += count;
-
-      if (cursor.getMonth() !== currentMonth) {
-        currentMonth = cursor.getMonth();
-        labels.push({ label: MONTHS[currentMonth], week: weekIdx });
-      }
-
-      weeks[weekIdx].push({ date: new Date(cursor), count });
-
-      if (weeks[weekIdx].length === 7) weekIdx++;
-      cursor.setDate(cursor.getDate() + 1);
-
-      if (cursor > today && weeks[weeks.length - 1]?.length === 7) break;
+  last365.forEach((item, index) => {
+    currentWeek.push(item);
+    if (currentWeek.length === 7 || index === last365.length - 1) {
+      weeks.push(currentWeek);
+      currentWeek = [];
     }
-
-    return { grid: weeks, monthLabels: labels, totalContributions: total };
-  }, [data]);
+  });
 
   return (
-    <div className="bg-surface rounded-2xl p-6 card-shadow">
+    <div className="bg-white border border-border rounded-premium p-6 shadow-card">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-base font-semibold text-text">Activity</h3>
-        <p className="text-sm text-text-secondary">
-          <span className="font-semibold text-text">{totalContributions}</span> contributions in the last year
-        </p>
+        <h2 className="text-base font-bold text-text flex items-center gap-2">
+          <Calendar className="w-4 h-4 text-primary" />
+          <span>Activity Heatmap</span>
+        </h2>
+        <span className="text-xs text-secondaryText">Past year of submissions</span>
       </div>
 
-      <div className="overflow-x-auto">
-        <div className="relative" style={{ minWidth: '700px' }}>
-          {/* Month labels */}
-          <div className="flex ml-8 mb-1">
-            {monthLabels.map((m, i) => (
-              <span
-                key={i}
-                className="text-xs text-text-secondary"
-                style={{ position: 'absolute', left: `${m.week * (CELL_SIZE + CELL_GAP) + 32}px` }}
-              >
-                {m.label}
-              </span>
-            ))}
+      <div className="flex flex-col space-y-2 select-none">
+        <div className="flex items-center justify-between text-xs text-secondaryText">
+          <div className="flex gap-2">
+            <span>Jan</span>
+            <span className="ml-8">Mar</span>
+            <span className="ml-10">May</span>
+            <span className="ml-10">Jul</span>
+            <span className="ml-12">Sep</span>
+            <span className="ml-10">Nov</span>
           </div>
+          <div className="flex items-center space-x-1.5">
+            <span>Less</span>
+            <div className="w-2.5 h-2.5 bg-gray-100 rounded-sm" />
+            <div className="w-2.5 h-2.5 bg-indigo-100 rounded-sm" />
+            <div className="w-2.5 h-2.5 bg-indigo-300 rounded-sm" />
+            <div className="w-2.5 h-2.5 bg-primary rounded-sm" />
+            <span>More</span>
+          </div>
+        </div>
+        
+        <div className="overflow-x-auto pb-2 flex">
+          <div className="grid grid-flow-col gap-1 pr-4">
+            {weeks.map((week, wIdx) => (
+              <div key={wIdx} className="grid grid-rows-7 gap-1">
+                {week.map((day, dIdx) => {
+                  let bgColor = 'bg-gray-100';
+                  if (day.count > 0 && day.count <= 2) bgColor = 'bg-indigo-100';
+                  else if (day.count > 2 && day.count <= 5) bgColor = 'bg-indigo-300';
+                  else if (day.count > 5) bgColor = 'bg-primary';
 
-          <div className="flex mt-5">
-            {/* Day labels */}
-            <div className="flex flex-col mr-2 mt-0" style={{ gap: `${CELL_GAP}px` }}>
-              {DAYS_OF_WEEK.map((day, i) => (
-                <span key={i} className="text-xs text-text-secondary leading-none" style={{ height: `${CELL_SIZE}px`, lineHeight: `${CELL_SIZE}px` }}>
-                  {day}
-                </span>
-              ))}
-            </div>
-
-            {/* Grid */}
-            <div className="flex" style={{ gap: `${CELL_GAP}px` }}>
-              {grid.map((week, wi) => (
-                <div key={wi} className="flex flex-col" style={{ gap: `${CELL_GAP}px` }}>
-                  {week.map((day, di) => (
+                  return (
                     <div
-                      key={di}
-                      className="rounded-sm cursor-pointer transition-transform hover:scale-125"
-                      style={{
-                        width: `${CELL_SIZE}px`,
-                        height: `${CELL_SIZE}px`,
-                        backgroundColor: getColor(day.count),
-                      }}
-                      onMouseEnter={(e) => {
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        setTooltip({
-                          x: rect.left + rect.width / 2,
-                          y: rect.top - 8,
-                          date: day.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-                          count: day.count,
-                        });
-                      }}
-                      onMouseLeave={() => setTooltip(null)}
-                    />
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Legend */}
-          <div className="flex items-center justify-end gap-1.5 mt-4">
-            <span className="text-xs text-text-secondary mr-1">Less</span>
-            {[0, 2, 4, 6, 8].map((v) => (
-              <div
-                key={v}
-                className="w-3 h-3 rounded-sm"
-                style={{ backgroundColor: getColor(v) }}
-              />
+                      key={dIdx}
+                      className={`w-2.5 h-2.5 rounded-[2px] ${bgColor} hover:scale-125 transition-transform duration-100 cursor-pointer relative group`}
+                    >
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-1 bg-gray-900 text-white text-[10px] rounded-md opacity-0 pointer-events-none group-hover:opacity-100 transition whitespace-nowrap z-10 shadow-card">
+                        {day.count} solved on {day.date}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             ))}
-            <span className="text-xs text-text-secondary ml-1">More</span>
           </div>
         </div>
       </div>
-
-      {/* Tooltip */}
-      {tooltip && (
-        <div
-          className="fixed z-50 px-3 py-1.5 bg-text text-white text-xs rounded-lg pointer-events-none"
-          style={{ left: tooltip.x, top: tooltip.y, transform: 'translate(-50%, -100%)' }}
-        >
-          <span className="font-semibold">{tooltip.count} contributions</span> on {tooltip.date}
-        </div>
-      )}
     </div>
   );
-}
+};
+export default ActivityHeatmap;

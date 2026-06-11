@@ -1,61 +1,48 @@
-import { useState, useEffect } from 'react';
-import { Code2 } from 'lucide-react';
+import React from 'react';
 
-interface Props {
-  onLogin: () => void;
-  onSignUp: () => void;
+interface LandingNavbarProps {
+  isScrolled: boolean;
+  onLoginClick: () => void;
+  onSignupClick: () => void;
 }
 
-export default function LandingNavbar({ onLogin, onSignUp }: Props) {
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const navLinks = ['Features', 'Roadmap', 'Companies', 'Success Stories', 'Pricing'];
-
+export const LandingNavbar: React.FC<LandingNavbarProps> = ({
+  isScrolled,
+  onLoginClick,
+  onSignupClick,
+}) => {
   return (
-    <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? 'glass' : 'bg-transparent'
-      }`}
-    >
-      <div className="max-w-[1400px] mx-auto px-6 h-16 flex items-center justify-between">
-        {/* Logo */}
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center shadow-primary">
-            <Code2 className="w-4 h-4 text-white" />
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      isScrolled ? 'glass-nav py-4 shadow-card' : 'bg-transparent py-6'
+    }`}>
+      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+        <div className="flex items-center space-x-2 cursor-pointer">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl shadow-glow">
+            CF
           </div>
-          <span className="text-lg font-bold text-[#0F172A] tracking-tight">Codeforge</span>
+          <span className="font-semibold text-xl tracking-tight bg-gradient-to-r from-gray-900 via-indigo-950 to-gray-900 bg-clip-text text-transparent">
+            Codeforge
+          </span>
         </div>
 
-        {/* Center links */}
-        <div className="hidden lg:flex items-center gap-8">
-          {navLinks.map((link) => (
-            <a
-              key={link}
-              href={`#${link.toLowerCase().replace(' ', '-')}`}
-              className="text-sm font-medium text-[#64748B] hover:text-[#0F172A] transition-colors"
-            >
-              {link}
-            </a>
-          ))}
+        <div className="hidden md:flex items-center space-x-8 text-sm font-medium text-[#6B7280]">
+          <a href="#features" className="hover:text-primary transition">Features</a>
+          <a href="#roadmap" className="hover:text-primary transition">Roadmap</a>
+          <a href="#companies" className="hover:text-primary transition">Companies</a>
+          <a href="#stories" className="hover:text-primary transition">Success Stories</a>
+          <a href="#pricing" className="hover:text-primary transition">Pricing</a>
         </div>
 
-        {/* Auth buttons */}
-        <div className="flex items-center gap-3">
-          <button
-            onClick={onLogin}
-            className="px-4 py-2 text-sm font-medium text-[#64748B] hover:text-[#0F172A] transition-colors bg-transparent border-none cursor-pointer"
+        <div className="flex items-center space-x-4">
+          <button 
+            onClick={onLoginClick}
+            className="text-sm font-medium text-[#6B7280] hover:text-text px-4 py-2 transition"
           >
-            Log in
+            Login
           </button>
-          <button
-            onClick={onSignUp}
-            className="px-5 py-2 text-sm font-semibold text-white gradient-primary rounded-xl transition-all hover:scale-[1.03] active:scale-[0.97] cursor-pointer shadow-primary"
+          <button 
+            onClick={onSignupClick}
+            className="text-sm font-semibold bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-premium shadow-glow hover:scale-[1.02] transition duration-200"
           >
             Sign Up
           </button>
@@ -63,4 +50,5 @@ export default function LandingNavbar({ onLogin, onSignUp }: Props) {
       </div>
     </nav>
   );
-}
+};
+export default LandingNavbar;

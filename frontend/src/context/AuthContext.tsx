@@ -1,84 +1,114 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import { authApi } from '@/lib/api';
+import React, { createContext, useState, useEffect, useContext } from 'react';
+import api from '../lib/api';
 
-interface User {
+export interface UserInfo {
   id: number;
   name: string;
   email: string;
-  avatarUrl: string;
+  avatarUrl?: string;
   problemsSolved: number;
   currentStreak: number;
   contestRating: number;
 }
 
 interface AuthContextType {
-  user: User | null;
+  user: UserInfo | null;
   token: string | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
+  loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
+  updateUserStats: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(localStorage.getItem('codeforge_token'));
-  const [isLoading, setIsLoading] = useState(true);
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<UserInfo | null>(null);
+  const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
+  const [loading, setLoading] = useState(true);
+
+  const fetchCurrentUser = async () => {
+    try {
+      const response = await api.get<UserInfo>('/auth/me');
+      setUser(response.data);
+      localStorage.setItem('user', JSON.stringify(response.data));
+    } catch (error) {
+      console.error('Failed to fetch user context:', error);
+      logout();
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (token) {
-      authApi.me()
-        .then((res) => {
-          setUser(res.data);
-          setIsLoading(false);
-        })
-        .catch(() => {
-          localStorage.removeItem('codeforge_token');
-          localStorage.removeItem('codeforge_user');
-          setToken(null);
-          setUser(null);
-          setIsLoading(false);
-        });
+      fetchCurrentUser();
     } else {
-      setIsLoading(false);
+      setLoading(false);
     }
   }, [token]);
 
   const login = async (email: string, password: string) => {
-    const res = await authApi.login({ email, password });
-    localStorage.setItem('codeforge_token', res.data.token);
-    localStorage.setItem('codeforge_user', JSON.stringify(res.data.user));
-    setToken(res.data.token);
-    setUser(res.data.user);
+    setLoading(true);
+    try {
+      const response = await api.post<{ token: string; user: UserInfo }>('/auth/login', { email, password });
+      const { token: receivedToken, user: receivedUser } = response.data;
+      localStorage.setItem('token', receivedToken);
+      localStorage.setItem('user', JSON.stringify(receivedUser));
+      setToken(receivedToken);
+      setUser(receivedUser);
+    } catch (error) {
+      setLoading(false);
+      throw error;
+    }
   };
 
   const register = async (name: string, email: string, password: string) => {
-    const res = await authApi.register({ name, email, password });
-    localStorage.setItem('codeforge_token', res.data.token);
-    localStorage.setItem('codeforge_user', JSON.stringify(res.data.user));
-    setToken(res.data.token);
-    setUser(res.data.user);
+    setLoading(true);
+    try {
+      const response = await api.post<{ token: string; user: UserInfo }>('/auth/register', { name, email, password });
+      const { token: receivedToken, user: receivedUser } = response.data;
+      localStorage.setItem('token', receivedToken);
+      localStorage.setItem('user', JSON.stringify(receivedUser));
+      setToken(receivedToken);
+      setUser(receivedUser);
+    } catch (error) {
+      setLoading(false);
+      throw error;
+    }
   };
 
   const logout = () => {
-    localStorage.removeItem('codeforge_token');
-    localStorage.removeItem('codeforge_user');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     setToken(null);
     setUser(null);
+    setLoading(false);
+  };
+
+  const updateUserStats = async () => {
+    if (!token) return;
+    try {
+      const response = await api.get<UserInfo>('/auth/me');
+      setUser(response.data);
+      localStorage.setItem('user', JSON.stringify(response.data));
+    } catch (error) {
+      console.error('Error updating stats:', error);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, isAuthenticated: !!user, isLoading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, logout, updateUserStats }}>
       {children}
     </AuthContext.Provider>
   );
-}
+};
 
-export function useAuth() {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
-  return ctx;
-}
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};

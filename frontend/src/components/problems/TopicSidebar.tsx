@@ -1,86 +1,71 @@
-import { PanelLeftClose } from 'lucide-react';
-
-const TOPIC_ICONS: Record<string, string> = {
-  'Arrays': '📊', 'Strings': '🔤', 'Linked List': '🔗', 'Stack': '📚', 'Queue': '📋',
-  'Trees': '🌳', 'BST': '🌲', 'Heap': '⛰️', 'Graph': '🕸️', 'Dynamic Programming': '💡',
-  'Greedy': '🎯', 'Backtracking': '↩️', 'Bit Manipulation': '⚡', 'Math': '🔢',
-  'Sorting': '📈', 'Searching': '🔍',
-};
+import React from 'react';
+import { ChevronLeft, FolderDot } from 'lucide-react';
 
 interface Topic {
   id: number;
   name: string;
+  icon: string;
   problemCount: number;
 }
 
 interface TopicSidebarProps {
   topics: Topic[];
   selectedTopic: number | null;
-  setSelectedTopic: (id: number | null) => void;
+  onTopicSelect: (id: number | null) => void;
   sidebarOpen: boolean;
-  setSidebarOpen: (open: boolean) => void;
-  setPage: (page: number) => void;
+  onSidebarClose: () => void;
 }
 
-export default function TopicSidebar({
+export const TopicSidebar: React.FC<TopicSidebarProps> = ({
   topics,
   selectedTopic,
-  setSelectedTopic,
+  onTopicSelect,
   sidebarOpen,
-  setSidebarOpen,
-  setPage,
-}: TopicSidebarProps) {
-  if (!sidebarOpen) return null;
-
+  onSidebarClose,
+}) => {
   return (
-    <aside className="w-64 shrink-0 bg-surface border-r border-border transition-all duration-300">
-      <div className="p-5 h-full">
-        <div className="flex items-center justify-between mb-5">
-          <h3 className="text-sm font-semibold text-text uppercase tracking-wide">Topics</h3>
+    <aside className={`border-r border-[#E5E7EB] bg-white transition-all duration-300 ${
+      sidebarOpen ? 'w-64' : 'w-0 overflow-hidden'
+    }`}>
+      <div className="p-4 flex items-center justify-between border-b border-border">
+        <span className="text-xs font-bold text-secondaryText tracking-wide">DSA TOPICS</span>
+        <button 
+          onClick={onSidebarClose}
+          className="text-secondaryText hover:text-text md:hidden"
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </button>
+      </div>
+      <div className="p-2 space-y-1 overflow-y-auto max-h-[calc(100vh-140px)]">
+        <button
+          onClick={() => onTopicSelect(null)}
+          className={`w-full text-left px-3 py-2 rounded-premium text-sm font-semibold flex items-center justify-between ${
+            selectedTopic === null ? 'bg-indigo-50 text-primary' : 'text-secondaryText hover:bg-secondaryBg hover:text-text'
+          }`}
+        >
+          <div className="flex items-center space-x-2.5">
+            <FolderDot className="w-4 h-4" />
+            <span>All Topics</span>
+          </div>
+        </button>
+        
+        {topics.map((t) => (
           <button
-            onClick={() => setSidebarOpen(false)}
-            className="p-1 hover:bg-bg-secondary rounded-lg transition-colors border-none bg-transparent cursor-pointer"
-          >
-            <PanelLeftClose className="w-4 h-4 text-text-secondary" />
-          </button>
-        </div>
-        <div className="space-y-0.5 max-h-[calc(100vh-180px)] overflow-y-auto pr-1 custom-scrollbar">
-          <button
-            onClick={() => {
-              setSelectedTopic(null);
-              setPage(0);
-            }}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer border-none text-left ${
-              !selectedTopic
-                ? 'bg-primary/5 text-primary'
-                : 'text-text-secondary hover:bg-bg-secondary hover:text-text'
+            key={t.id}
+            onClick={() => onTopicSelect(t.id)}
+            className={`w-full text-left px-3 py-2 rounded-premium text-sm font-semibold flex items-center justify-between transition-colors duration-150 ${
+              selectedTopic === t.id ? 'bg-indigo-50 text-primary' : 'text-secondaryText hover:bg-secondaryBg hover:text-text'
             }`}
           >
-            <span>📋</span>
-            All Problems
+            <div className="flex items-center space-x-2.5">
+              <span className="text-base">{t.icon || '💻'}</span>
+              <span className="truncate">{t.name}</span>
+            </div>
+            <span className="text-[10px] bg-secondaryBg text-muted px-2 py-0.5 rounded-full font-medium">{t.problemCount}</span>
           </button>
-          {topics.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => {
-                setSelectedTopic(t.id);
-                setPage(0);
-              }}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer border-none text-left ${
-                selectedTopic === t.id
-                  ? 'bg-primary/5 text-primary'
-                  : 'text-text-secondary hover:bg-bg-secondary hover:text-text'
-              }`}
-            >
-              <span className="flex items-center gap-3">
-                <span>{TOPIC_ICONS[t.name] || '📌'}</span>
-                {t.name}
-              </span>
-              <span className="text-xs text-muted">{t.problemCount}</span>
-            </button>
-          ))}
-        </div>
+        ))}
       </div>
     </aside>
   );
-}
+};
+export default TopicSidebar;
