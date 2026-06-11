@@ -61,7 +61,13 @@ export const CompanySidebar: React.FC<CompanySidebarProps> = ({
               }`}
             >
               <div className="flex items-center space-x-2.5 min-w-0">
-                <span className="text-base">{c.logoUrl ? c.logoUrl : '🏢'}</span>
+                <span className="text-base flex items-center justify-center w-6 h-6 overflow-hidden rounded-md border border-slate-100 bg-slate-50 flex-shrink-0">
+                  {c.logoUrl && (c.logoUrl.startsWith('http') || c.logoUrl.includes('/')) ? (
+                    <img src={c.logoUrl} alt={c.name} className="w-full h-full object-contain" />
+                  ) : (
+                    c.logoUrl || '🏢'
+                  )}
+                </span>
                 <span className="truncate">{c.name}</span>
               </div>
               <span className="text-[10px] bg-secondaryBg text-muted px-2 py-0.5 rounded-full font-medium">

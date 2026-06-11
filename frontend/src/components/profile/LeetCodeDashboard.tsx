@@ -139,8 +139,12 @@ export const LeetCodeDashboard: React.FC<LeetCodeDashboardProps> = ({
       {/* PLATFORM HEADER */}
       <div className="bg-white border border-border rounded-premium p-6 shadow-card flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-center space-x-4">
-          <div className="w-14 h-14 rounded-full bg-indigo-50 border border-border flex items-center justify-center text-3xl font-bold">
-            {user?.avatarUrl ? user.avatarUrl : getPlatformIcon(dashboard.platform)}
+          <div className="w-14 h-14 rounded-full bg-indigo-50 border border-border flex items-center justify-center overflow-hidden text-3xl font-bold flex-shrink-0">
+            {user?.avatarUrl && (user.avatarUrl.startsWith('http') || user.avatarUrl.includes('/')) ? (
+              <img src={user.avatarUrl} alt={user.name || "Avatar"} className="w-full h-full object-cover" />
+            ) : (
+              getPlatformIcon(dashboard.platform)
+            )}
           </div>
           <div>
             <h1 className="text-xl font-bold text-text flex items-center gap-1.5">

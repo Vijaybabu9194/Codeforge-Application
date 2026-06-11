@@ -6,6 +6,12 @@ import java.util.List;
 public class ProblemDto {
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    public static class CompanyInfo {
+        private String name;
+        private String logoUrl;
+    }
+
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
     public static class ProblemResponse {
         private Long id;
         private String title;
@@ -14,8 +20,15 @@ public class ProblemDto {
         private Double acceptanceRate;
         private List<String> topics;
         private List<String> companies;
+        private List<CompanyInfo> companyInfo;
         private Boolean solved;
         private Boolean bookmarked;
+        private String leetcodeUrl;
+        private String gfgUrl;
+        private String youtubeUrl;
+        private String articleUrl;
+        private Long subtopicId;
+        private String subtopicName;
     }
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
@@ -32,5 +45,21 @@ public class ProblemDto {
         private String name;
         private String icon;
         private Integer problemCount;
+    }
+
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    public static class SubtopicResponse {
+        private Long id;
+        private String name;
+        private String description;
+        private List<ProblemResponse> problems;
+    }
+
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    public static class TopicDetailsResponse {
+        private Long id;
+        private String name;
+        private String icon;
+        private List<SubtopicResponse> subtopics;
     }
 }

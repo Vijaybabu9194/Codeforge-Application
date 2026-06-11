@@ -29,4 +29,11 @@ public class ProfileController {
         User user = (User) auth.getPrincipal();
         return ResponseEntity.ok(profileService.getPlatformDashboard(user, platform));
     }
+
+    @PostMapping("/platforms/link")
+    public ResponseEntity<ProfileDto.PlatformListItem> linkPlatform(
+            Authentication auth, @RequestBody ProfileDto.LinkPlatformRequest request) {
+        User user = (User) auth.getPrincipal();
+        return ResponseEntity.ok(profileService.linkPlatform(user, request));
+    }
 }

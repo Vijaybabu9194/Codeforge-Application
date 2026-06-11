@@ -2,6 +2,7 @@ package com.codeforge.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.util.*;
 
 @Entity
 @Table(name = "topics")
@@ -18,4 +19,8 @@ public class Topic {
 
     @Builder.Default
     private Integer problemCount = 0;
+
+    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Subtopic> subtopics = new ArrayList<>();
 }

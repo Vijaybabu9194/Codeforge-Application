@@ -30,4 +30,10 @@ public class ProfileDto {
         private String badges; // JSON
         private String recentActivity; // JSON
     }
+
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    public static class LinkPlatformRequest {
+        private String platform;
+        private String username;
+    }
 }

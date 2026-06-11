@@ -31,6 +31,22 @@ public class Problem {
     @Builder.Default
     private Integer timesAsked = 0;
 
+    @Column(name = "leetcode_url")
+    private String leetcodeUrl;
+
+    @Column(name = "gfg_url")
+    private String gfgUrl;
+
+    @Column(name = "youtube_url")
+    private String youtubeUrl;
+
+    @Column(name = "article_url")
+    private String articleUrl;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "subtopic_id")
+    private Subtopic subtopic;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "problem_topics",

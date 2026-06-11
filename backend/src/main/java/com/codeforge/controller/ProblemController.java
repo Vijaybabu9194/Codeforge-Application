@@ -34,6 +34,12 @@ public class ProblemController {
         return ResponseEntity.ok(problemService.getTopics());
     }
 
+    @GetMapping("/topic/{topicId}")
+    public ResponseEntity<ProblemDto.TopicDetailsResponse> getTopicDetails(Authentication auth, @PathVariable Long topicId) {
+        User user = (User) auth.getPrincipal();
+        return ResponseEntity.ok(problemService.getTopicDetails(user, topicId));
+    }
+
     @PostMapping("/{id}/bookmark")
     public ResponseEntity<Void> toggleBookmark(Authentication auth, @PathVariable Long id) {
         User user = (User) auth.getPrincipal();

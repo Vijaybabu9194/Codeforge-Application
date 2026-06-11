@@ -2,6 +2,7 @@ package com.codeforge.service;
 
 import com.codeforge.dto.ProblemDto;
 import com.codeforge.entity.Problem;
+import com.codeforge.entity.Subtopic;
 import com.codeforge.entity.User;
 import com.codeforge.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -23,6 +25,8 @@ public class ProblemService {
     private final TopicRepository topicRepository;
     private final SubmissionRepository submissionRepository;
     private final BookmarkRepository bookmarkRepository;
+    private final SubtopicRepository subtopicRepository;
+    private final NotificationService notificationService;
 
     public ProblemDto.ProblemListResponse getProblems(User user, Long topicId, String difficulty,
                                                        String search, int page, int size) {
@@ -98,8 +102,52 @@ public class ProblemService {
                     .build();
             submissionRepository.save(submission);
             user.setProblemsSolved(user.getProblemsSolved() + 1);
-            // userRepository would be needed here but we rely on JPA dirty checking
+            
+            // Add a notification
+            notificationService.createNotification(user, "Problem Solved! 🎉", "You successfully completed: " + problem.getTitle());
         }
+    }
+
+    @Transactional(readOnly = true)
+    public ProblemDto.TopicDetailsResponse getTopicDetails(User user, Long topicId) {
+        var topic = topicRepository.findById(topicId)
+                .orElseThrow(() -> new RuntimeException("Topic not found"));
+
+        Set<Long> solvedIds = submissionRepository.findSolvedProblemIdsByUserId(user.getId())
+                .stream().collect(Collectors.toSet());
+        Set<Long> bookmarkedIds = bookmarkRepository.findBookmarkedProblemIdsByUserId(user.getId())
+                .stream().collect(Collectors.toSet());
+
+        List<Subtopic> subtopics = subtopicRepository.findByTopicId(topicId);
+        List<Problem> problems = problemRepository.findAllByTopicId(topicId);
+
+        // Group problems by subtopic ID for quick lookup
+        Map<Long, List<Problem>> problemsBySubtopic = problems.stream()
+                .filter(p -> p.getSubtopic() != null)
+                .collect(Collectors.groupingBy(p -> p.getSubtopic().getId()));
+
+        List<ProblemDto.SubtopicResponse> subtopicResponses = subtopics.stream()
+                .map(sub -> {
+                    List<Problem> subProblems = problemsBySubtopic.getOrDefault(sub.getId(), List.of());
+                    List<ProblemDto.ProblemResponse> problemResponses = subProblems.stream()
+                            .map(p -> mapToResponse(p, solvedIds, bookmarkedIds))
+                            .collect(Collectors.toList());
+
+                    return ProblemDto.SubtopicResponse.builder()
+                            .id(sub.getId())
+                            .name(sub.getName())
+                            .description(sub.getDescription())
+                            .problems(problemResponses)
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        return ProblemDto.TopicDetailsResponse.builder()
+                .id(topic.getId())
+                .name(topic.getName())
+                .icon(topic.getIcon())
+                .subtopics(subtopicResponses)
+                .build();
     }
 
     private ProblemDto.ProblemResponse mapToResponse(Problem p, Set<Long> solvedIds, Set<Long> bookmarkedIds) {
@@ -111,8 +159,17 @@ public class ProblemService {
                 .acceptanceRate(p.getAcceptanceRate())
                 .topics(p.getTopics().stream().map(t -> t.getName()).collect(Collectors.toList()))
                 .companies(p.getCompanies().stream().map(c -> c.getName()).collect(Collectors.toList()))
+                .companyInfo(p.getCompanies().stream()
+                        .map(c -> new ProblemDto.CompanyInfo(c.getName(), c.getLogoUrl()))
+                        .collect(Collectors.toList()))
                 .solved(solvedIds.contains(p.getId()))
                 .bookmarked(bookmarkedIds.contains(p.getId()))
+                .leetcodeUrl(p.getLeetcodeUrl())
+                .gfgUrl(p.getGfgUrl())
+                .youtubeUrl(p.getYoutubeUrl())
+                .articleUrl(p.getArticleUrl())
+                .subtopicId(p.getSubtopic() != null ? p.getSubtopic().getId() : null)
+                .subtopicName(p.getSubtopic() != null ? p.getSubtopic().getName() : null)
                 .build();
     }
 }

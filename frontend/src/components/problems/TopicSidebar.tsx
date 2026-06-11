@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronLeft, FolderDot } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 
 interface Topic {
   id: number;
@@ -37,18 +37,6 @@ export const TopicSidebar: React.FC<TopicSidebarProps> = ({
         </button>
       </div>
       <div className="p-2 space-y-1 overflow-y-auto max-h-[calc(100vh-140px)]">
-        <button
-          onClick={() => onTopicSelect(null)}
-          className={`w-full text-left px-3 py-2 rounded-premium text-sm font-semibold flex items-center justify-between ${
-            selectedTopic === null ? 'bg-indigo-50 text-primary' : 'text-secondaryText hover:bg-secondaryBg hover:text-text'
-          }`}
-        >
-          <div className="flex items-center space-x-2.5">
-            <FolderDot className="w-4 h-4" />
-            <span>All Topics</span>
-          </div>
-        </button>
-        
         {topics.map((t) => (
           <button
             key={t.id}

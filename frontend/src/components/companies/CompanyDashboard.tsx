@@ -49,8 +49,12 @@ export const CompanyDashboard: React.FC<CompanyDashboardProps> = ({ companyDetai
       {/* COMPANY OVERVIEW HEADER */}
       <div className="bg-white border border-border rounded-premium p-6 shadow-card flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center space-x-4">
-          <div className="w-16 h-16 rounded-premium border border-border bg-[#FAFBFC] flex items-center justify-center text-3xl">
-            {companyDetail.logoUrl ? companyDetail.logoUrl : '🏢'}
+          <div className="w-16 h-16 rounded-premium border border-border bg-[#FAFBFC] flex items-center justify-center overflow-hidden flex-shrink-0">
+            {companyDetail.logoUrl && (companyDetail.logoUrl.startsWith('http') || companyDetail.logoUrl.includes('/')) ? (
+              <img src={companyDetail.logoUrl} alt={companyDetail.name} className="w-12 h-12 object-contain" />
+            ) : (
+              <span className="text-3xl">{companyDetail.logoUrl || '🏢'}</span>
+            )}
           </div>
           <div>
             <h1 className="text-2xl font-bold text-[#111827]">{companyDetail.name} Questions</h1>
