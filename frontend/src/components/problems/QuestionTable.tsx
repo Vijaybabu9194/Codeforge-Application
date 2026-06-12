@@ -58,8 +58,10 @@ export const QuestionTable: React.FC<QuestionTableProps> = ({
             </tr>
           </thead>
           <tbody className="divide-y divide-[#E5E7EB] text-sm text-[#111827]">
-            {problems.map((prob) => (
-              <tr key={prob.id} className="hover:bg-[#FAFBFC] transition group">
+            {problems.map((prob) => {
+              const hasNote = !!localStorage.getItem(`notes_${prob.id}`);
+              return (
+                <tr key={prob.id} className="hover:bg-[#FAFBFC] transition group">
                 {/* Status Checkbox */}
                 <td className="py-4 px-4 text-center align-middle">
                   <button
@@ -180,8 +182,10 @@ export const QuestionTable: React.FC<QuestionTableProps> = ({
                   <div className="flex items-center justify-center gap-1.5">
                     <button
                       onClick={() => onSolve(prob)}
-                      className="p-1.5 hover:bg-slate-100 text-slate-400 hover:text-slate-600 rounded-lg transition"
-                      title="Open Scratchpad / Notes"
+                      className={`p-1.5 hover:bg-slate-100 rounded-lg transition ${
+                        hasNote ? 'text-primary bg-indigo-50/50 border border-indigo-100/50' : 'text-slate-400 hover:text-slate-600'
+                      }`}
+                      title={hasNote ? "Edit Notes (Contains Saved Notes)" : "Open Scratchpad / Notes"}
                     >
                       <FileText className="w-4.5 h-4.5" />
                     </button>
@@ -197,7 +201,7 @@ export const QuestionTable: React.FC<QuestionTableProps> = ({
                   </div>
                 </td>
               </tr>
-            ))}
+            )})}
           </tbody>
         </table>
       </div>

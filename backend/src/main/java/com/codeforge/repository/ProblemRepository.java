@@ -13,7 +13,7 @@ import java.util.Optional;
 public interface ProblemRepository extends JpaRepository<Problem, Long> {
     Optional<Problem> findBySlug(String slug);
 
-    @Query("SELECT DISTINCT p FROM Problem p JOIN FETCH p.subtopic LEFT JOIN FETCH p.companies LEFT JOIN FETCH p.topics JOIN p.topics t WHERE t.id = :topicId")
+    @Query("SELECT DISTINCT p FROM Problem p JOIN FETCH p.subtopic JOIN p.topics t WHERE t.id = :topicId")
     List<Problem> findAllByTopicId(@Param("topicId") Long topicId);
 
     @Query("SELECT p FROM Problem p JOIN p.topics t WHERE t.id = :topicId")

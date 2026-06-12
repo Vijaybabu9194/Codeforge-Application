@@ -2,6 +2,7 @@ package com.codeforge.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 import java.util.*;
 
 @Entity
@@ -47,21 +48,23 @@ public class Problem {
     @JoinColumn(name = "subtopic_id")
     private Subtopic subtopic;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "problem_topics",
         joinColumns = @JoinColumn(name = "problem_id"),
         inverseJoinColumns = @JoinColumn(name = "topic_id")
     )
+    @BatchSize(size = 100)
     @Builder.Default
     private Set<Topic> topics = new HashSet<>();
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "problem_companies",
         joinColumns = @JoinColumn(name = "problem_id"),
         inverseJoinColumns = @JoinColumn(name = "company_id")
     )
+    @BatchSize(size = 100)
     @Builder.Default
     private Set<Company> companies = new HashSet<>();
 
