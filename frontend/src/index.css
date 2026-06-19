@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -10,7 +10,19 @@
   }
 }
 
-/* Custom premium transitions and adjustments */
+/* ============================================
+   LANDING PAGE — DARK THEME
+   ============================================ */
+
+/* Glass Navbar (dark) */
+.glass-nav-dark {
+  background: rgba(5, 10, 24, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Glass Navbar (light — dashboard) */
 .glass-nav {
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(12px);
@@ -18,26 +30,167 @@
   border-bottom: 1px solid rgba(229, 231, 235, 0.5);
 }
 
-/* Custom Webkit Scrollbars for Notion-like clean layout */
+/* Landing Primary Button */
+.btn-landing-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 32px;
+  background: #4A6CF7;
+  color: #fff;
+  font-weight: 600;
+  font-size: 16px;
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 0 30px rgba(74, 108, 247, 0.25);
+}
+.btn-landing-primary:hover {
+  background: #3B5BEB;
+  box-shadow: 0 0 40px rgba(74, 108, 247, 0.4);
+  transform: translateY(-1px);
+}
+
+/* Landing Outline Button */
+.btn-landing-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 24px;
+  background: transparent;
+  color: #FFFFFF;
+  font-weight: 600;
+  font-size: 16px;
+  border-radius: 14px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.btn-landing-outline:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Scroll Mouse Indicator */
+.scroll-mouse {
+  width: 24px;
+  height: 38px;
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  border-radius: 14px;
+  position: relative;
+}
+.scroll-mouse::before {
+  content: '';
+  position: absolute;
+  top: 7px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.35);
+  border-radius: 3px;
+  animation: scrollDot 2s ease-in-out infinite;
+}
+@keyframes scrollDot {
+  0%, 100% { opacity: 1; top: 7px; }
+  50% { opacity: 0.2; top: 18px; }
+}
+
+/* Company Logo Text */
+.company-logo-text {
+  font-size: 20px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: -0.02em;
+  user-select: none;
+  transition: color 0.2s ease;
+}
+.company-logo-text:hover {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* CTA Banner Gradient */
+.cta-banner {
+  background: linear-gradient(135deg, #0A1233 0%, #111D4A 40%, #0D1535 100%);
+  border: 1px solid rgba(74, 108, 247, 0.12);
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+}
+.cta-banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 30% 50%, rgba(74, 108, 247, 0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Feature Card */
+.feature-card {
+  background: linear-gradient(180deg, rgba(11, 16, 38, 0.95) 0%, rgba(8, 12, 28, 0.98) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 28px 24px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+.feature-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 5%, rgba(74, 108, 247, 0.4) 50%, transparent 95%);
+  opacity: 0.6;
+}
+.feature-card:hover {
+  border-color: rgba(74, 108, 247, 0.15);
+  box-shadow: 0 8px 40px rgba(74, 108, 247, 0.08);
+}
+
+/* Star particles / ambient glow */
+.landing-bg-effects {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+/* Stats container */
+.stats-container {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 16px 24px;
+  background: rgba(10, 17, 40, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(74, 108, 247, 0.15);
+  border-radius: 18px;
+}
+
+/* ============================================
+   DASHBOARD — LIGHT THEME
+   ============================================ */
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
-
 ::-webkit-scrollbar-track {
   background: transparent;
 }
-
 ::-webkit-scrollbar-thumb {
   background: #E5E7EB;
   border-radius: 10px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
   background: #94A3B8;
 }
 
-/* Tooltip transition utility */
 .tooltip-trigger:hover .tooltip-content {
   opacity: 1;
   visibility: visible;

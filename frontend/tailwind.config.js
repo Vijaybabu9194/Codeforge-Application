@@ -22,6 +22,16 @@ export default {
         secondaryText: '#6B7280',
         muted: '#94A3B8',
         border: '#E5E7EB',
+        // Landing page dark theme
+        landing: {
+          bg: '#020205',
+          card: '#0B1026',
+          blue: '#4A6CF7',
+          blueLight: '#6B8AFF',
+          textMuted: '#7B8AB8',
+          textDim: '#4A5580',
+          border: 'rgba(255,255,255,0.07)',
+        },
       },
       fontFamily: {
         sans: ['Geist', 'Inter', 'sans-serif'],
@@ -35,12 +45,22 @@ export default {
       },
       animation: {
         'float': 'float 6s ease-in-out infinite',
+        'float-slow': 'floatSlow 8s ease-in-out infinite',
+        'float-gentle': 'floatGentle 10s ease-in-out infinite',
       },
       keyframes: {
         float: {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-6px)' },
-        }
+        },
+        floatSlow: {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-10px)' },
+        },
+        floatGentle: {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-5px)' },
+        },
       }
     },
   },

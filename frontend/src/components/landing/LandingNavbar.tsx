@@ -13,38 +13,39 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({
 }) => {
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      isScrolled ? 'glass-nav py-4 shadow-card' : 'bg-transparent py-6'
+      isScrolled ? 'glass-nav-dark py-3' : 'bg-transparent py-5'
     }`}>
-      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-        <div className="flex items-center space-x-2 cursor-pointer">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl shadow-glow">
-            CF
-          </div>
-          <span className="font-semibold text-xl tracking-tight bg-gradient-to-r from-gray-900 via-indigo-950 to-gray-900 bg-clip-text text-transparent">
+      <div className="w-full max-w-full px-6 md:px-12 flex items-center justify-between">
+        {/* Logo */}
+        <div className="flex items-center space-x-2.5 cursor-pointer">
+          <span className="text-[#4A6CF7] text-[26px] font-bold tracking-tight select-none">&lt;/&gt;</span>
+          <span className="font-bold text-[22px] tracking-tight text-white">
             Codeforge
           </span>
         </div>
 
-        <div className="hidden md:flex items-center space-x-8 text-sm font-medium text-[#6B7280]">
-          <a href="#features" className="hover:text-primary transition">Features</a>
-          <a href="#roadmap" className="hover:text-primary transition">Roadmap</a>
-          <a href="#companies" className="hover:text-primary transition">Companies</a>
-          <a href="#stories" className="hover:text-primary transition">Success Stories</a>
-          <a href="#pricing" className="hover:text-primary transition">Pricing</a>
+        {/* Navigation Links */}
+        <div className="hidden md:flex items-center space-x-10 text-[15px] font-medium text-[#7B8AB8]">
+          <a href="#features" className="hover:text-white transition-colors duration-200">Features</a>
+          <a href="#roadmap" className="hover:text-white transition-colors duration-200">Roadmap</a>
+          <a href="#companies" className="hover:text-white transition-colors duration-200">Companies</a>
+          <a href="#testimonials" className="hover:text-white transition-colors duration-200">Testimonials</a>
+          <a href="#faqs" className="hover:text-white transition-colors duration-200">FAQs</a>
         </div>
 
-        <div className="flex items-center space-x-4">
+        {/* Auth Buttons */}
+        <div className="flex items-center space-x-3">
           <button 
             onClick={onLoginClick}
-            className="text-sm font-medium text-[#6B7280] hover:text-text px-4 py-2 transition"
+            className="text-[15px] font-medium text-[#C8D0E7] hover:text-white px-6 py-2.5 rounded-full border border-white/10 hover:border-white/20 transition-all duration-200"
           >
-            Login
+            Log in
           </button>
           <button 
             onClick={onSignupClick}
-            className="text-sm font-semibold bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-premium shadow-glow hover:scale-[1.02] transition duration-200"
+            className="text-[15px] font-semibold bg-[#4A6CF7] hover:bg-[#3B5BEB] text-white px-6 py-2.5 rounded-full shadow-[0_0_24px_rgba(74,108,247,0.25)] hover:shadow-[0_0_32px_rgba(74,108,247,0.4)] transition-all duration-200"
           >
-            Sign Up
+            Sign up
           </button>
         </div>
       </div>
