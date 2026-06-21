@@ -206,6 +206,12 @@ public class ProblemService {
             
             // Add a notification
             notificationService.createNotification(user, "Problem Solved! 🎉", "You successfully completed: " + problem.getTitle());
+        } else {
+            submissionRepository.delete(existing.get());
+            user.setProblemsSolved(Math.max(0, user.getProblemsSolved() - 1));
+            
+            // We do not decrement daily activity or streaks to keep it simple, 
+            // but we removed the submission.
         }
     }
 
@@ -234,7 +240,7 @@ public class ProblemService {
                 // Ignore duplicates
             } else {
                 break;
-            }
+}
         }
         return streak;
     }
@@ -279,6 +285,100 @@ public class ProblemService {
                 .icon(topic.getIcon())
                 .subtopics(subtopicResponses)
                 .build();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProblemDto.TopicDetailsResponse> getAllTopicDetails(User user) {
+        // Fetch solved/bookmarked ids first
+        Set<Long> solvedIds = submissionRepository.findSolvedProblemIdsByUserId(user.getId())
+                .stream().collect(Collectors.toSet());
+        Set<Long> bookmarkedIds = bookmarkRepository.findBookmarkedProblemIdsByUserId(user.getId())
+                .stream().collect(Collectors.toSet());
+
+        // Eagerly load all topics
+        List<Topic> topics = topicRepository.findAll();
+
+        // Eagerly load all subtopics with their topic (JOIN FETCH)
+        List<Subtopic> allSubtopics = entityManager.createQuery(
+                "SELECT DISTINCT s FROM Subtopic s JOIN FETCH s.topic", Subtopic.class)
+                .getResultList();
+
+        // Load problems with subtopic only
+        List<Problem> baseProblems = entityManager.createQuery(
+                "SELECT DISTINCT p FROM Problem p LEFT JOIN FETCH p.subtopic WHERE p.subtopic IS NOT NULL", Problem.class)
+                .getResultList();
+
+        // Load topics separately to avoid MultipleBagFetchException
+        @SuppressWarnings("unchecked")
+        List<Object[]> topicRows = entityManager.createNativeQuery(
+                "SELECT pt.problem_id, t.id, t.name, t.icon, t.problem_count FROM problem_topics pt JOIN topics t ON t.id = pt.topic_id")
+                .getResultList();
+        
+        // Load companies separately
+        @SuppressWarnings("unchecked")
+        List<Object[]> companyRows = entityManager.createNativeQuery(
+                "SELECT pc.problem_id, c.id, c.name, c.logo_url FROM problem_companies pc JOIN companies c ON c.id = pc.company_id")
+                .getResultList();
+
+        Map<Long, Set<Company>> companiesByProblem = new java.util.HashMap<>();
+        for (Object[] row : companyRows) {
+            Long pid = ((Number) row[0]).longValue();
+            Company c = new Company();
+            c.setId(((Number) row[1]).longValue());
+            c.setName((String) row[2]);
+            c.setLogoUrl(row[3] != null ? (String) row[3] : null);
+            companiesByProblem.computeIfAbsent(pid, k -> new java.util.HashSet<>()).add(c);
+        }
+
+        Map<Long, Set<Topic>> topicsPerProblem = new java.util.HashMap<>();
+        for (Object[] row : topicRows) {
+            Long pid = ((Number) row[0]).longValue();
+            Topic t = new Topic();
+            t.setId(((Number) row[1]).longValue());
+            t.setName((String) row[2]);
+            topicsPerProblem.computeIfAbsent(pid, k -> new java.util.HashSet<>()).add(t);
+        }
+
+        // Build final problem map
+        Map<Long, Problem> problemMap = new java.util.LinkedHashMap<>();
+        for (Problem p : baseProblems) {
+            p.setTopics(topicsPerProblem.getOrDefault(p.getId(), new java.util.HashSet<>()));
+            p.setCompanies(companiesByProblem.getOrDefault(p.getId(), new java.util.HashSet<>()));
+            problemMap.put(p.getId(), p);
+        }
+
+        Map<Long, List<Subtopic>> subtopicsByTopic = allSubtopics.stream()
+                .collect(Collectors.groupingBy(s -> s.getTopic().getId()));
+
+        Map<Long, List<Problem>> problemsBySubtopic = new java.util.HashMap<>();
+        for (Problem p : problemMap.values()) {
+            if (p.getSubtopic() != null) {
+                problemsBySubtopic.computeIfAbsent(p.getSubtopic().getId(), k -> new ArrayList<>()).add(p);
+            }
+        }
+
+        return topics.stream().map(topic -> {
+            List<Subtopic> subtopics = subtopicsByTopic.getOrDefault(topic.getId(), List.of());
+            List<ProblemDto.SubtopicResponse> subtopicResponses = subtopics.stream().map(sub -> {
+                List<Problem> subProblems = problemsBySubtopic.getOrDefault(sub.getId(), List.of());
+                List<ProblemDto.ProblemResponse> problemResponses = subProblems.stream()
+                        .map(p -> mapToResponse(p, solvedIds, bookmarkedIds))
+                        .collect(Collectors.toList());
+                return ProblemDto.SubtopicResponse.builder()
+                        .id(sub.getId())
+                        .name(sub.getName())
+                        .description(sub.getDescription())
+                        .problems(problemResponses)
+                        .build();
+            }).collect(Collectors.toList());
+
+            return ProblemDto.TopicDetailsResponse.builder()
+                    .id(topic.getId())
+                    .name(topic.getName())
+                    .icon(topic.getIcon())
+                    .subtopics(subtopicResponses)
+                    .build();
+        }).collect(Collectors.toList());
     }
 
     private ProblemDto.ProblemResponse mapToResponse(Problem p, Set<Long> solvedIds, Set<Long> bookmarkedIds) {

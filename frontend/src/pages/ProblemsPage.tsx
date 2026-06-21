@@ -49,6 +49,10 @@ interface ProblemsPageProps {
 
 const ITEMS_PER_PAGE = 12;
 
+let globalTopics: Topic[] | null = null;
+let globalAllProblems: Problem[] | null = null;
+let globalTopicDetailsMap: Record<number, TopicDetails> | null = null;
+
 export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
   const { user, updateUserStats } = useAuth();
 
@@ -103,51 +107,64 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
     setActiveNoteProblem(null);
   };
 
-  // Load all topics and problems eagerly
+  // Load all topics and problems eagerly with stale-while-revalidate
   useEffect(() => {
     const init = async () => {
-      setLoading(true);
+      if (globalTopics && globalAllProblems && globalTopicDetailsMap) {
+        setTopics(globalTopics);
+        setAllProblems(globalAllProblems);
+        setTopicDetailsMap(globalTopicDetailsMap);
+        // Auto-select Arrays topic if nothing is selected yet
+        setSelectedTopicId(prev => {
+          if (prev !== null) return prev;
+          const arrTopic = globalTopics!.find(t => t.name.toLowerCase().includes('array'));
+          return arrTopic ? arrTopic.id : (globalTopics![0]?.id ?? null);
+        });
+        setLoading(false);
+      } else {
+        setLoading(true);
+      }
+
       setLoadingProgress(0);
       try {
         const topicsRes = await api.get<Topic[]>('/problems/topics');
-        setTopics(topicsRes.data);
+        const newTopics = topicsRes.data;
+        if (!globalTopics) setTopics(newTopics);
+        setLoadingProgress(50);
 
-        let completed = 0;
-        const total = topicsRes.data.length;
-
-        const detailResults = await Promise.all(
-          topicsRes.data.map(t =>
-            api.get<TopicDetails>(`/problems/topic/${t.id}`)
-              .then(r => {
-                completed++;
-                setLoadingProgress(Math.round((completed / total) * 100));
-                return { topicId: t.id, topicName: t.name, data: r.data };
-              })
-              .catch(() => {
-                completed++;
-                setLoadingProgress(Math.round((completed / total) * 100));
-                return null;
-              })
-          )
-        );
+        const detailsRes = await api.get<TopicDetails[]>('/problems/topics/details');
+        const allDetails = detailsRes.data;
+        setLoadingProgress(100);
 
         const flat: Problem[] = [];
         const seen = new Set<number>();
         const detailsMap: Record<number, TopicDetails> = {};
-        detailResults.forEach(result => {
+        allDetails.forEach(result => {
           if (!result) return;
-          detailsMap[result.topicId] = result.data;
-          result.data.subtopics.forEach(sub => {
+          detailsMap[result.id] = result;
+          result.subtopics.forEach(sub => {
             sub.problems.forEach(p => {
               if (!seen.has(p.id)) {
                 seen.add(p.id);
-                flat.push({ ...p, topicId: result.topicId, topicName: result.topicName });
+                flat.push({ ...p, topicId: result.id, topicName: result.name });
               }
             });
           });
         });
+
+        globalTopics = newTopics;
+        globalAllProblems = flat;
+        globalTopicDetailsMap = detailsMap;
+
+        setTopics(newTopics);
         setAllProblems(flat);
         setTopicDetailsMap(detailsMap);
+        // Auto-select Arrays topic on first load
+        setSelectedTopicId(prev => {
+          if (prev !== null) return prev;
+          const arrTopic = newTopics.find(t => t.name.toLowerCase().includes('array'));
+          return arrTopic ? arrTopic.id : (newTopics[0]?.id ?? null);
+        });
       } catch (err) {
         console.error('Failed to load problems:', err);
       } finally {
@@ -158,8 +175,34 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
   }, []);
 
   const toggleSolved = async (id: number) => {
-    setAllProblems(prev => prev.map(p => p.id === id ? { ...p, solved: !p.solved } : p));
-    try { await api.post(`/problems/${id}/solve`); updateUserStats(); } catch {}
+    // Optimistic update — toggle immediately in UI
+    const wasAlreadySolved = allProblems.find(p => p.id === id)?.solved ?? false;
+
+    const applyToggle = (solved: boolean) => {
+      setAllProblems(prev => prev.map(p => p.id === id ? { ...p, solved } : p));
+      if (globalAllProblems) {
+        globalAllProblems = globalAllProblems.map(p => p.id === id ? { ...p, solved } : p);
+      }
+      if (globalTopicDetailsMap) {
+        Object.values(globalTopicDetailsMap).forEach(topic => {
+          topic.subtopics.forEach(sub => {
+            const prob = sub.problems.find(p => p.id === id);
+            if (prob) prob.solved = solved;
+          });
+        });
+        setTopicDetailsMap({ ...globalTopicDetailsMap });
+      }
+    };
+
+    applyToggle(!wasAlreadySolved);
+
+    try {
+      await api.post(`/problems/${id}/solve`);
+      updateUserStats();
+    } catch {
+      // Revert on failure
+      applyToggle(wasAlreadySolved);
+    }
   };
 
 
@@ -275,23 +318,7 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
       <div className="space-y-3" onClick={e => e.stopPropagation()}>
         {/* Top row: Pinned topics + More button */}
         <div className="flex flex-wrap items-center gap-2">
-          {/* All Problems */}
-          <button
-            onClick={() => { setSelectedTopicId(null); setShowMoreTopics(false); }}
-            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all duration-200 flex-shrink-0 ${
-              selectedTopicId === null
-                ? 'bg-[#4A6CF7] text-white shadow-lg shadow-[#4A6CF7]/25'
-                : 'bg-white/[0.03] border border-white/[0.06] text-[#7B8AB8] hover:text-white hover:bg-white/[0.06]'
-            }`}
-          >
-            <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor">
-              <rect x="1" y="1" width="6" height="6" rx="1" />
-              <rect x="9" y="1" width="6" height="6" rx="1" />
-              <rect x="1" y="9" width="6" height="6" rx="1" />
-              <rect x="9" y="9" width="6" height="6" rx="1" />
-            </svg>
-            All Problems
-          </button>
+
 
           {/* Pinned topic tabs */}
           {pinnedTopics.map(t => (

@@ -2,6 +2,7 @@ package com.codeforge.service;
 
 import com.codeforge.dto.AuthDto;
 import com.codeforge.entity.User;
+import com.codeforge.repository.SubmissionRepository;
 import com.codeforge.repository.UserRepository;
 import com.codeforge.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final SubmissionRepository submissionRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
@@ -54,16 +56,22 @@ public class AuthService {
     }
 
     public AuthDto.UserInfo getCurrentUser(User user) {
-        return mapToUserInfo(user);
+        // Compute solved count from actual submissions so it's always accurate
+        int solvedCount = (int) submissionRepository.countSolvedByUserId(user.getId());
+        return mapToUserInfo(user, solvedCount);
     }
 
     private AuthDto.UserInfo mapToUserInfo(User user) {
+        return mapToUserInfo(user, user.getProblemsSolved());
+    }
+
+    private AuthDto.UserInfo mapToUserInfo(User user, int problemsSolved) {
         return AuthDto.UserInfo.builder()
                 .id(user.getId())
                 .name(user.getName())
                 .email(user.getEmail())
                 .avatarUrl(user.getAvatarUrl())
-                .problemsSolved(user.getProblemsSolved())
+                .problemsSolved(problemsSolved)
                 .currentStreak(user.getCurrentStreak())
                 .contestRating(user.getContestRating())
                 .build();
