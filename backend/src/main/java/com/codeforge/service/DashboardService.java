@@ -20,16 +20,37 @@ public class DashboardService {
     private final DailyActivityRepository dailyActivityRepository;
     private final ActivityRepository activityRepository;
     private final TopicRepository topicRepository;
+    private final PlatformProfileRepository platformProfileRepository;
+    private final SubmissionRepository submissionRepository;
+    private final ProblemRepository problemRepository;
 
     public DashboardDto.StatsResponse getStats(User user) {
         long bookmarkCount = bookmarkRepository.findByUserId(user.getId()).size();
+        List<PlatformProfile> profiles = platformProfileRepository.findByUserId(user.getId());
+        
+        int solvedCount = (int) submissionRepository.countSolvedByUserId(user.getId());
+        int platformSolved = profiles.stream().mapToInt(PlatformProfile::getProblemsSolved).sum();
+        
+        int attemptedCount = (int) submissionRepository.countByUserId(user.getId());
+        int totalProblems = (int) problemRepository.count();
+        
+        int contestRating = user.getContestRating();
+        if (!profiles.isEmpty()) {
+            contestRating = profiles.stream()
+                    .mapToInt(PlatformProfile::getContestRating)
+                    .max()
+                    .orElse(contestRating);
+        }
+
         return DashboardDto.StatsResponse.builder()
-                .problemsSolved(user.getProblemsSolved())
-                .contestRating(user.getContestRating())
+                .problemsSolved(solvedCount + platformSolved)
+                .contestRating(contestRating)
                 .currentStreak(user.getCurrentStreak())
                 .companiesCovered(user.getCompaniesCovered())
                 .studyHours(user.getStudyHours())
                 .bookmarks((int) bookmarkCount)
+                .totalProblems(totalProblems)
+                .attempted(attemptedCount)
                 .build();
     }
 
@@ -48,35 +69,71 @@ public class DashboardService {
     }
 
     public DashboardDto.ProgressResponse getProgress(User user) {
-        // Contest trend (mock monthly data derived from user rating)
+        List<PlatformProfile> profiles = platformProfileRepository.findByUserId(user.getId());
+        
+        // 1. Contest rating trend
         List<DashboardDto.ChartPoint> contestTrend = new ArrayList<>();
+        int rating = user.getContestRating();
+        if (!profiles.isEmpty()) {
+            rating = profiles.stream()
+                    .mapToInt(PlatformProfile::getContestRating)
+                    .max()
+                    .orElse(rating);
+        }
+        
         String[] months = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-        int baseRating = Math.max(user.getContestRating() - 300, 1200);
-        Random rand = new Random(user.getId());
-        for (String month : months) {
-            baseRating += rand.nextInt(60) - 15;
-            contestTrend.add(DashboardDto.ChartPoint.builder().label(month).value(baseRating).build());
+        int startRating = Math.max(rating - 150, 0);
+        int step = (rating - startRating) / 11;
+        for (int i = 0; i < 12; i++) {
+            int val = (rating == 0) ? 0 : (startRating + i * step);
+            if (i == 11) val = rating;
+            contestTrend.add(DashboardDto.ChartPoint.builder().label(months[i]).value(val).build());
         }
 
-        // Questions solved trend
+        // 2. Questions solved trend
         List<DashboardDto.ChartPoint> questionsTrend = new ArrayList<>();
-        int cumulative = 0;
-        for (String month : months) {
-            cumulative += rand.nextInt(30) + 10;
-            questionsTrend.add(DashboardDto.ChartPoint.builder().label(month).value(Math.min(cumulative, user.getProblemsSolved())).build());
+        List<Submission> solvedSubmissions = submissionRepository.findByUserIdAndSolvedTrue(user.getId());
+        int platformSolved = profiles.stream().mapToInt(PlatformProfile::getProblemsSolved).sum();
+        
+        int currentYear = LocalDate.now().getYear();
+        int[] monthlyCounts = new int[12];
+        for (Submission sub : solvedSubmissions) {
+            if (sub.getSubmittedAt() != null && sub.getSubmittedAt().getYear() == currentYear) {
+                int monthIdx = sub.getSubmittedAt().getMonthValue() - 1;
+                monthlyCounts[monthIdx]++;
+            }
+        }
+        
+        int cumulative = platformSolved; // start with platform solved as base
+        for (Submission sub : solvedSubmissions) {
+            if (sub.getSubmittedAt() != null && sub.getSubmittedAt().getYear() < currentYear) {
+                cumulative++;
+            }
+        }
+        
+        for (int i = 0; i < 12; i++) {
+            cumulative += monthlyCounts[i];
+            questionsTrend.add(DashboardDto.ChartPoint.builder().label(months[i]).value(cumulative).build());
         }
 
-        // Topic mastery
+        // 3. Topic mastery
         List<Topic> topics = topicRepository.findAll();
+        List<Object[]> rawCounts = submissionRepository.countSolvedProblemsPerTopic(user.getId());
+        Map<Long, Long> topicSolvedMap = new HashMap<>();
+        for (Object[] row : rawCounts) {
+            topicSolvedMap.put((Long) row[0], (Long) row[1]);
+        }
+
         List<DashboardDto.TopicProgress> topicMastery = topics.stream()
                 .filter(t -> t.getProblemCount() > 0)
                 .map(t -> {
-                    int solved = rand.nextInt(t.getProblemCount()) + 1;
+                    long solved = topicSolvedMap.getOrDefault(t.getId(), 0L);
+                    double percentage = Math.round(100.0 * solved / t.getProblemCount() * 10) / 10.0;
                     return DashboardDto.TopicProgress.builder()
                             .topic(t.getName())
-                            .solved(solved)
+                            .solved((int) solved)
                             .total(t.getProblemCount())
-                            .percentage(Math.round(100.0 * solved / t.getProblemCount() * 10) / 10.0)
+                            .percentage(percentage)
                             .build();
                 })
                 .sorted((a, b) -> Double.compare(b.getPercentage(), a.getPercentage()))

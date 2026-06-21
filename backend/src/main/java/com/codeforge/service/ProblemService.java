@@ -1,9 +1,7 @@
 package com.codeforge.service;
 
 import com.codeforge.dto.ProblemDto;
-import com.codeforge.entity.Problem;
-import com.codeforge.entity.Subtopic;
-import com.codeforge.entity.User;
+import com.codeforge.entity.*;
 import com.codeforge.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -12,6 +10,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.persistence.EntityManager;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,37 +27,107 @@ public class ProblemService {
     private final BookmarkRepository bookmarkRepository;
     private final SubtopicRepository subtopicRepository;
     private final NotificationService notificationService;
+    private final ActivityRepository activityRepository;
+    private final DailyActivityRepository dailyActivityRepository;
+    private final EntityManager entityManager;
 
     public ProblemDto.ProblemListResponse getProblems(User user, Long topicId, String difficulty,
-                                                       String search, int page, int size) {
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.by("id").ascending());
-        Page<Problem> problemPage;
+                                                       String search, Long companyId, String status, int page, int size) {
+        StringBuilder queryBuilder = new StringBuilder("SELECT DISTINCT p FROM Problem p");
+        StringBuilder countBuilder = new StringBuilder("SELECT COUNT(DISTINCT p) FROM Problem p");
 
-        if (search != null && !search.isBlank()) {
-            problemPage = problemRepository.searchByTitle(search, pageRequest);
-        } else if (topicId != null && difficulty != null && !difficulty.isBlank()) {
-            problemPage = problemRepository.findByTopicIdAndDifficulty(topicId, Problem.Difficulty.valueOf(difficulty.toUpperCase()), pageRequest);
-        } else if (topicId != null) {
-            problemPage = problemRepository.findByTopicId(topicId, pageRequest);
-        } else if (difficulty != null && !difficulty.isBlank()) {
-            problemPage = problemRepository.findByDifficulty(Problem.Difficulty.valueOf(difficulty.toUpperCase()), pageRequest);
-        } else {
-            problemPage = problemRepository.findAll(pageRequest);
+        StringBuilder joins = new StringBuilder();
+        if (topicId != null) {
+            joins.append(" JOIN p.topics t");
         }
+        if (companyId != null) {
+            joins.append(" JOIN p.companies c");
+        }
+        queryBuilder.append(joins);
+        countBuilder.append(joins);
+
+        List<String> wheres = new ArrayList<>();
+        if (topicId != null) {
+            wheres.add("t.id = :topicId");
+        }
+        if (companyId != null) {
+            wheres.add("c.id = :companyId");
+        }
+        if (difficulty != null && !difficulty.isBlank() && !"all".equalsIgnoreCase(difficulty)) {
+            wheres.add("p.difficulty = :difficulty");
+        }
+        if (search != null && !search.isBlank()) {
+            wheres.add("LOWER(p.title) LIKE LOWER(:search)");
+        }
+        if (status != null && !status.isBlank() && !"all".equalsIgnoreCase(status)) {
+            if ("solved".equalsIgnoreCase(status)) {
+                wheres.add("p.id IN (SELECT s2.problem.id FROM Submission s2 WHERE s2.user.id = :userId AND s2.solved = true)");
+            } else if ("unsolved".equalsIgnoreCase(status)) {
+                wheres.add("p.id NOT IN (SELECT s2.problem.id FROM Submission s2 WHERE s2.user.id = :userId AND s2.solved = true)");
+            } else if ("bookmarked".equalsIgnoreCase(status)) {
+                wheres.add("p.id IN (SELECT b2.problem.id FROM Bookmark b2 WHERE b2.user.id = :userId)");
+            }
+        }
+
+        if (!wheres.isEmpty()) {
+            String whereStr = " WHERE " + String.join(" AND ", wheres);
+            queryBuilder.append(whereStr);
+            countBuilder.append(whereStr);
+        }
+
+        queryBuilder.append(" ORDER BY p.id ASC");
+
+        var query = entityManager.createQuery(queryBuilder.toString(), Problem.class);
+        var countQuery = entityManager.createQuery(countBuilder.toString(), Long.class);
+
+        // Set parameters
+        if (wheres.stream().anyMatch(w -> w.contains(":userId"))) {
+            query.setParameter("userId", user.getId());
+            countQuery.setParameter("userId", user.getId());
+        }
+        if (topicId != null) {
+            query.setParameter("topicId", topicId);
+            countQuery.setParameter("topicId", topicId);
+        }
+        if (companyId != null) {
+            query.setParameter("companyId", companyId);
+            countQuery.setParameter("companyId", companyId);
+        }
+        if (difficulty != null && !difficulty.isBlank() && !"all".equalsIgnoreCase(difficulty)) {
+            Problem.Difficulty diffEnum = Problem.Difficulty.valueOf(difficulty.toUpperCase());
+            query.setParameter("difficulty", diffEnum);
+            countQuery.setParameter("difficulty", diffEnum);
+        }
+        if (search != null && !search.isBlank()) {
+            String searchPattern = "%" + search.trim().toLowerCase() + "%";
+            query.setParameter("search", searchPattern);
+            countQuery.setParameter("search", searchPattern);
+        }
+
+        // Execute count
+        Long totalElements = countQuery.getSingleResult();
+
+        // Paginate select
+        query.setFirstResult(page * size);
+        query.setMaxResults(size);
+
+        List<Problem> problemsList = query.getResultList();
 
         Set<Long> solvedIds = submissionRepository.findSolvedProblemIdsByUserId(user.getId())
                 .stream().collect(Collectors.toSet());
         Set<Long> bookmarkedIds = bookmarkRepository.findBookmarkedProblemIdsByUserId(user.getId())
                 .stream().collect(Collectors.toSet());
 
-        List<ProblemDto.ProblemResponse> problems = problemPage.getContent().stream()
+        List<ProblemDto.ProblemResponse> problems = problemsList.stream()
                 .map(p -> mapToResponse(p, solvedIds, bookmarkedIds))
                 .collect(Collectors.toList());
 
+        int totalPages = (int) Math.ceil((double) totalElements / size);
+
         return ProblemDto.ProblemListResponse.builder()
                 .problems(problems)
-                .totalPages(problemPage.getTotalPages())
-                .totalElements(problemPage.getTotalElements())
+                .totalPages(totalPages)
+                .totalElements(totalElements)
                 .currentPage(page)
                 .build();
     }
@@ -101,11 +171,72 @@ public class ProblemService {
                     .solved(true)
                     .build();
             submissionRepository.save(submission);
+            
+            // Increment problems solved
             user.setProblemsSolved(user.getProblemsSolved() + 1);
+            
+            // Save Activity entry
+            var activity = Activity.builder()
+                    .user(user)
+                    .type(Activity.ActivityType.SOLVED)
+                    .description("Solved " + problem.getTitle())
+                    .detail(problem.getDifficulty().name())
+                    .difficulty(problem.getDifficulty().name())
+                    .createdAt(java.time.LocalDateTime.now())
+                    .build();
+            activityRepository.save(activity);
+
+            // Increment/save DailyActivity entry
+            java.time.LocalDate today = java.time.LocalDate.now();
+            var dailyAct = dailyActivityRepository.findByUserIdAndActivityDate(user.getId(), today)
+                    .orElseGet(() -> DailyActivity.builder()
+                            .user(user)
+                            .activityDate(today)
+                            .count(0)
+                            .build());
+            dailyAct.setCount(dailyAct.getCount() + 1);
+            dailyActivityRepository.save(dailyAct);
+
+            // Update streaks
+            int computedStreak = calculateCurrentStreak(user.getId());
+            user.setCurrentStreak(computedStreak);
+            if (computedStreak > user.getMaxStreak()) {
+                user.setMaxStreak(computedStreak);
+            }
             
             // Add a notification
             notificationService.createNotification(user, "Problem Solved! 🎉", "You successfully completed: " + problem.getTitle());
         }
+    }
+
+    private int calculateCurrentStreak(Long userId) {
+        java.time.LocalDate today = java.time.LocalDate.now();
+        java.time.LocalDate yesterday = today.minusDays(1);
+        
+        List<java.time.LocalDate> activeDates = dailyActivityRepository.findActiveDatesByUserId(userId);
+        
+        if (activeDates.isEmpty()) {
+            return 0;
+        }
+        
+        java.time.LocalDate mostRecent = activeDates.get(0);
+        if (!mostRecent.equals(today) && !mostRecent.equals(yesterday)) {
+            return 0;
+        }
+        
+        int streak = 1;
+        for (int i = 0; i < activeDates.size() - 1; i++) {
+            java.time.LocalDate current = activeDates.get(i);
+            java.time.LocalDate next = activeDates.get(i + 1);
+            if (current.minusDays(1).equals(next)) {
+                streak++;
+            } else if (current.equals(next)) {
+                // Ignore duplicates
+            } else {
+                break;
+            }
+        }
+        return streak;
     }
 
     @Transactional(readOnly = true)

@@ -13,6 +13,8 @@ public class DashboardDto {
         private Integer companiesCovered;
         private Double studyHours;
         private Integer bookmarks;
+        private Integer totalProblems;
+        private Integer attempted;
     }
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder

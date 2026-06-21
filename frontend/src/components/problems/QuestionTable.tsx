@@ -1,5 +1,6 @@
 import React from 'react';
-import { Code, FileText, ExternalLink, Check, Star } from 'lucide-react';
+import { FileText, Check, Plus } from 'lucide-react';
+import { LeetCodeLogo, GfgLogo, CompanyLogo } from '../CompanyLogos';
 
 interface CompanyInfo {
   name: string;
@@ -26,6 +27,8 @@ interface QuestionTableProps {
   onSolveToggle: (id: number) => void;
   onBookmarkToggle: (id: number) => void;
   onSolve: (problem: Problem) => void;
+  onEditNote: (problem: Problem) => void;
+  problemNotes: Record<number, string>;
 }
 
 export const QuestionTable: React.FC<QuestionTableProps> = ({
@@ -33,12 +36,14 @@ export const QuestionTable: React.FC<QuestionTableProps> = ({
   onSolveToggle,
   onBookmarkToggle,
   onSolve,
+  onEditNote,
+  problemNotes,
 }) => {
   if (problems.length === 0) {
     return (
-      <div className="py-8 text-center text-[#6B7280]">
-        <p className="font-semibold text-sm text-text">No Problems Found</p>
-        <p className="text-xs mt-1">No questions match the current filters.</p>
+      <div className="py-6 text-center text-[#6B7280]">
+        <p className="font-semibold text-xs text-[#111827]">No Problems Found</p>
+        <p className="text-[11px] mt-1 text-[#6B7280]">No questions match the current filters.</p>
       </div>
     );
   }
@@ -46,162 +51,142 @@ export const QuestionTable: React.FC<QuestionTableProps> = ({
   return (
     <div className="bg-white border border-[#E5E7EB] rounded-premium shadow-card overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
+        <table className="w-full text-left border-collapse min-w-[800px]">
           <thead>
-            <tr className="border-b border-[#E5E7EB] bg-[#F8FAFC] text-[11px] font-bold text-secondaryText uppercase tracking-wider">
-              <th className="py-3 px-4 w-12 text-center">Status</th>
-              <th className="py-3 px-4">Problem Name & Companies</th>
-              <th className="py-3 px-4 w-28 text-center">Difficulty</th>
-              <th className="py-3 px-4 w-24 text-center">Solve</th>
-              <th className="py-3 px-4 w-48">Platforms</th>
-              <th className="py-3 px-4 w-24 text-center">Actions</th>
+            <tr className="border-b border-[#E5E7EB] bg-[#F8FAFC] text-[9.5px] font-bold text-secondaryText uppercase tracking-wider select-none">
+              <th className="py-2 px-2 w-10 text-center">Status</th>
+              <th className="py-2 px-2 text-left">Problem</th>
+              <th className="py-2 px-2 w-16 text-center">Solve</th>
+              <th className="py-2 px-2 w-16 text-center">Resource</th>
+              <th className="py-2 px-2 w-20 text-center">Practice</th>
+              <th className="py-2 px-2 w-12 text-center">Note</th>
+              <th className="py-2 px-2 w-32">Companies</th>
+              <th className="py-2 px-2 w-20 text-center">Difficulty</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#E5E7EB] text-sm text-[#111827]">
+          <tbody className="divide-y divide-[#E5E7EB] text-[11.5px] font-semibold text-[#111827]">
             {problems.map((prob) => {
-              const hasNote = !!localStorage.getItem(`notes_${prob.id}`);
               return (
                 <tr key={prob.id} className="hover:bg-[#FAFBFC] transition group">
-                {/* Status Checkbox */}
-                <td className="py-4 px-4 text-center align-middle">
-                  <button
-                    onClick={() => onSolveToggle(prob.id)}
-                    className={`w-5.5 h-5.5 mx-auto rounded-md border flex items-center justify-center transition hover:scale-105 active:scale-95 ${
-                      prob.solved
-                        ? 'bg-success/15 border-success text-success'
-                        : 'border-slate-300 hover:border-success text-transparent hover:text-success/50'
-                    }`}
-                  >
-                    <Check className="w-3.5 h-3.5 stroke-[3.5]" />
-                  </button>
-                </td>
-
-                {/* Name & Company Logos */}
-                <td className="py-4 px-4 align-middle">
-                  <div className="flex flex-col">
-                    <span 
-                      onClick={() => onSolve(prob)}
-                      className="font-semibold text-text hover:text-primary cursor-pointer transition text-sm"
+                  {/* Status Checkbox */}
+                  <td className="py-1 px-1 text-center align-middle w-10">
+                    <button
+                      onClick={() => onSolveToggle(prob.id)}
+                      className={`w-4.5 h-4.5 mx-auto rounded-md border flex items-center justify-center transition hover:scale-105 active:scale-95 ${
+                        prob.solved
+                          ? 'bg-success/15 border-success text-success'
+                          : 'border-slate-300 hover:border-success text-transparent hover:text-success/50'
+                      }`}
                     >
+                      <Check className="w-2.5 h-2.5 stroke-[3.5]" />
+                    </button>
+                  </td>
+
+                  {/* Problem Title */}
+                  <td className="py-1.5 px-2 align-middle text-left font-bold text-text group-hover:text-primary cursor-pointer transition">
+                    <span onClick={() => onSolve(prob)}>
                       {prob.title}
                     </span>
-                    
-                    {/* Company info with logos */}
-                    {prob.companyInfo && prob.companyInfo.length > 0 ? (
-                      <div className="flex flex-wrap gap-1.5 mt-1.5">
-                        {prob.companyInfo.map((comp, idx) => (
-                          <span
-                            key={idx}
-                            className="inline-flex items-center gap-1.5 text-[10px] bg-slate-50 border border-slate-200 text-slate-600 px-2 py-0.5 rounded-full font-medium"
-                          >
-                            {comp.logoUrl ? (
-                              <img
-                                src={comp.logoUrl}
-                                className="w-3.5 h-3.5 object-contain"
-                                alt={comp.name}
-                                onError={(e) => {
-                                  e.currentTarget.style.display = 'none';
-                                }}
-                              />
-                            ) : (
-                              <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-                            )}
-                            <span>{comp.name}</span>
-                          </span>
-                        ))}
-                      </div>
-                    ) : (
-                      prob.companies && prob.companies.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5 mt-1.5">
-                          {prob.companies.map((c, idx) => (
-                            <span
-                              key={idx}
-                              className="text-[10px] bg-slate-50 border border-slate-200 text-slate-600 px-2 py-0.5 rounded-full font-medium"
-                            >
-                              {c}
-                            </span>
-                          ))}
-                        </div>
-                      )
-                    )}
-                  </div>
-                </td>
+                  </td>
 
-                {/* Difficulty */}
-                <td className="py-4 px-4 text-center align-middle">
-                  <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                    prob.difficulty === 'EASY' ? 'bg-green-50 text-success' :
-                    prob.difficulty === 'MEDIUM' ? 'bg-amber-50 text-warning' :
-                    'bg-red-50 text-danger'
-                  }`}>
-                    {prob.difficulty}
-                  </span>
-                </td>
-
-                {/* Solve Button */}
-                <td className="py-4 px-4 text-center align-middle">
-                  <button
-                    onClick={() => onSolve(prob)}
-                    className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-premium shadow-sm transition active:scale-95"
-                  >
-                    <Code className="w-3.5 h-3.5" />
-                    <span>Solve</span>
-                  </button>
-                </td>
-
-                {/* Platform Links */}
-                <td className="py-4 px-4 align-middle">
-                  <div className="flex items-center gap-2">
-                    {prob.leetcodeUrl && (
-                      <a
-                        href={prob.leetcodeUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-[#FFF7ED] text-[#EA580C] hover:bg-[#FEE2E2] hover:text-[#DC2626] border border-[#FED7AA] rounded-premium text-[11px] font-bold transition"
-                      >
-                        <span>LeetCode</span>
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
-                    )}
-                    {prob.gfgUrl && (
-                      <a
-                        href={prob.gfgUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-[#F0FDF4] text-[#16A34A] hover:bg-[#DCFCE7] hover:text-[#15803D] border border-[#BBF7D0] rounded-premium text-[11px] font-bold transition"
-                      >
-                        <span>GFG</span>
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
-                    )}
-                  </div>
-                </td>
-
-                {/* Actions */}
-                <td className="py-4 px-4 text-center align-middle">
-                  <div className="flex items-center justify-center gap-1.5">
+                  {/* Solve Button */}
+                  <td className="py-1.5 px-2 text-center align-middle w-16">
                     <button
                       onClick={() => onSolve(prob)}
-                      className={`p-1.5 hover:bg-slate-100 rounded-lg transition ${
-                        hasNote ? 'text-primary bg-indigo-50/50 border border-indigo-100/50' : 'text-slate-400 hover:text-slate-600'
-                      }`}
-                      title={hasNote ? "Edit Notes (Contains Saved Notes)" : "Open Scratchpad / Notes"}
+                      className="px-2.5 py-0.5 bg-primary hover:bg-primary-hover text-white rounded-full text-[8.5px] font-black uppercase tracking-wider transition-all duration-200"
                     >
-                      <FileText className="w-4.5 h-4.5" />
+                      Solve
                     </button>
+                  </td>
+
+                  {/* Resource Column */}
+                  <td className="py-1.5 px-2 text-center align-middle w-16">
                     <button
-                      onClick={() => onBookmarkToggle(prob.id)}
-                      className={`p-1.5 hover:bg-slate-100 rounded-lg transition ${
-                        prob.bookmarked ? 'text-[#8B5CF6]' : 'text-slate-400 hover:text-[#8B5CF6]'
-                      }`}
-                      title={prob.bookmarked ? 'Remove Bookmark' : 'Bookmark'}
+                      onClick={() => onSolve(prob)}
+                      className="p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-all mx-auto block"
+                      title="Open Scratchpad & Resources"
                     >
-                      <Star className={`w-4.5 h-4.5 ${prob.bookmarked ? 'fill-accent text-accent' : ''}`} />
+                      <FileText className="w-4 h-4" />
                     </button>
-                  </div>
-                </td>
-              </tr>
-            )})}
+                  </td>
+
+                  {/* Practice Platforms Column */}
+                  <td className="py-1.5 px-2 text-center align-middle w-20">
+                    <div className="flex items-center justify-center gap-1.5">
+                      {prob.leetcodeUrl ? (
+                        <a href={prob.leetcodeUrl} target="_blank" rel="noopener noreferrer" className="block scale-[0.8] origin-center">
+                          <LeetCodeLogo />
+                        </a>
+                      ) : (
+                        <LeetCodeLogo disabled />
+                      )}
+                      {prob.gfgUrl ? (
+                        <a href={prob.gfgUrl} target="_blank" rel="noopener noreferrer" className="block scale-[0.8] origin-center">
+                          <GfgLogo />
+                        </a>
+                      ) : (
+                        <GfgLogo disabled />
+                      )}
+                    </div>
+                  </td>
+
+                  {/* Note Column Cell */}
+                  <td className="py-1.5 px-2 text-center align-middle w-12">
+                    <button
+                      onClick={() => onEditNote(prob)}
+                      className={`w-5.5 h-5.5 mx-auto rounded-full flex items-center justify-center border transition-all duration-200 ${
+                        problemNotes[prob.id]
+                          ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.15)]'
+                          : 'bg-slate-50 border-slate-300 text-slate-400 hover:border-primary/40 hover:text-primary hover:bg-slate-100'
+                      }`}
+                      title={problemNotes[prob.id] ? "View/Edit Note" : "Add Note"}
+                    >
+                      <Plus className="w-2.5 h-2.5 stroke-[3]" />
+                    </button>
+                  </td>
+
+                  {/* Companies Logos */}
+                  <td className="py-1.5 px-2 w-32 align-middle">
+                    <div className="flex items-center gap-1 flex-wrap">
+                      {prob.companyInfo && prob.companyInfo.length > 0 ? (
+                        prob.companyInfo.slice(0, 4).map((comp, cIdx) => (
+                          <div key={cIdx} className="tooltip-trigger relative">
+                            <CompanyLogo name={comp.name} logoUrl={comp.logoUrl} className="w-5.5 h-5.5" />
+                            <div className="tooltip-content absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 bg-black/95 text-[9px] font-bold text-white px-2 py-0.5 rounded border border-white/10 whitespace-nowrap opacity-0 pointer-events-none transition duration-150 z-20">
+                              {comp.name}
+                            </div>
+                          </div>
+                        ))
+                      ) : prob.companies && prob.companies.length > 0 ? (
+                        prob.companies.slice(0, 4).map((cName, cIdx) => (
+                          <div key={cIdx} className="tooltip-trigger relative">
+                            <CompanyLogo name={cName} className="w-5.5 h-5.5" />
+                            <div className="tooltip-content absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 bg-black/95 text-[9px] font-bold text-white px-2 py-0.5 rounded border border-white/10 whitespace-nowrap opacity-0 pointer-events-none transition duration-150 z-20">
+                              {cName}
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <span className="text-[9px] text-slate-400 italic font-medium pl-1">General</span>
+                      )}
+                    </div>
+                  </td>
+
+                  {/* Difficulty */}
+                  <td className="py-1.5 px-2 text-center border border-slate-100 align-middle w-20">
+                    <span className={`inline-flex px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ${
+                      prob.difficulty === 'EASY' 
+                        ? 'bg-green-50 text-success border border-success/20' 
+                        : prob.difficulty === 'MEDIUM' 
+                        ? 'bg-amber-50 text-warning border border-warning/20' 
+                        : 'bg-red-50 text-danger border border-danger/20'
+                    }`}>
+                      {prob.difficulty === 'EASY' ? 'Easy' : prob.difficulty === 'MEDIUM' ? 'Medium' : 'Hard'}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

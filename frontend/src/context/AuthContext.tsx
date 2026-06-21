@@ -93,6 +93,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const response = await api.get<UserInfo>('/auth/me');
       setUser(response.data);
       localStorage.setItem('user', JSON.stringify(response.data));
+      window.dispatchEvent(new Event('stats-updated'));
     } catch (error) {
       console.error('Error updating stats:', error);
     }

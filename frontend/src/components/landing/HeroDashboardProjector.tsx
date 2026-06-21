@@ -58,11 +58,6 @@ export const HeroDashboardProjector: React.FC = () => {
           <line x1="260" y1="65" x2="310" y2="130" stroke="#22D3EE" strokeWidth="1" strokeOpacity="0.2" />
           <line x1="260" y1="65" x2="390" y2="130" stroke="#4A6CF7" strokeWidth="1" strokeOpacity="0.15" />
           <line x1="260" y1="65" x2="470" y2="130" stroke="#4A6CF7" strokeWidth="1" strokeOpacity="0.15" />
-          
-          <line x1="260" y1="65" x2="0" y2="65" stroke="#4A6CF7" strokeWidth="1" strokeOpacity="0.1" />
-          <line x1="260" y1="65" x2="520" y2="65" stroke="#4A6CF7" strokeWidth="1" strokeOpacity="0.1" />
-          <line x1="260" y1="65" x2="80" y2="0" stroke="#4A6CF7" strokeWidth="1" strokeOpacity="0.05" />
-          <line x1="260" y1="65" x2="440" y2="0" stroke="#4A6CF7" strokeWidth="1" strokeOpacity="0.05" />
         </svg>
       </div>
 
@@ -78,6 +73,26 @@ export const HeroDashboardProjector: React.FC = () => {
             </linearGradient>
           </defs>
           <polygon points="175,400 325,400 440,0 60,0" fill="url(#lightBeam)" />
+        </svg>
+      </div>
+
+      {/* ====== CONNECTING LASER LINES (pedestal center to cards) ====== */}
+      <svg className="absolute inset-0 w-full h-full pointer-events-none z-0 opacity-40">
+        <line x1="300" y1="470" x2="160" y2="130" stroke="#22D3EE" strokeWidth="1" strokeDasharray="3 3" />
+        <line x1="320" y1="470" x2="460" y2="180" stroke="#22D3EE" strokeWidth="1" strokeDasharray="3 3" />
+        <line x1="280" y1="470" x2="150" y2="360" stroke="#22D3EE" strokeWidth="1" strokeDasharray="3 3" />
+        <line x1="330" y1="470" x2="450" y2="350" stroke="#22D3EE" strokeWidth="1" strokeDasharray="3 3" />
+        <line x1="310" y1="470" x2="310" y2="380" stroke="#22D3EE" strokeWidth="1" strokeDasharray="3 3" />
+      </svg>
+
+      {/* ====== HOLOGRAPHIC PLANET SPHERE ====== */}
+      <div className="absolute top-[4%] right-[13%] w-[120px] h-[120px] rounded-full bg-gradient-to-tr from-blue-900/35 via-cyan-600/30 to-cyan-400/15 blur-[0.5px] pointer-events-none z-0 border border-cyan-400/20 shadow-[0_0_24px_rgba(34,211,238,0.2)] flex items-center justify-center animate-float-gentle">
+        <svg className="w-full h-full opacity-40" viewBox="0 0 100 100">
+          <ellipse cx="50" cy="50" rx="45" ry="12" fill="none" stroke="#22D3EE" strokeWidth="0.75" transform="rotate(-25 50 50)" />
+          <ellipse cx="50" cy="50" rx="45" ry="24" fill="none" stroke="#22D3EE" strokeWidth="0.75" transform="rotate(-25 50 50)" />
+          <ellipse cx="50" cy="50" rx="12" ry="45" fill="none" stroke="#22D3EE" strokeWidth="0.75" transform="rotate(-25 50 50)" />
+          <ellipse cx="50" cy="50" rx="24" ry="45" fill="none" stroke="#22D3EE" strokeWidth="0.75" transform="rotate(-25 50 50)" />
+          <path d="M 5 50 A 45 45 0 0 0 95 50" fill="none" stroke="#22D3EE" strokeWidth="0.75" transform="rotate(-25 50 50)" />
         </svg>
       </div>
 
@@ -98,11 +113,11 @@ export const HeroDashboardProjector: React.FC = () => {
       {/* ====== CARD 1: Problems Solved (top-left) ====== */}
       <div className="absolute top-[6%] left-[6%] animate-float-slow z-10" style={{ animationDelay: '0s' }}>
         <div 
-          className="w-[185px] bg-[#070c1e]/40 border border-white/[0.08] backdrop-blur-xl rounded-xl p-4 shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-300 hover:border-[#22D3EE]/30 relative overflow-hidden"
+          className="w-[185px] bg-[#070c1e]/40 border border-[#22D3EE]/35 backdrop-blur-xl rounded-xl p-4 shadow-[0_0_15px_rgba(34,211,238,0.2),inset_0_0_10px_rgba(34,211,238,0.1),0_16px_48px_rgba(0,0,0,0.4)] transition-all duration-300 hover:border-[#22D3EE]/60 relative overflow-hidden"
           style={{ transform: 'rotateY(-18deg) rotateX(10deg) rotateZ(-1deg)', transformStyle: 'preserve-3d' }}
         >
           {/* Glossy sheen overlay */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.015] to-white/[0.06] pointer-events-none rounded-xl" />
+          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.02] to-white/[0.08] pointer-events-none rounded-xl" />
           
           <span className="text-[11px] text-[#7B8AB8] font-semibold tracking-wide relative z-10">Problems Solved</span>
           <div className="flex items-baseline gap-2 mt-1.5 relative z-10">
@@ -121,11 +136,11 @@ export const HeroDashboardProjector: React.FC = () => {
       {/* ====== CARD 2: LeetCode Heatmap (top-right) ====== */}
       <div className="absolute top-[0%] right-[3%] animate-float-slow z-10" style={{ animationDelay: '1.2s' }}>
         <div 
-          className="w-[245px] bg-[#070c1e]/40 border border-white/[0.08] backdrop-blur-xl rounded-xl p-4 shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-300 hover:border-[#60A5FA]/30 relative overflow-hidden"
+          className="w-[245px] bg-[#070c1e]/40 border border-[#22D3EE]/35 backdrop-blur-xl rounded-xl p-4 shadow-[0_0_15px_rgba(34,211,238,0.2),inset_0_0_10px_rgba(34,211,238,0.1),0_16px_48px_rgba(0,0,0,0.4)] transition-all duration-300 hover:border-[#22D3EE]/60 relative overflow-hidden"
           style={{ transform: 'rotateY(16deg) rotateX(8deg) rotateZ(1deg)', transformStyle: 'preserve-3d' }}
         >
           {/* Glossy sheen overlay */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.015] to-white/[0.06] pointer-events-none rounded-xl" />
+          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.02] to-white/[0.08] pointer-events-none rounded-xl" />
           
           <span className="text-[11px] text-[#7B8AB8] font-semibold tracking-wide block mb-2.5 relative z-10">LeetCode Heatmap</span>
           
@@ -166,11 +181,11 @@ export const HeroDashboardProjector: React.FC = () => {
       {/* ====== CARD 3: Contest Rating (middle-left) ====== */}
       <div className="absolute top-[43%] left-[-2%] animate-float-slow z-10" style={{ animationDelay: '2.4s' }}>
         <div 
-          className="w-[185px] bg-[#070c1e]/40 border border-white/[0.08] backdrop-blur-xl rounded-xl p-4 shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-300 hover:border-[#818CF8]/30 relative overflow-hidden"
+          className="w-[185px] bg-[#070c1e]/40 border border-[#818CF8]/35 backdrop-blur-xl rounded-xl p-4 shadow-[0_0_15px_rgba(129,140,248,0.2),inset_0_0_10px_rgba(129,140,248,0.1),0_16px_48px_rgba(0,0,0,0.4)] transition-all duration-300 hover:border-[#818CF8]/60 relative overflow-hidden"
           style={{ transform: 'rotateY(-18deg) rotateX(-5deg) rotateZ(-2deg)', transformStyle: 'preserve-3d' }}
         >
           {/* Glossy sheen overlay */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.015] to-white/[0.06] pointer-events-none rounded-xl" />
+          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.02] to-white/[0.08] pointer-events-none rounded-xl" />
           
           <span className="text-[11px] text-[#7B8AB8] font-semibold tracking-wide relative z-10">Contest Rating</span>
           <div className="flex items-baseline gap-2 mt-1.5 relative z-10">
@@ -189,11 +204,11 @@ export const HeroDashboardProjector: React.FC = () => {
       {/* ====== CARD 4: Difficulty Distribution (right) ====== */}
       <div className="absolute top-[28%] right-[-4%] animate-float-slow z-10" style={{ animationDelay: '1.7s' }}>
         <div 
-          className="w-[210px] bg-[#070c1e]/40 border border-white/[0.08] backdrop-blur-xl rounded-xl p-4 shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-300 hover:border-[#22D3EE]/30 relative overflow-hidden"
+          className="w-[210px] bg-[#070c1e]/40 border border-[#3B82F6]/35 backdrop-blur-xl rounded-xl p-4 shadow-[0_0_15px_rgba(59,130,246,0.2),inset_0_0_10px_rgba(59,130,246,0.1),0_16px_48px_rgba(0,0,0,0.4)] transition-all duration-300 hover:border-[#3B82F6]/60 relative overflow-hidden"
           style={{ transform: 'rotateY(20deg) rotateX(5deg) rotateZ(1.5deg)', transformStyle: 'preserve-3d' }}
         >
           {/* Glossy sheen overlay */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.015] to-white/[0.06] pointer-events-none rounded-xl" />
+          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.02] to-white/[0.08] pointer-events-none rounded-xl" />
           
           <span className="text-[11px] text-[#7B8AB8] font-semibold tracking-wide block mb-3 relative z-10">Difficulty Distribution</span>
           <div className="flex items-center gap-4 relative z-10">
@@ -231,11 +246,11 @@ export const HeroDashboardProjector: React.FC = () => {
       {/* ====== CARD 5: Current Streak (bottom-center) ====== */}
       <div className="absolute bottom-[15%] left-[28%] animate-float-slow z-10" style={{ animationDelay: '2.8s' }}>
         <div 
-          className="w-[155px] bg-[#070c1e]/40 border border-white/[0.08] backdrop-blur-xl rounded-xl p-3.5 shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-300 hover:border-[#FFA500]/30 relative overflow-hidden"
+          className="w-[155px] bg-[#070c1e]/40 border border-[#FB923C]/35 backdrop-blur-xl rounded-xl p-3.5 shadow-[0_0_15px_rgba(251,146,60,0.2),inset_0_0_10px_rgba(251,146,60,0.1),0_16px_48px_rgba(0,0,0,0.4)] transition-all duration-300 hover:border-[#FB923C]/60 relative overflow-hidden"
           style={{ transform: 'rotateY(4deg) rotateX(15deg) rotateZ(0deg)', transformStyle: 'preserve-3d' }}
         >
           {/* Glossy sheen overlay */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.015] to-white/[0.06] pointer-events-none rounded-xl" />
+          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.02] to-white/[0.08] pointer-events-none rounded-xl" />
           
           <span className="text-[10px] text-[#7B8AB8] font-semibold tracking-wide relative z-10">Current Streak</span>
           <div className="flex items-center gap-3 mt-2 relative z-10">
@@ -274,6 +289,11 @@ export const HeroDashboardProjector: React.FC = () => {
               <stop offset="70%" stopColor="#22D3EE" stopOpacity="0.85" />
               <stop offset="100%" stopColor="#22D3EE" stopOpacity="0" />
             </linearGradient>
+            <linearGradient id="coreBeam" x1="0.5" y1="1" x2="0.5" y2="0">
+              <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.85" />
+              <stop offset="25%" stopColor="#22D3EE" stopOpacity="0.5" />
+              <stop offset="100%" stopColor="#4A6CF7" stopOpacity="0" />
+            </linearGradient>
           </defs>
           
           {/* Bottom shadow */}
@@ -297,6 +317,9 @@ export const HeroDashboardProjector: React.FC = () => {
           <ellipse cx="200" cy="35" rx="100" ry="12" fill="#1D4ED8" fillOpacity="0.4" />
           <ellipse cx="200" cy="35" rx="75" ry="9" fill="#22D3EE" fillOpacity="0.65" filter="blur(1.5px)" />
           <ellipse cx="200" cy="35" rx="40" ry="4" fill="#FFFFFF" fillOpacity="0.95" filter="blur(1px)" />
+
+          {/* Core light beam core polygon */}
+          <polygon points="185,35 215,35 225,0 175,0" fill="url(#coreBeam)" opacity="0.4" />
         </svg>
       </div>
     </div>

@@ -23,10 +23,12 @@ public class ProblemController {
             @RequestParam(required = false) Long topicId,
             @RequestParam(required = false) String difficulty,
             @RequestParam(required = false) String search,
+            @RequestParam(required = false) Long companyId,
+            @RequestParam(required = false) String status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         User user = (User) auth.getPrincipal();
-        return ResponseEntity.ok(problemService.getProblems(user, topicId, difficulty, search, page, size));
+        return ResponseEntity.ok(problemService.getProblems(user, topicId, difficulty, search, companyId, status, page, size));
     }
 
     @GetMapping("/topics")

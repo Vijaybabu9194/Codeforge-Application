@@ -1,19 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import api from '../lib/api';
 import { useAuth } from '../context/AuthContext';
-import { 
-  Trophy, 
-  Flame, 
-  Building2, 
-  Clock, 
-  Bookmark, 
-  CheckCircle 
-} from 'lucide-react';
 
-import StatsCard from '../components/dashboard/StatsCard';
-import ActivityHeatmap from '../components/dashboard/ActivityHeatmap';
-import ProgressCharts from '../components/dashboard/ProgressCharts';
-import RecentActivity from '../components/dashboard/RecentActivity';
+import DashboardGreeting from '../components/dashboard/DashboardGreeting';
+import DashboardStatsRow from '../components/dashboard/DashboardStatsRow';
+import DashboardHeatmap from '../components/dashboard/DashboardHeatmap';
+import DashboardRecentActivity from '../components/dashboard/DashboardRecentActivity';
+import DashboardContestPerformance from '../components/dashboard/DashboardContestPerformance';
+import DashboardTopicMastery from '../components/dashboard/DashboardTopicMastery';
+import DashboardDifficultyDonut from '../components/dashboard/DashboardDifficultyDonut';
+import DashboardWeeklyProgress from '../components/dashboard/DashboardWeeklyProgress';
+import DashboardGoalProgress from '../components/dashboard/DashboardGoalProgress';
+import DashboardBadges from '../components/dashboard/DashboardBadges';
+import DashboardUpcomingContests from '../components/dashboard/DashboardUpcomingContests';
 
 interface Stats {
   problemsSolved: number;
@@ -75,121 +74,129 @@ export const HomePage: React.FC = () => {
     fetchDashboardData();
   }, []);
 
+  // Slices heatmap counts to compute dynamic current/previous week progress
+  const getWeeklyDetails = () => {
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const today = new Date();
+    
+    // Get date of Monday of the current week
+    const dayOfWeek = today.getDay(); // 0 is Sunday, 1 is Monday, etc.
+    const mondayDiff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    const monday = new Date(today);
+    monday.setDate(today.getDate() + mondayDiff);
+
+    let weeklyTotal = 0;
+    const weeklyData = days.map((day, idx) => {
+      const currentDate = new Date(monday);
+      currentDate.setDate(monday.getDate() + idx);
+      
+      const year = currentDate.getFullYear();
+      const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+      const dateVal = String(currentDate.getDate()).padStart(2, '0');
+      const dateStr = `${year}-${month}-${dateVal}`;
+      
+      const entry = heatmap.find(d => d.date === dateStr);
+      const val = entry ? entry.count : 0;
+      weeklyTotal += val;
+      return {
+        day,
+        value: val
+      };
+    });
+
+    // Compute previous week total solved
+    const prevMonday = new Date(monday);
+    prevMonday.setDate(monday.getDate() - 7);
+    
+    let prevWeeklyTotal = 0;
+    for (let i = 0; i < 7; i++) {
+      const currentDate = new Date(prevMonday);
+      currentDate.setDate(prevMonday.getDate() + i);
+      const year = currentDate.getFullYear();
+      const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+      const dateVal = String(currentDate.getDate()).padStart(2, '0');
+      const dateStr = `${year}-${month}-${dateVal}`;
+      const entry = heatmap.find(d => d.date === dateStr);
+      prevWeeklyTotal += entry ? entry.count : 0;
+    }
+
+    const diff = weeklyTotal - prevWeeklyTotal;
+    const trendText = diff >= 0 ? `↑ ${diff} vs last week` : `↓ ${Math.abs(diff)} vs last week`;
+    const trendUp = diff >= 0;
+
+    return { weeklyData, weeklyTotal, trendText, trendUp };
+  };
+
+  const weeklyInfo = getWeeklyDetails();
+
   if (loading) {
     return (
-      <div className="p-8 max-w-7xl mx-auto space-y-8 animate-pulse">
-        <div className="h-12 bg-white border border-border rounded-premium w-1/3" />
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-6">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="h-28 bg-white border border-border rounded-premium" />
+      <div className="space-y-5 select-none animate-pulse">
+        {/* Greeting Banner Skeleton */}
+        <div className="bg-[#090D1A] border border-white/[0.04] rounded-2xl h-[120px] w-full" />
+        
+        {/* Stats Row Skeleton */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 pt-24">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="bg-[#090D1A] border border-white/[0.04] rounded-xl h-[130px] w-full" />
           ))}
         </div>
-        <div className="h-48 bg-white border border-border rounded-premium" />
-        <div className="grid md:grid-cols-3 gap-8">
-          <div className="md:col-span-2 h-72 bg-white border border-border rounded-premium" />
-          <div className="h-72 bg-white border border-border rounded-premium" />
+
+        {/* Heatmap Skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-5">
+          <div className="bg-[#090D1A] border border-white/[0.04] rounded-xl h-[240px] w-full" />
+          <div className="bg-[#090D1A] border border-white/[0.04] rounded-xl h-[240px] w-full" />
+        </div>
+
+        {/* Charts Grid Skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="bg-[#090D1A] border border-white/[0.04] rounded-xl h-[240px] w-full" />
+          ))}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8 select-none">
-      {/* WELCOME BANNER */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between bg-white border border-border rounded-premium p-6 shadow-card">
-        <div>
-          <h1 className="text-2xl font-bold text-[#111827]">
-            Good Evening, {user?.name || 'Vijay'} 👋
-          </h1>
-          <p className="text-sm text-secondaryText mt-1">
-            Consistency compounds. Keep solving. Keep growing.
-          </p>
-        </div>
-        <div className="mt-4 md:mt-0 flex items-center space-x-2 text-xs text-primary font-semibold bg-indigo-50 px-3.5 py-1.5 rounded-full">
-          <Flame className="w-4 h-4" />
-          <span>Active Streak: {stats?.currentStreak || 0} Days</span>
-        </div>
+    <div className="space-y-5 select-none">
+      {/* Greeting Banner */}
+      <DashboardGreeting name={user?.name} />
+
+      {/* Stats Row — 4 cards */}
+      <div className="pt-24">
+        <DashboardStatsRow stats={stats} progress={progress} />
       </div>
 
-      {/* STATS GRID */}
-      <div className="grid grid-cols-2 md:grid-cols-6 gap-6">
-        {/* Problems Solved */}
-        <StatsCard
-          label="Solved"
-          value={stats?.problemsSolved || 0}
-          icon={<CheckCircle className="w-4 h-4 text-success" />}
-          sparklinePath="M0,15 L20,13 L40,14 L60,8 L80,10 L100,2"
-          sparklineColorClass="text-success"
-        />
-
-        {/* Contest Rating */}
-        <StatsCard
-          label="Rating"
-          value={stats?.contestRating || 0}
-          icon={<Trophy className="w-4 h-4 text-primary" />}
-          sparklinePath="M0,18 L20,16 L40,15 L60,11 L80,5 L100,1"
-          sparklineColorClass="text-primary"
-        />
-
-        {/* Current Streak */}
-        <StatsCard
-          label="Streak"
-          value={stats?.currentStreak || 0}
-          icon={<Flame className="w-4 h-4 text-warning" />}
-          sparklinePath="M0,16 L25,12 L50,14 L75,8 L100,2"
-          sparklineColorClass="text-warning"
-        />
-
-        {/* Companies Covered */}
-        <StatsCard
-          label="Companies"
-          value={stats?.companiesCovered || 0}
-          icon={<Building2 className="w-4 h-4 text-[#8B5CF6]" />}
-          progressBar={true}
-          progressPercentage={45}
-          progressBarColorClass="bg-[#8B5CF6]"
-        />
-
-        {/* Study Hours */}
-        <StatsCard
-          label="Study Hours"
-          value={`${stats?.studyHours?.toFixed(1) || 0}h`}
-          icon={<Clock className="w-4 h-4 text-secondaryText" />}
-          customFooter={
-            <div className="h-6 flex items-end justify-between gap-1 w-full mt-2">
-              {[3, 5, 8, 4, 7, 6, 9].map((val, idx) => (
-                <div key={idx} className="bg-indigo-100 group-hover:bg-primary transition w-full rounded-sm" style={{ height: `${val * 10}%` }} />
-              ))}
-            </div>
-          }
-        />
-
-        {/* Bookmarks */}
-        <StatsCard
-          label="Bookmarks"
-          value={stats?.bookmarks || 0}
-          icon={<Bookmark className="w-4 h-4 text-danger" />}
-          customFooter={
-            <span className="text-[10px] text-secondaryText font-medium bg-red-50 text-danger border border-red-100 px-2 py-0.5 rounded-full mb-1">
-              Saved Problems
-            </span>
-          }
-        />
+      {/* Heatmap + Recent Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-5">
+        <DashboardHeatmap heatmapData={heatmap} />
+        <DashboardRecentActivity activityItems={activity} />
       </div>
 
-      {/* HEATMAP */}
-      <ActivityHeatmap heatmapData={heatmap} />
-
-      {/* PROGRESS ANALYTICS AND TIMELINE */}
-      <div className="grid md:grid-cols-3 gap-8">
-        <ProgressCharts
-          contestTrend={progress?.contestTrend || []}
-          topicMastery={progress?.topicMastery || []}
-        />
-
-        <RecentActivity activityItems={activity} />
+      {/* Contest Performance + Topic Mastery + Difficulty Donut */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <DashboardContestPerformance progress={progress} />
+        <DashboardTopicMastery progress={progress} />
+        <DashboardDifficultyDonut problemsSolved={stats?.problemsSolved} />
       </div>
+
+      {/* Weekly Progress + Goal Progress + Badges */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <DashboardWeeklyProgress 
+          weeklyData={weeklyInfo.weeklyData} 
+          solvedCount={weeklyInfo.weeklyTotal} 
+          trendText={weeklyInfo.trendText}
+          trendUp={weeklyInfo.trendUp}
+        />
+        <DashboardGoalProgress current={stats?.problemsSolved} />
+        <DashboardBadges solved={stats?.problemsSolved} streak={stats?.currentStreak} rating={stats?.contestRating} />
+      </div>
+
+      {/* Upcoming Contests */}
+      <DashboardUpcomingContests />
     </div>
   );
 };
+
 export default HomePage;

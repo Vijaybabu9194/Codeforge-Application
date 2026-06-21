@@ -2,187 +2,189 @@ import React from 'react';
 import { CheckCircle } from 'lucide-react';
 
 /* =========================================================
-   BOTTOM ILLUSTRATIONS — 3D isometric objects on glowing pedestals
-   Each matches the design's space/hologram style exactly
+   FEATURE ILLUSTRATIONS — Render the high-fidelity design image assets
    ========================================================= */
 
-const TopicIllustration = () => (
-  <div className="relative w-full h-[140px] flex items-end justify-center">
-    {/* Glowing circular pedestal */}
-    <div className="absolute bottom-0 w-[120px] h-[40px] rounded-full bg-gradient-to-t from-[#4A6CF7]/25 to-transparent blur-md" />
-    <div className="absolute bottom-1 w-[100px] h-[8px] rounded-full bg-[#4A6CF7]/35 shadow-[0_0_20px_rgba(74,108,247,0.5)] blur-[2px]" />
-    
-    <svg width="100" height="110" viewBox="0 0 100 110" className="relative z-10 drop-shadow-[0_8px_16px_rgba(74,108,247,0.25)] select-none pointer-events-none">
-      {/* 3D Isometric Book 1 (Bottom - Blue) */}
-      <g transform="translate(10, 68)">
-        {/* Spine base */}
-        <polygon points="0,10 50,25 80,10 30,-5" fill="#1E3A8A" />
-        {/* Spine front-left cover */}
-        <polygon points="0,10 50,25 50,33 0,18" fill="#3B82F6" />
-        {/* Spine front-right pages */}
-        <polygon points="50,25 80,10 80,18 50,33" fill="#2563EB" />
-        {/* Pages inner texture */}
-        <polygon points="48,24 78,10 78,15 48,29" fill="#E2E8F0" />
-      </g>
-      
-      {/* 3D Isometric Book 2 (Middle - Cyan) */}
-      <g transform="translate(18, 45)">
-        <polygon points="0,10 45,22 72,10 27,-2" fill="#0891B2" />
-        <polygon points="0,10 45,22 45,30 0,18" fill="#22D3EE" />
-        <polygon points="45,22 72,10 72,18 45,30" fill="#0E7490" />
-        <polygon points="43,21 70,10 70,15 43,26" fill="#F1F5F9" />
-      </g>
-      
-      {/* 3D Isometric Book 3 (Top - Purple) */}
-      <g transform="translate(24, 23)">
-        <polygon points="0,10 40,20 64,10 24,0" fill="#6D28D9" />
-        <polygon points="0,10 40,20 40,28 0,18" fill="#A78BFA" />
-        <polygon points="40,20 64,10 64,18 40,28" fill="#7C3AED" />
-        <polygon points="38,19 62,10 62,15 38,24" fill="#F8FAFC" />
-      </g>
-      
-      {/* Floating Gear above books, angled */}
-      <g transform="translate(48, 12) rotate(-15)">
-        <circle cx="0" cy="0" r="10" fill="none" stroke="#60A5FA" strokeWidth="2.5" />
-        <circle cx="0" cy="0" r="5" fill="#3B82F6" />
-        {/* Gear Teeth */}
-        {Array.from({ length: 8 }).map((_, i) => (
-          <rect key={i} x="-2.5" y="-13" width="5" height="4" fill="#60A5FA" transform={`rotate(${i * 45})`} />
-        ))}
-      </g>
-    </svg>
+const FeatureIllustration: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <div className="relative w-full h-[145px] flex items-end justify-center overflow-hidden pointer-events-none select-none">
+    {/* Soft glow behind the illustration */}
+    <div className="absolute bottom-[-10px] w-[130px] h-[35px] rounded-full bg-[#4A6CF7]/20 blur-md" />
+    <div className="relative z-10 w-full h-full flex items-center justify-center transition-transform duration-500 hover:scale-105">
+      {children}
+    </div>
   </div>
 );
 
-const CompanyIllustration = () => (
-  <div className="relative w-full h-[140px] flex items-end justify-center">
-    {/* Glowing circular pedestal */}
-    <div className="absolute bottom-0 w-[120px] h-[40px] rounded-full bg-gradient-to-t from-[#22D3EE]/20 to-transparent blur-md" />
-    <div className="absolute bottom-1 w-[100px] h-[8px] rounded-full bg-[#22D3EE]/30 shadow-[0_0_20px_rgba(34,211,238,0.4)] blur-[2px]" />
+const TopicIllustration: React.FC = () => (
+  <svg viewBox="0 0 160 145" className="w-full h-full max-h-[135px]" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="nodeGlow" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stopColor="#4A6CF7" />
+        <stop offset="100%" stopColor="#6B8AFF" />
+      </linearGradient>
+      <linearGradient id="activeNode" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stopColor="#22D3EE" />
+        <stop offset="100%" stopColor="#3B82F6" />
+      </linearGradient>
+    </defs>
     
-    <svg width="110" height="100" viewBox="0 0 110 100" className="relative z-10 drop-shadow-[0_8px_16px_rgba(34,211,238,0.2)] select-none pointer-events-none">
-      {/* Building 1 (Left - smaller) */}
-      <g transform="translate(15, 45)">
-        {/* Top Face */}
-        <polygon points="0,5 12,0 24,5 12,10" fill="#22D3EE" />
-        {/* Left Face */}
-        <polygon points="0,5 12,10 12,45 0,40" fill="#0891B2" />
-        {/* Right Face */}
-        <polygon points="12,10 24,5 24,40 12,45" fill="#0E7490" />
-        {/* Windows */}
-        <line x1="3" y1="12" x2="3" y2="35" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" strokeDasharray="2 3" />
-        <line x1="7" y1="14" x2="7" y2="37" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" strokeDasharray="2 3" />
-      </g>
-      
-      {/* Building 2 (Center - tall skyscraper) */}
-      <g transform="translate(38, 18)">
-        {/* Top Face */}
-        <polygon points="0,7 16,0 32,7 16,14" fill="#67E8F9" />
-        {/* Left Face */}
-        <polygon points="0,7 16,14 16,72 0,65" fill="#06B6D4" />
-        {/* Right Face */}
-        <polygon points="16,14 32,7 32,65 16,72" fill="#0891B2" />
-        {/* Windows */}
-        <line x1="4" y1="17" x2="4" y2="60" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5" strokeDasharray="3 3" />
-        <line x1="10" y1="20" x2="10" y2="63" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5" strokeDasharray="3 3" />
-        <line x1="22" y1="17" x2="22" y2="60" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5" strokeDasharray="3 3" />
-      </g>
-      
-      {/* Building 3 (Right - medium skyscraper) */}
-      <g transform="translate(68, 38)">
-        {/* Top Face */}
-        <polygon points="0,6 12,0 24,6 12,12" fill="#22D3EE" opacity="0.8" />
-        {/* Left Face */}
-        <polygon points="0,6 12,12 12,50 0,44" fill="#0891B2" opacity="0.8" />
-        {/* Right Face */}
-        <polygon points="12,12 24,6 24,44 12,50" fill="#0E7490" opacity="0.8" />
-        {/* Windows */}
-        <line x1="4" y1="13" x2="4" y2="40" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" strokeDasharray="2 3" />
-        <line x1="8" y1="15" x2="8" y2="42" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" strokeDasharray="2 3" />
-      </g>
-    </svg>
-  </div>
+    <path d="M 30 105 L 60 70 M 60 70 L 100 50 M 60 70 L 80 105 M 100 50 L 130 85 M 100 50 L 130 25" stroke="#4A6CF7" strokeWidth="2.5" strokeOpacity="0.3" strokeDasharray="3 3" />
+    <path d="M 30 105 L 60 70 L 100 50 L 130 25" stroke="url(#nodeGlow)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+
+    <circle cx="30" cy="105" r="9" fill="#0A0F24" stroke="url(#nodeGlow)" strokeWidth="2" />
+    <path d="M 27 105 L 29 107 L 33 103" stroke="#22D3EE" strokeWidth="2" strokeLinecap="round" />
+
+    <circle cx="60" cy="70" r="11" fill="#0A0F24" stroke="url(#nodeGlow)" strokeWidth="2" />
+    <path d="M 57 70 L 59 72 L 63 68" stroke="#22D3EE" strokeWidth="2" strokeLinecap="round" />
+
+    <circle cx="100" cy="50" r="13" fill="#030712" stroke="url(#activeNode)" strokeWidth="2.5" className="animate-pulse" />
+    <circle cx="100" cy="50" r="5" fill="#22D3EE" />
+
+    <circle cx="80" cy="105" r="8" fill="#050A18" stroke="#334155" strokeWidth="2" />
+    <circle cx="130" cy="85" r="8" fill="#050A18" stroke="#334155" strokeWidth="2" />
+    <circle cx="130" cy="25" r="9" fill="#050A18" stroke="#334155" strokeWidth="2" />
+
+    <rect x="15" y="122" width="30" height="11" rx="3" fill="#111827" stroke="#4A6CF7" strokeWidth="0.5" strokeOpacity="0.5" />
+    <text x="30" y="130" fill="#A8B8E0" fontSize="7" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">BASIC</text>
+
+    <rect x="85" y="15" width="30" height="11" rx="3" fill="#111827" stroke="#22D3EE" strokeWidth="0.5" strokeOpacity="0.5" />
+    <text x="100" y="23" fill="#22D3EE" fontSize="7" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">ACTIVE</text>
+  </svg>
 );
 
-const AnalyticsIllustration = () => (
-  <div className="relative w-full h-[140px] flex items-end justify-center">
-    {/* Glowing circular pedestal */}
-    <div className="absolute bottom-0 w-[120px] h-[40px] rounded-full bg-gradient-to-t from-[#A78BFA]/20 to-transparent blur-md" />
-    <div className="absolute bottom-1 w-[100px] h-[8px] rounded-full bg-[#A78BFA]/30 shadow-[0_0_20px_rgba(167,139,250,0.4)] blur-[2px]" />
-    
-    <svg width="110" height="100" viewBox="0 0 110 100" className="relative z-10 drop-shadow-[0_8px_16px_rgba(167,139,250,0.2)] select-none pointer-events-none">
-      {/* 3D Isometric Bar 1 (Left - low) */}
-      <g transform="translate(15, 60)">
-        <polygon points="0,3 7,0 14,3 7,6" fill="#DDD6FE" />
-        <polygon points="0,3 7,6 7,30 0,27" fill="#8B5CF6" />
-        <polygon points="7,6 14,3 14,27 7,30" fill="#7C3AED" />
-      </g>
-      
-      {/* 3D Isometric Bar 2 (Medium) */}
-      <g transform="translate(35, 40)">
-        <polygon points="0,3 7,0 14,3 7,6" fill="#C084FC" />
-        <polygon points="0,3 7,6 7,50 0,47" fill="#A855F7" />
-        <polygon points="7,6 14,3 14,47 7,50" fill="#9333EA" />
-      </g>
-      
-      {/* 3D Isometric Bar 3 (Tall) */}
-      <g transform="translate(55, 20)">
-        <polygon points="0,3 7,0 14,3 7,6" fill="#DDD6FE" />
-        <polygon points="0,3 7,6 7,70 0,67" fill="#8B5CF6" />
-        <polygon points="7,6 14,3 14,67 7,70" fill="#7C3AED" />
-      </g>
+const CompanyIllustration: React.FC = () => (
+  <svg viewBox="0 0 160 145" className="w-full h-full max-h-[135px]" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="cardGlowGoogle" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stopColor="#EA4335" />
+        <stop offset="50%" stopColor="#FBBC05" />
+        <stop offset="100%" stopColor="#34A853" />
+      </linearGradient>
+      <linearGradient id="cardGlowMeta" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stopColor="#0668E1" />
+        <stop offset="100%" stopColor="#00F2FE" />
+      </linearGradient>
+    </defs>
 
-      {/* 3D Isometric Bar 4 (Medium-High) */}
-      <g transform="translate(75, 45)">
-        <polygon points="0,3 7,0 14,3 7,6" fill="#F472B6" />
-        <polygon points="0,3 7,6 7,45 0,42" fill="#EC4899" />
-        <polygon points="7,6 14,3 14,42 7,45" fill="#DB2777" />
+    <g transform="translate(15, 65) rotate(-6)">
+      <rect width="62" height="40" rx="6" fill="#0A0F24" stroke="#334155" strokeWidth="1" />
+      <g transform="translate(6, 12)">
+        <rect x="0" y="0" width="8" height="8" fill="#F25022" />
+        <rect x="10" y="0" width="8" height="8" fill="#7FBA00" />
+        <rect x="0" y="10" width="8" height="8" fill="#00A4EF" />
+        <rect x="10" y="10" width="8" height="8" fill="#FFB900" />
       </g>
+      <text x="28" y="20" fill="#A8B8E0" fontSize="7.5" fontWeight="bold" fontFamily="sans-serif">MSFT</text>
+      <text x="28" y="29" fill="#4ADE80" fontSize="6.5" fontWeight="bold" fontFamily="sans-serif">45 Qs</text>
+    </g>
+
+    <g transform="translate(82, 52) rotate(6)">
+      <rect width="62" height="40" rx="6" fill="#0A0F24" stroke="url(#cardGlowGoogle)" strokeWidth="1" />
+      <circle cx="14" cy="20" r="7" fill="#1F2937" />
+      <text x="14" y="23" fill="#EA4335" fontSize="10" fontWeight="extrabold" textAnchor="middle" fontFamily="sans-serif">G</text>
+      <text x="26" y="18" fill="#FFFFFF" fontSize="7.5" fontWeight="bold" fontFamily="sans-serif">Google</text>
+      <text x="26" y="27" fill="#FBBC05" fontSize="6.5" fontWeight="bold" fontFamily="sans-serif">120+ Qs</text>
+    </g>
+
+    <g transform="translate(44, 22) rotate(-2)">
+      <rect width="72" height="44" rx="8" fill="#050B1E" stroke="url(#cardGlowMeta)" strokeWidth="1.5" style={{ filter: 'drop-shadow(0 4px 10px rgba(6, 104, 225, 0.25))' }} />
+      <path d="M 12 24 C 16 16, 23 16, 23 24 C 23 32, 16 32, 12 24" stroke="#0668E1" strokeWidth="2" fill="none" />
+      <path d="M 28 24 C 24 16, 17 16, 17 24 C 17 32, 24 32, 28 24" stroke="#00F2FE" strokeWidth="2" fill="none" />
       
-      {/* Grid Floor Line */}
-      <path d="M 5 72 L 98 72" stroke="rgba(255,255,255,0.08)" strokeWidth="1.5" />
-    </svg>
-  </div>
+      <text x="35" y="20" fill="#FFFFFF" fontSize="8.5" fontWeight="bold" fontFamily="sans-serif">Meta</text>
+      <text x="35" y="29" fill="#00F2FE" fontSize="6.5" fontWeight="semibold" fontFamily="sans-serif">Top Rated</text>
+      <rect x="35" y="32" width="28" height="6" rx="2" fill="#0668E1" fillOpacity="0.2" />
+      <text x="49" y="37" fill="#00F2FE" fontSize="4.5" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">HOT</text>
+    </g>
+  </svg>
 );
 
-const TrophyIllustration = () => (
-  <div className="relative w-full h-[140px] flex items-end justify-center">
-    {/* Glowing circular pedestal */}
-    <div className="absolute bottom-0 w-[120px] h-[40px] rounded-full bg-gradient-to-t from-[#F59E0B]/20 to-transparent blur-md" />
-    <div className="absolute bottom-1 w-[100px] h-[8px] rounded-full bg-[#F59E0B]/30 shadow-[0_0_20px_rgba(245,158,11,0.4)] blur-[2px]" />
-    
-    <svg width="100" height="100" viewBox="0 0 100 100" className="relative z-10 drop-shadow-[0_8px_16px_rgba(245,158,11,0.25)] select-none pointer-events-none">
-      <defs>
-        <linearGradient id="goldLight" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#FBBF24" />
-          <stop offset="50%" stopColor="#F59E0B" />
-          <stop offset="100%" stopColor="#D97706" />
-        </linearGradient>
-        <linearGradient id="goldCore" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#FCD34D" />
-          <stop offset="100%" stopColor="#B45309" />
-        </linearGradient>
-      </defs>
+const AnalyticsIllustration: React.FC = () => (
+  <svg viewBox="0 0 160 145" className="w-full h-full max-h-[135px]" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stopColor="#22D3EE" stopOpacity="0.35" />
+        <stop offset="100%" stopColor="#22D3EE" stopOpacity="0" />
+      </linearGradient>
+    </defs>
+
+    <g transform="translate(15, 12)">
+      <text x="0" y="0" fill="#6B8AFF" fontSize="7" fontWeight="bold" fontFamily="sans-serif">SOLVED HEATMAP</text>
+      {Array.from({ length: 4 }).map((_, r) =>
+        Array.from({ length: 9 }).map((_, c) => {
+          const vals = [0.1, 0.4, 0.8, 0.9, 0.2, 0.7, 0.1, 0.3, 0.6, 0.9, 0.2, 0.5, 0.8, 0.1, 0.4, 0.7, 0.9, 0.3, 0.2, 0.5, 0.8, 0.1, 0.6, 0.9, 0.2, 0.4, 0.7, 0.3];
+          const opacity = vals[(r * 9 + c) % vals.length];
+          const color = opacity > 0.7 ? '#22D3EE' : opacity > 0.3 ? '#4A6CF7' : '#1F2937';
+          return (
+            <rect
+              key={`${r}-${c}`}
+              x={c * 9}
+              y={r * 9 + 4}
+              width="6.5"
+              height="6.5"
+              rx="1.5"
+              fill={color}
+              fillOpacity={color === '#1F2937' ? 0.3 : 1}
+              stroke={color === '#1F2937' ? 'none' : '#22D3EE'}
+              strokeWidth="0.25"
+              strokeOpacity="0.2"
+            />
+          );
+        })
+      )}
+    </g>
+
+    <g transform="translate(15, 75)">
+      <path d="M 0 42 L 130 42" stroke="#334155" strokeWidth="1" />
+      <path d="M 0 42 Q 25 15, 45 30 T 90 10 T 130 5" stroke="#A78BFA" strokeWidth="2.5" strokeLinecap="round" />
+      <path d="M 0 42 Q 25 15, 45 30 T 90 10 T 130 5 L 130 42 L 0 42 Z" fill="url(#chartGradient)" />
       
-      {/* Left Handle */}
-      <path d="M 32 30 C 18 30 18 46 32 48" fill="none" stroke="url(#goldLight)" strokeWidth="3.5" />
-      {/* Right Handle */}
-      <path d="M 68 30 C 82 30 82 46 68 48" fill="none" stroke="url(#goldLight)" strokeWidth="3.5" />
+      <circle cx="90" cy="10" r="4.5" fill="#22D3EE" className="animate-pulse" />
+      <circle cx="90" cy="10" r="2.2" fill="#FFFFFF" />
+
+      <rect x="73" y="-12" width="34" height="11" rx="3" fill="#0C1024" stroke="#22D3EE" strokeWidth="0.75" />
+      <text x="90" y="-4.5" fill="#22D3EE" fontSize="6" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">85% Accuracy</text>
+    </g>
+  </svg>
+);
+
+const ContestIllustration: React.FC = () => (
+  <svg viewBox="0 0 160 145" className="w-full h-full max-h-[135px]" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="trophyGlow" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stopColor="#F59E0B" />
+        <stop offset="100%" stopColor="#D97706" />
+      </linearGradient>
+    </defs>
+
+    <circle cx="80" cy="65" r="28" fill="#F59E0B" fillOpacity="0.08" className="blur-xl" />
+
+    <g transform="translate(18, 62) rotate(-8)">
+      <circle cx="15" cy="15" r="15" fill="#0F172A" stroke="#94A3B8" strokeWidth="1" />
+      <text x="15" y="19" fill="#94A3B8" fontSize="10" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">#2</text>
+    </g>
+
+    <g transform="translate(112, 66) rotate(10)">
+      <circle cx="15" cy="15" r="15" fill="#0F172A" stroke="#B45309" strokeWidth="1" />
+      <text x="15" y="19" fill="#B45309" fontSize="10" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">#3</text>
+    </g>
+
+    <g transform="translate(52, 28)">
+      <path d="M 12 52 L 44 52 L 38 48 L 18 48 Z" fill="#475569" />
+      <rect x="14" y="52" width="28" height="7" rx="2" fill="#1E293B" stroke="#475569" strokeWidth="1" />
       
-      {/* Trophy Bowl */}
-      <path d="M 32 20 L 68 20 L 62 48 Q 50 56 38 48 Z" fill="url(#goldCore)" stroke="#D97706" strokeWidth="1" />
+      <path d="M 26 34 L 30 34 L 30 48 L 26 48 Z" fill="url(#trophyGlow)" />
       
-      {/* Base Stem */}
-      <path d="M 46 48 L 54 48 L 52 68 L 48 68 Z" fill="url(#goldLight)" />
+      <path d="M 14 14 C 4 14 4 32 14 32 Z" stroke="url(#trophyGlow)" strokeWidth="2" fill="none" />
+      <path d="M 42 14 C 52 14 52 32 42 32 Z" stroke="url(#trophyGlow)" strokeWidth="2" fill="none" />
+
+      <path d="M 14 9 L 42 9 L 38 36 C 35 43, 21 43, 18 36 Z" fill="url(#trophyGlow)" stroke="#FBBF24" strokeWidth="0.5" />
       
-      {/* 3D Wood Base Pedestal */}
-      <polygon points="34,72 66,72 62,84 38,84" fill="#451A03" stroke="#1c0a02" strokeWidth="1.25" />
-      <polygon points="38,84 62,84 60,92 40,92" fill="#1C0A02" />
+      <text x="28" y="26" fill="#FFFFFF" fontSize="14" fontWeight="extrabold" textAnchor="middle" fontFamily="sans-serif">1</text>
       
-      {/* Star decal inside trophy bowl */}
-      <polygon points="50,28 52,33 57,33 53,36 55,41 50,38 45,41 47,36 43,33 48,33" fill="#FFFFFF" fillOpacity="0.8" />
-    </svg>
-  </div>
+      <polygon points="28,2 29.5,5 33,5.5 30.5,8 31.5,11.5 28,9.5 24.5,11.5 25.5,8 23,5.5 26.5,5" fill="#FDE047" transform="translate(0, -10)" />
+    </g>
+  </svg>
 );
 
 /* =========================================================
@@ -246,7 +248,7 @@ export const FeaturesSection: React.FC = () => {
       title: 'Topic-wise Practice',
       description: 'Structured DSA topics from basic to advanced with a beautiful learning experience.',
       items: ['Arrays', 'Linked List', 'Dynamic Programming', 'Graphs & more'],
-      illustration: <TopicIllustration />,
+      illustration: <FeatureIllustration><TopicIllustration /></FeatureIllustration>,
     },
     {
       iconColor: '#22D3EE',
@@ -260,7 +262,7 @@ export const FeaturesSection: React.FC = () => {
       title: 'Company Questions',
       description: 'Access previous year interview questions from top product companies.',
       items: ['Google', 'Amazon', 'Microsoft', 'Meta & more'],
-      illustration: <CompanyIllustration />,
+      illustration: <FeatureIllustration><CompanyIllustration /></FeatureIllustration>,
     },
     {
       iconColor: '#A78BFA',
@@ -273,7 +275,7 @@ export const FeaturesSection: React.FC = () => {
       title: 'Track & Analyze',
       description: 'Track your progress, solve rate, accuracy and identify your strengths & weaknesses.',
       items: ['Detailed Analytics', 'Contest Performance', 'Progress Heatmaps', 'Smart Insights'],
-      illustration: <AnalyticsIllustration />,
+      illustration: <FeatureIllustration><AnalyticsIllustration /></FeatureIllustration>,
     },
     {
       iconColor: '#F59E0B',
@@ -288,7 +290,7 @@ export const FeaturesSection: React.FC = () => {
       title: 'Contest & Compete',
       description: 'Participate in contests, climb rankings and compete with thousands of developers.',
       items: ['Weekly Contests', 'Global Rankings', 'Real-time Leaderboard', 'Exciting Rewards'],
-      illustration: <TrophyIllustration />,
+      illustration: <FeatureIllustration><ContestIllustration /></FeatureIllustration>,
     },
   ];
 

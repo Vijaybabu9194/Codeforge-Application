@@ -12,51 +12,51 @@ export const CTABanner: React.FC<CTABannerProps> = ({ onSignupClick }) => {
         <div className="cta-banner px-8 md:px-12 py-10 flex flex-col md:flex-row items-center justify-between gap-8">
           {/* Left: Rocket & Heading */}
           <div className="flex items-center gap-7 flex-1">
-            {/* Custom 3D Vector Rocket SVG */}
-            <svg className="w-24 h-24 md:w-28 md:h-28 flex-shrink-0 select-none pointer-events-none animate-float-slow transform rotate-12 drop-shadow-[0_0_24px_rgba(74,108,247,0.35)]" viewBox="0 0 100 100">
-              <defs>
-                <linearGradient id="rocketBody" x1="0" y1="1" x2="1" y2="0">
-                  <stop offset="0%" stopColor="#2563EB" />
-                  <stop offset="40%" stopColor="#3B82F6" />
-                  <stop offset="80%" stopColor="#60A5FA" />
-                  <stop offset="100%" stopColor="#E0F2FE" />
-                </linearGradient>
-                <linearGradient id="rocketFin" x1="0" y1="1" x2="1" y2="0">
-                  <stop offset="0%" stopColor="#1D4ED8" />
-                  <stop offset="100%" stopColor="#1E3A8A" />
-                </linearGradient>
-                <linearGradient id="exhaustGlow" x1="0" y1="1" x2="1" y2="0">
-                  <stop offset="0%" stopColor="#EC4899" stopOpacity="0" />
-                  <stop offset="45%" stopColor="#8B5CF6" stopOpacity="0.6" />
-                  <stop offset="80%" stopColor="#4A6CF7" stopOpacity="0.9" />
-                  <stop offset="100%" stopColor="#60A5FA" />
-                </linearGradient>
-              </defs>
-              
-              {/* Exhaust trail clouds */}
-              <path d="M15 85 C 5 95, 2 92, 2 98 C 8 98, 5 95, 15 85 Z" fill="url(#exhaustGlow)" />
-              <path d="M 22 78 C 8 92, 10 90, 8 96 C 14 96, 12 92, 22 78 Z" fill="url(#exhaustGlow)" />
-              
-              {/* Left fin */}
-              <path d="M 32 72 L 14 78 L 22 58 Z" fill="url(#rocketFin)" stroke="#1E40AF" strokeWidth="0.5" />
-              {/* Right fin */}
-              <path d="M 68 36 L 78 18 L 58 26 Z" fill="url(#rocketFin)" stroke="#1E40AF" strokeWidth="0.5" />
-              
-              {/* Rocket Fuselage */}
-              <path d="M 26 74 C 44 60, 60 44, 76 24 C 56 40, 40 56, 26 74 Z" fill="url(#rocketBody)" />
-              <path d="M 32 68 C 48 54, 62 40, 76 24 C 60 38, 48 50, 32 68 Z" fill="#FFFFFF" fillOpacity="0.15" />
-              
-              {/* Nose cone */}
-              <path d="M 64 36 C 72 28, 76 24, 76 24 C 76 24, 72 28, 64 36 Z" fill="#EF4444" />
-              
-              {/* Porthole */}
-              <circle cx="51" cy="49" r="6" fill="#1E293B" stroke="#60A5FA" strokeWidth="1.5" />
-              <circle cx="51" cy="49" r="4" fill="#0EA5E9" />
-              <circle cx="49" cy="47" r="1.5" fill="#FFFFFF" fillOpacity="0.8" />
-              
-              {/* booster connection ring */}
-              <ellipse cx="26" cy="74" rx="4" ry="4" fill="#64748B" transform="rotate(-45 26 74)" />
-            </svg>
+            {/* High-fidelity 3D rocket design image mixed with background */}
+            <div className="relative w-24 h-24 md:w-28 md:h-28 flex-shrink-0 select-none pointer-events-none animate-float-slow">
+              {/* Glowing flare behind rocket */}
+              <div className="absolute inset-0 bg-[#4A6CF7]/25 rounded-full blur-xl scale-75" />
+              <svg className="w-full h-full object-contain relative z-10 transform rotate-12 drop-shadow-[0_0_15px_rgba(34,211,238,0.4)]" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="rocketBodyGrad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#22D3EE" />
+                    <stop offset="60%" stopColor="#4A6CF7" />
+                    <stop offset="100%" stopColor="#8B5CF6" />
+                  </linearGradient>
+                  <linearGradient id="rocketFinsGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#F43F5E" />
+                    <stop offset="100%" stopColor="#BE123C" />
+                  </linearGradient>
+                  <linearGradient id="rocketFlameGrad" x1="0.5" y1="0" x2="0.5" y2="1">
+                    <stop offset="0%" stopColor="#FDE047" />
+                    <stop offset="50%" stopColor="#F97316" stopOpacity="0.85" />
+                    <stop offset="100%" stopColor="#EF4444" stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+
+                {/* Fire Exhaust */}
+                <path d="M 44 76 Q 50 100, 50 100 Q 50 100, 56 76 Z" fill="url(#rocketFlameGrad)" className="animate-pulse" />
+                <path d="M 47 76 Q 50 90, 50 90 Q 50 90, 53 76 Z" fill="#FDE047" />
+
+                {/* Left/Right wings */}
+                <path d="M 33 55 L 20 70 L 35 68 Z" fill="url(#rocketFinsGrad)" />
+                <path d="M 67 55 L 80 70 L 65 68 Z" fill="url(#rocketFinsGrad)" />
+                
+                {/* Engine exhaust rim */}
+                <path d="M 41 71 L 59 71 L 55 76 L 45 76 Z" fill="#334155" />
+
+                {/* Fuselage / Main Body */}
+                <path d="M 50 8 C 65 38, 65 66, 64 70 C 50 74, 50 74, 36 70 C 35 66, 35 38, 50 8 Z" fill="url(#rocketBodyGrad)" />
+                
+                {/* Porthole */}
+                <circle cx="50" cy="38" r="8" fill="#0A0F24" />
+                <circle cx="50" cy="38" r="6" fill="#000" stroke="#E2E8F0" strokeWidth="0.5" />
+                <path d="M 45 35 A 6 6 0 0 1 55 35" fill="none" stroke="#22D3EE" strokeWidth="1" strokeLinecap="round" />
+                
+                {/* Nose cone tip */}
+                <path d="M 50 8 C 53 14, 56 22, 57 24 C 50 22, 50 22, 43 24 C 44 22, 47 14, 50 8 Z" fill="#EF4444" />
+              </svg>
+            </div>
             <div>
               <h3 className="text-white font-bold text-[22px] md:text-[26px] leading-tight select-none">
                 Ready to forge your coding journey?

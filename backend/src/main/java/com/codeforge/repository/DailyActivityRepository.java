@@ -14,4 +14,7 @@ public interface DailyActivityRepository extends JpaRepository<DailyActivity, Lo
     List<DailyActivity> findByUserIdAndDateRange(@Param("userId") Long userId, @Param("start") LocalDate start, @Param("end") LocalDate end);
 
     Optional<DailyActivity> findByUserIdAndActivityDate(Long userId, LocalDate date);
+
+    @Query("SELECT da.activityDate FROM DailyActivity da WHERE da.user.id = :userId AND da.count > 0 ORDER BY da.activityDate DESC")
+    List<LocalDate> findActiveDatesByUserId(@Param("userId") Long userId);
 }

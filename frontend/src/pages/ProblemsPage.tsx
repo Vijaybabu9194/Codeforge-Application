@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import api from '../lib/api';
 import { useAuth } from '../context/AuthContext';
-import { ChevronDown, ChevronRight, HelpCircle, Flame, Bookmark, CheckCircle } from 'lucide-react';
-
-import QuestionTable from '../components/problems/QuestionTable';
-import ProblemFilters from '../components/problems/ProblemFilters';
+import {
+  Search, ChevronDown, Check,
+  ChevronLeft, ChevronRight, Plus, X,
+  Clock, TrendingUp, Code2, CheckCircle2, FileText
+} from 'lucide-react';
+import { CompanyLogo, LeetCodeLogo, GfgLogo } from '../components/CompanyLogos';
 
 interface Problem {
   id: number;
@@ -18,6 +20,8 @@ interface Problem {
   bookmarked: boolean;
   leetcodeUrl?: string;
   gfgUrl?: string;
+  topicId?: number;
+  topicName?: string;
 }
 
 interface Topic {
@@ -27,484 +31,687 @@ interface Topic {
   problemCount: number;
 }
 
-interface Subtopic {
-  id: number;
-  name: string;
-  description: string;
-  problems: Problem[];
-}
-
 interface TopicDetails {
   id: number;
   name: string;
   icon: string;
-  subtopics: Subtopic[];
+  subtopics: Array<{
+    id: number;
+    name: string;
+    description: string;
+    problems: Problem[];
+  }>;
 }
 
 interface ProblemsPageProps {
   onSolve: (problem: any) => void;
 }
 
+const ITEMS_PER_PAGE = 12;
+
 export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
   const { user, updateUserStats } = useAuth();
-  const [topics, setTopics] = useState<Topic[]>([]);
-  const [loadedTopicDetails, setLoadedTopicDetails] = useState<Record<number, TopicDetails>>({});
-  const [expandedTopics, setExpandedTopics] = useState<Record<number, boolean>>({});
-  const [expandedSubtopics, setExpandedSubtopics] = useState<Record<number, boolean>>({});
-  const [loadingTopics, setLoadingTopics] = useState<Record<number, boolean>>({});
-  
-  const [search, setSearch] = useState('');
-  const [difficulty, setDifficulty] = useState<'All' | 'Easy' | 'Medium' | 'Hard'>('All');
-  const [showBookmarkedOnly, setShowBookmarkedOnly] = useState(false);
-  const [bookmarkCount, setBookmarkCount] = useState(0);
-  const [globalLoading, setGlobalLoading] = useState(true);
 
-  // Fetch topics list and initial dashboard stats on mount
+  const [topics, setTopics] = useState<Topic[]>([]);
+  const [allProblems, setAllProblems] = useState<Problem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+
+  const [selectedTopicId, setSelectedTopicId] = useState<number | null>(null);
+  const [search, setSearch] = useState('');
+  const [difficulty, setDifficulty] = useState('All Difficulties');
+  const [statusFilter, setStatusFilter] = useState('All Status');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [showMoreTopics, setShowMoreTopics] = useState(false);
+
+  const [diffOpen, setDiffOpen] = useState(false);
+  const [statusOpen, setStatusOpen] = useState(false);
+
+  // Notes state
+  const [problemNotes, setProblemNotes] = useState<Record<number, string>>({});
+  const [activeNoteProblem, setActiveNoteProblem] = useState<Problem | null>(null);
+  const [tempNoteText, setTempNoteText] = useState('');
+
+  // Load notes from localStorage
   useEffect(() => {
-    const initPage = async () => {
+    const prefix = `notes_${user?.id || 'guest'}_`;
+    const notes: Record<number, string> = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key?.startsWith(prefix)) {
+        const id = parseInt(key.replace(prefix, ''), 10);
+        if (!isNaN(id)) notes[id] = localStorage.getItem(key) || '';
+      }
+    }
+    setProblemNotes(notes);
+  }, [user]);
+
+  useEffect(() => {
+    if (activeNoteProblem) setTempNoteText(problemNotes[activeNoteProblem.id] || '');
+  }, [activeNoteProblem]);
+
+  const saveNote = () => {
+    if (!activeNoteProblem) return;
+    const key = `notes_${user?.id || 'guest'}_${activeNoteProblem.id}`;
+    if (tempNoteText.trim()) localStorage.setItem(key, tempNoteText);
+    else localStorage.removeItem(key);
+    setProblemNotes(prev => ({ ...prev, [activeNoteProblem.id]: tempNoteText }));
+    setActiveNoteProblem(null);
+  };
+
+  // Load all topics and problems eagerly
+  useEffect(() => {
+    const init = async () => {
+      setLoading(true);
+      setLoadingProgress(0);
       try {
-        setGlobalLoading(true);
-        const [topicsRes, statsRes] = await Promise.all([
-          api.get<Topic[]>('/problems/topics'),
-          api.get<{ bookmarks: number }>('/dashboard/stats')
-        ]);
+        const topicsRes = await api.get<Topic[]>('/problems/topics');
         setTopics(topicsRes.data);
-        setBookmarkCount(statsRes.data.bookmarks);
-        
+
+        let completed = 0;
+        const total = topicsRes.data.length;
+
+        const detailResults = await Promise.all(
+          topicsRes.data.map(t =>
+            api.get<TopicDetails>(`/problems/topic/${t.id}`)
+              .then(r => {
+                completed++;
+                setLoadingProgress(Math.round((completed / total) * 100));
+                return { topicId: t.id, topicName: t.name, data: r.data };
+              })
+              .catch(() => {
+                completed++;
+                setLoadingProgress(Math.round((completed / total) * 100));
+                return null;
+              })
+          )
+        );
+
+        const flat: Problem[] = [];
+        const seen = new Set<number>();
+        detailResults.forEach(result => {
+          if (!result) return;
+          result.data.subtopics.forEach(sub => {
+            sub.problems.forEach(p => {
+              if (!seen.has(p.id)) {
+                seen.add(p.id);
+                flat.push({ ...p, topicId: result.topicId, topicName: result.topicName });
+              }
+            });
+          });
+        });
+        setAllProblems(flat);
       } catch (err) {
-        console.error('Error initializing problems page:', err);
+        console.error('Failed to load problems:', err);
       } finally {
-        setGlobalLoading(false);
+        setLoading(false);
       }
     };
-    initPage();
+    init();
   }, []);
 
-  // Fetch topic details (subtopics and questions) on demand
-  const fetchTopicDetails = async (topicId: number) => {
-    if (loadedTopicDetails[topicId] || loadingTopics[topicId]) return;
-    try {
-      setLoadingTopics((prev) => ({ ...prev, [topicId]: true }));
-      const response = await api.get<TopicDetails>(`/problems/topic/${topicId}`);
-      
-      setLoadedTopicDetails((prev) => ({
-        ...prev,
-        [topicId]: response.data
-      }));
-    } catch (err) {
-      console.error(`Failed to fetch topic details for topic ${topicId}:`, err);
-    } finally {
-      setLoadingTopics((prev) => ({ ...prev, [topicId]: false }));
-    }
+  const toggleSolved = async (id: number) => {
+    setAllProblems(prev => prev.map(p => p.id === id ? { ...p, solved: !p.solved } : p));
+    try { await api.post(`/problems/${id}/solve`); updateUserStats(); } catch {}
   };
-
-  // Trigger loading of all topics when any filter is active to support global search
-  useEffect(() => {
-    const hasActiveFilters = search.trim() !== '' || difficulty !== 'All' || showBookmarkedOnly;
-    if (hasActiveFilters && topics.length > 0) {
-      topics.forEach((t) => {
-        if (!loadedTopicDetails[t.id] && !loadingTopics[t.id]) {
-          fetchTopicDetails(t.id);
-        }
-      });
-    }
-  }, [search, difficulty, showBookmarkedOnly, topics]);
 
   const toggleBookmark = async (id: number) => {
-    try {
-      // Find the topic containing this problem to update cache optimistically
-      let foundTopicId: number | null = null;
-      let isCurrentlyBookmarked = false;
-      
-      for (const tId in loadedTopicDetails) {
-        const topic = loadedTopicDetails[tId];
-        const hasProb = topic.subtopics.some(sub => sub.problems.some(p => p.id === id));
-        if (hasProb) {
-          foundTopicId = Number(tId);
-          isCurrentlyBookmarked = topic.subtopics
-            .flatMap(s => s.problems)
-            .find(p => p.id === id)?.bookmarked || false;
-          break;
-        }
-      }
-
-      if (foundTopicId !== null) {
-        setLoadedTopicDetails((prev) => {
-          const currentTopic = prev[foundTopicId!];
-          return {
-            ...prev,
-            [foundTopicId!]: {
-              ...currentTopic,
-              subtopics: currentTopic.subtopics.map((sub) => ({
-                ...sub,
-                problems: sub.problems.map((p) => p.id === id ? { ...p, bookmarked: !p.bookmarked } : p)
-              }))
-            }
-          };
-        });
-      }
-
-      // Optimistic update of bookmark counter
-      setBookmarkCount((prev) => isCurrentlyBookmarked ? Math.max(0, prev - 1) : prev + 1);
-
-      await api.post(`/problems/${id}/bookmark`);
-      updateUserStats();
-    } catch (err) {
-      console.error('Failed to toggle bookmark:', err);
-    }
+    setAllProblems(prev => prev.map(p => p.id === id ? { ...p, bookmarked: !p.bookmarked } : p));
+    try { await api.post(`/problems/${id}/bookmark`); updateUserStats(); } catch {}
   };
 
-  const toggleSolved = async (id: number) => {
-    try {
-      // Find the topic containing this problem to update cache optimistically
-      let foundTopicId: number | null = null;
-      for (const tId in loadedTopicDetails) {
-        const topic = loadedTopicDetails[tId];
-        const hasProb = topic.subtopics.some(sub => sub.problems.some(p => p.id === id));
-        if (hasProb) {
-          foundTopicId = Number(tId);
-          break;
-        }
-      }
-
-      if (foundTopicId !== null) {
-        setLoadedTopicDetails((prev) => {
-          const currentTopic = prev[foundTopicId!];
-          return {
-            ...prev,
-            [foundTopicId!]: {
-              ...currentTopic,
-              subtopics: currentTopic.subtopics.map((sub) => ({
-                ...sub,
-                problems: sub.problems.map((p) => p.id === id ? { ...p, solved: !p.solved } : p)
-              }))
-            }
-          };
-        });
-      }
-
-      await api.post(`/problems/${id}/solve`);
-      updateUserStats();
-    } catch (err) {
-      console.error('Failed to toggle solved status:', err);
-    }
-  };
-
-  const handleTopicToggle = (topicId: number) => {
-    setExpandedTopics((prev) => {
-      const isExpanded = !prev[topicId];
-      if (isExpanded) {
-        fetchTopicDetails(topicId);
-      }
-      return {
-        ...prev,
-        [topicId]: isExpanded
-      };
-    });
-  };
-
-  const toggleSubtopic = (id: number) => {
-    setExpandedSubtopics((prev) => ({
-      ...prev,
-      [id]: !prev[id]
-    }));
-  };
-
-  // Compute stats
+  // Stats
   const totalProblems = topics.reduce((acc, t) => acc + t.problemCount, 0);
   const totalSolved = user?.problemsSolved || 0;
-  const overallProgressPercent = totalProblems > 0 ? Math.round((totalSolved / totalProblems) * 100) : 0;
-  
-  const hasActiveFilters = search.trim() !== '' || difficulty !== 'All' || showBookmarkedOnly;
+  const avgAcceptance = allProblems.length > 0
+    ? (allProblems.reduce((s, p) => s + (p.acceptanceRate || 0), 0) / allProblems.length).toFixed(1)
+    : '0.0';
 
-  // Determine if any problems match current filters across loaded details
-  const hasAnyMatchingProblems = topics.some(t => {
-    const details = loadedTopicDetails[t.id];
-    if (!details) return false;
-    return details.subtopics.some(sub => 
-      sub.problems.some(p => {
-        const matchesSearch = p.title.toLowerCase().includes(search.toLowerCase());
-        const matchesDifficulty = difficulty === 'All' || p.difficulty.toUpperCase() === difficulty.toUpperCase();
-        const matchesBookmark = !showBookmarkedOnly || p.bookmarked;
-        return matchesSearch && matchesDifficulty && matchesBookmark;
-      })
-    );
-  });
+  // Filtered list
+  const filteredProblems = useMemo(() => {
+    return allProblems.filter(p => {
+      if (selectedTopicId !== null && p.topicId !== selectedTopicId) return false;
+      if (search.trim() && !p.title.toLowerCase().includes(search.toLowerCase())) return false;
+      if (difficulty !== 'All Difficulties' && p.difficulty.toUpperCase() !== difficulty.toUpperCase()) return false;
+      if (statusFilter === 'Solved' && !p.solved) return false;
+      if (statusFilter === 'Unsolved' && p.solved) return false;
+      return true;
+    });
+  }, [allProblems, selectedTopicId, search, difficulty, statusFilter]);
 
-  if (globalLoading) {
+  const totalPages = Math.max(1, Math.ceil(filteredProblems.length / ITEMS_PER_PAGE));
+  const pagedProblems = filteredProblems.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  useEffect(() => setCurrentPage(1), [search, difficulty, statusFilter, selectedTopicId]);
+
+  // Visible topic tabs
+  const visibleTopics = topics.slice(0, 5);
+  const extraTopics = topics.slice(5);
+
+  const getDiffBadge = (diff: string) => {
+    const d = diff.toUpperCase();
+    if (d === 'EASY') return 'text-[#4ADE80] bg-[#4ADE80]/10 border border-[#4ADE80]/20';
+    if (d === 'MEDIUM') return 'text-[#F59E0B] bg-[#F59E0B]/10 border border-[#F59E0B]/20';
+    return 'text-[#EF4444] bg-[#EF4444]/10 border border-[#EF4444]/20';
+  };
+
+  const getDiffLabel = (diff: string) => {
+    const d = diff.toUpperCase();
+    if (d === 'EASY') return 'Easy';
+    if (d === 'MEDIUM') return 'Medium';
+    return 'Hard';
+  };
+
+  const getPaginationNums = (): (number | '...')[] => {
+    const pages: (number | '...')[] = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (currentPage > 3) pages.push('...');
+      const start = Math.max(2, currentPage - 1);
+      const end = Math.min(totalPages - 1, currentPage + 1);
+      for (let i = start; i <= end; i++) pages.push(i);
+      if (currentPage < totalPages - 2) pages.push('...');
+      pages.push(totalPages);
+    }
+    return pages;
+  };
+
+  // Close dropdowns on outside click
+  useEffect(() => {
+    const handler = () => { setDiffOpen(false); setStatusOpen(false); setShowMoreTopics(false); };
+    document.addEventListener('click', handler);
+    return () => document.removeEventListener('click', handler);
+  }, []);
+
+  if (loading) {
     return (
-      <div className="p-8 max-w-7xl mx-auto space-y-8 animate-pulse select-none">
-        <div className="h-20 bg-white border border-border rounded-premium" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-24 bg-white border border-border rounded-premium" />
-          ))}
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-5">
+        <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#4A6CF7] to-[#A78BFA] flex items-center justify-center shadow-lg shadow-[#4A6CF7]/30 animate-pulse">
+          <Code2 className="w-7 h-7 text-white" />
         </div>
-        <div className="h-12 bg-white border border-border rounded-premium" />
-        <div className="space-y-4">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-16 bg-white border border-border rounded-premium" />
-          ))}
+        <div className="text-center space-y-1">
+          <p className="text-white font-bold text-base">Loading Problems...</p>
+          <p className="text-[#4A5580] text-xs">{loadingProgress}% complete</p>
+        </div>
+        <div className="w-56 h-1.5 bg-white/5 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-gradient-to-r from-[#4A6CF7] to-[#A78BFA] rounded-full transition-all duration-300"
+            style={{ width: `${loadingProgress}%` }}
+          />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-[calc(100vh-64px)] bg-[#FAFBFC] p-8 select-none">
-      <div className="max-w-7xl mx-auto space-y-8">
-        
-        {/* WELCOME / MAIN HEADER */}
-        <div className="bg-white border border-[#E5E7EB] rounded-premium p-6 shadow-card flex items-center space-x-4">
-          <div className="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-3xl shadow-sm">
-            🎯
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-text">Rising Brain DSA Sheet</h1>
-            <p className="text-xs text-secondaryText mt-0.5">Master coding interview patterns topic-by-topic without limits.</p>
-          </div>
+    <div className="space-y-5 select-none" onClick={() => { setDiffOpen(false); setStatusOpen(false); setShowMoreTopics(false); }}>
+
+      {/* ── HEADER ── */}
+      <div className="flex items-start justify-between gap-6 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold text-white tracking-tight">Problems</h1>
+          <p className="text-[#4A5580] text-sm mt-0.5 font-medium">
+            Practice coding problems and improve your skills
+          </p>
         </div>
 
-        {/* DYNAMIC STATS CARD ROW */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Solved Card */}
-          <div className="bg-white border border-[#E5E7EB] rounded-premium p-5 shadow-card flex items-center justify-between group hover:border-success/30 transition-all duration-300">
-            <div className="space-y-1">
-              <span className="text-[10px] font-bold text-secondaryText uppercase tracking-wider block">Total Solved</span>
-              <h3 className="text-2xl font-black text-text group-hover:text-success transition-colors">{totalSolved}</h3>
+        {/* Stat Cards */}
+        <div className="flex items-stretch gap-3 flex-wrap">
+          {/* Total Problems */}
+          <div className="bg-[#0F1526] border border-white/[0.05] rounded-xl px-4 py-3 flex items-center gap-3 min-w-[130px]">
+            <div className="w-9 h-9 rounded-lg bg-[#4A6CF7]/10 border border-[#4A6CF7]/20 flex items-center justify-center flex-shrink-0">
+              <Code2 className="w-4 h-4 text-[#4A6CF7]" />
             </div>
-            <div className="w-10 h-10 rounded-xl bg-green-50 border border-green-100 flex items-center justify-center text-success shadow-sm">
-              <CheckCircle className="w-5 h-5 stroke-[2.5]" />
-            </div>
-          </div>
-
-          {/* Bookmarks Card */}
-          <div className="bg-white border border-[#E5E7EB] rounded-premium p-5 shadow-card flex items-center justify-between group hover:border-[#8B5CF6]/30 transition-all duration-300">
-            <div className="space-y-1">
-              <span className="text-[10px] font-bold text-secondaryText uppercase tracking-wider block">Bookmarks</span>
-              <h3 className="text-2xl font-black text-text group-hover:text-[#8B5CF6] transition-colors">{bookmarkCount}</h3>
-            </div>
-            <div className="w-10 h-10 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center text-[#8B5CF6] shadow-sm">
-              <Bookmark className="w-5 h-5 stroke-[2.5]" />
+            <div>
+              <p className="text-[9px] text-[#4A5580] font-bold uppercase tracking-wider">Total Problems</p>
+              <p className="text-[17px] font-black text-white leading-tight">{totalProblems.toLocaleString()}</p>
+              <p className="text-[9px] text-[#4ADE80] font-semibold">+ 128 this week</p>
             </div>
           </div>
 
-          {/* Streak Card */}
-          <div className="bg-white border border-[#E5E7EB] rounded-premium p-5 shadow-card flex items-center justify-between group hover:border-warning/30 transition-all duration-300">
-            <div className="space-y-1">
-              <span className="text-[10px] font-bold text-secondaryText uppercase tracking-wider block">Active Streak</span>
-              <h3 className="text-2xl font-black text-text group-hover:text-warning transition-colors">{user?.currentStreak || 0} Days</h3>
+          {/* Solved */}
+          <div className="bg-[#0F1526] border border-white/[0.05] rounded-xl px-4 py-3 flex items-center gap-3 min-w-[130px]">
+            <div className="w-9 h-9 rounded-lg bg-[#4ADE80]/10 border border-[#4ADE80]/20 flex items-center justify-center flex-shrink-0">
+              <CheckCircle2 className="w-4 h-4 text-[#4ADE80]" />
             </div>
-            <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-warning shadow-sm">
-              <Flame className="w-5 h-5 stroke-[2.5] animate-pulse" />
+            <div>
+              <p className="text-[9px] text-[#4A5580] font-bold uppercase tracking-wider">Solved</p>
+              <p className="text-[17px] font-black text-white leading-tight">{totalSolved.toLocaleString()}</p>
+              <p className="text-[9px] text-[#4ADE80] font-semibold">+ 24 this week</p>
             </div>
           </div>
 
-          {/* Curriculum Progress Card */}
-          <div className="bg-white border border-[#E5E7EB] rounded-premium p-5 shadow-card flex flex-col justify-between gap-3 group hover:border-primary/30 transition-all duration-300">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold text-secondaryText uppercase tracking-wider block">Overall Progress</span>
-              <span className="text-xs font-bold text-primary">{overallProgressPercent}%</span>
+          {/* Acceptance */}
+          <div className="bg-[#0F1526] border border-white/[0.05] rounded-xl px-4 py-3 flex items-center gap-3 min-w-[130px]">
+            <div className="w-9 h-9 rounded-lg bg-[#F59E0B]/10 border border-[#F59E0B]/20 flex items-center justify-center flex-shrink-0">
+              <TrendingUp className="w-4 h-4 text-[#F59E0B]" />
             </div>
-            <div className="space-y-2">
-              <div className="w-full h-2 bg-secondaryBg rounded-full overflow-hidden border border-border">
-                <div 
-                  className="h-full bg-gradient-to-r from-primary to-accent rounded-full transition-all duration-500" 
-                  style={{ width: `${overallProgressPercent}%` }}
-                />
-              </div>
-              <div className="flex justify-between items-center text-[10px] text-secondaryText font-semibold">
-                <span>{totalSolved} Solved</span>
-                <span>{totalProblems} Total</span>
-              </div>
+            <div>
+              <p className="text-[9px] text-[#4A5580] font-bold uppercase tracking-wider">Acceptance</p>
+              <p className="text-[17px] font-black text-white leading-tight">{avgAcceptance}%</p>
+              <p className="text-[9px] text-[#4ADE80] font-semibold">+ 4.2% this week</p>
+            </div>
+          </div>
+
+          {/* Avg Time */}
+          <div className="bg-[#0F1526] border border-white/[0.05] rounded-xl px-4 py-3 flex items-center gap-3 min-w-[130px]">
+            <div className="w-9 h-9 rounded-lg bg-[#A78BFA]/10 border border-[#A78BFA]/20 flex items-center justify-center flex-shrink-0">
+              <Clock className="w-4 h-4 text-[#A78BFA]" />
+            </div>
+            <div>
+              <p className="text-[9px] text-[#4A5580] font-bold uppercase tracking-wider">Avg. Time</p>
+              <p className="text-[17px] font-black text-white leading-tight">24m</p>
+              <p className="text-[9px] text-[#EF4444] font-semibold">- 6m vs last week</p>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* SEARCH AND FILTERS */}
-        <ProblemFilters
-          search={search}
-          onSearchChange={(val) => setSearch(val)}
-          difficulty={difficulty}
-          onDifficultyChange={(val) => setDifficulty(val)}
-          showBookmarkedOnly={showBookmarkedOnly}
-          onBookmarkedToggle={() => setShowBookmarkedOnly(prev => !prev)}
-        />
+      {/* ── TOPIC TABS ── */}
+      <div className="flex items-center gap-1.5 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+        <button
+          onClick={e => { e.stopPropagation(); setSelectedTopicId(null); }}
+          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all duration-200 ${
+            selectedTopicId === null
+              ? 'bg-[#4A6CF7] text-white shadow-lg shadow-[#4A6CF7]/20'
+              : 'bg-white/[0.03] border border-white/[0.06] text-[#7B8AB8] hover:text-white hover:bg-white/[0.06]'
+          }`}
+        >
+          <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor">
+            <rect x="1" y="1" width="6" height="6" rx="1" />
+            <rect x="9" y="1" width="6" height="6" rx="1" />
+            <rect x="1" y="9" width="6" height="6" rx="1" />
+            <rect x="9" y="9" width="6" height="6" rx="1" />
+          </svg>
+          All Topics
+        </button>
 
-        {/* TOPICS VERTICAL LIST */}
-        <div className="space-y-6">
-          {topics.map((t) => {
-            const isTopicExpanded = !!expandedTopics[t.id];
-            const details = loadedTopicDetails[t.id];
-            const isLoading = !!loadingTopics[t.id];
+        {visibleTopics.map(t => (
+          <button
+            key={t.id}
+            onClick={e => { e.stopPropagation(); setSelectedTopicId(t.id); }}
+            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all duration-200 ${
+              selectedTopicId === t.id
+                ? 'bg-[#4A6CF7] text-white shadow-lg shadow-[#4A6CF7]/20'
+                : 'bg-white/[0.03] border border-white/[0.06] text-[#7B8AB8] hover:text-white hover:bg-white/[0.06]'
+            }`}
+          >
+            <span className="text-[11px]">{t.icon || '📋'}</span>
+            {t.name}
+            <span className={`text-[10px] font-black ml-0.5 ${selectedTopicId === t.id ? 'text-white/70' : 'text-[#4A5580]'}`}>
+              {t.problemCount}
+            </span>
+          </button>
+        ))}
 
-            // Filter problems helper
-            const getFilteredTopicSubtopics = () => {
-              if (!details || !details.subtopics) return [];
-              return details.subtopics.map((sub) => {
-                const filtered = sub.problems.filter((p) => {
-                  const matchesSearch = p.title.toLowerCase().includes(search.toLowerCase());
-                  const matchesDifficulty = difficulty === 'All' || p.difficulty.toUpperCase() === difficulty.toUpperCase();
-                  const matchesBookmark = !showBookmarkedOnly || p.bookmarked;
-                  return matchesSearch && matchesDifficulty && matchesBookmark;
-                });
-                return {
-                  ...sub,
-                  problems: filtered
-                };
-              }).filter((sub) => sub.problems.length > 0 || search === '');
-            };
-
-            const filteredSubtopics = getFilteredTopicSubtopics();
-            const hasProblems = filteredSubtopics.some(sub => sub.problems.length > 0);
-
-            // Skip rendering this topic if filters are active and no problems match
-            if (hasActiveFilters && details && !hasProblems) {
-              return null;
-            }
-
-            const topicSolvedCount = details 
-              ? details.subtopics.reduce((acc, sub) => acc + sub.problems.filter((p) => p.solved).length, 0)
-              : 0;
-            
-            const topicProgressPercent = details && t.problemCount > 0 
-              ? Math.round((topicSolvedCount / t.problemCount) * 100) 
-              : 0;
-
-            return (
-              <div key={t.id} className="border border-[#E5E7EB] rounded-premium bg-white shadow-card overflow-hidden transition-all duration-300">
-                {/* Topic Header */}
-                <div 
-                  onClick={() => handleTopicToggle(t.id)}
-                  className="px-6 py-5 flex items-center justify-between cursor-pointer hover:bg-slate-50/50 transition select-none"
-                >
-                  <div className="flex items-center space-x-4">
-                    <div className="text-slate-400 hover:text-text transition-colors">
-                      {isTopicExpanded ? <ChevronDown className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
-                    </div>
-                    <div className="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-2xl shadow-sm">
-                      {t.icon || '💻'}
-                    </div>
-                    <div>
-                      <h2 className="text-base font-bold text-text">{t.name}</h2>
-                      <p className="text-xs text-secondaryText mt-0.5">
-                        {t.problemCount} Curated Problems
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Progress info */}
-                  <div className="flex items-center space-x-4">
-                    {details ? (
-                      <div className="flex items-center space-x-3.5">
-                        <span className="text-xs font-bold text-secondaryText">
-                          {topicSolvedCount} / {t.problemCount} Solved
-                        </span>
-                        <div className="w-24 h-2 bg-secondaryBg rounded-full overflow-hidden border border-border hidden sm:block">
-                          <div 
-                            className="h-full bg-primary rounded-full transition-all duration-300"
-                            style={{ width: `${topicProgressPercent}%` }}
-                          />
-                        </div>
-                      </div>
-                    ) : (
-                      <span className="text-xs text-secondaryText font-medium bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
-                        Expand Topic
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Subtopics and question list */}
-                {isTopicExpanded && (
-                  <div className="p-6 bg-slate-50/20 border-t border-border space-y-5">
-                    {isLoading ? (
-                      <div className="space-y-4 animate-pulse">
-                        <div className="h-16 bg-white border border-border rounded-premium" />
-                        <div className="h-16 bg-white border border-[#E5E7EB] rounded-premium" />
-                      </div>
-                    ) : !details ? (
-                      <div className="text-center py-4 text-xs text-secondaryText">
-                        Failed to load problems. Please reload the page.
-                      </div>
-                    ) : filteredSubtopics.length === 0 ? (
-                      <div className="text-center py-6 text-secondaryText">
-                        <HelpCircle className="w-8 h-8 text-muted mx-auto mb-2" />
-                        <p className="text-xs font-semibold">No subtopics match the filters</p>
-                      </div>
-                    ) : (
-                      filteredSubtopics.map((sub) => {
-                        const isSubExpanded = search.trim() !== '' ? true : !!expandedSubtopics[sub.id];
-                        const subProblemsCount = sub.problems.length;
-                        const subSolvedCount = sub.problems.filter((p) => p.solved).length;
-                        const subProgressPercent = subProblemsCount > 0 ? Math.round((subSolvedCount / subProblemsCount) * 100) : 0;
-
-                        return (
-                          <div key={sub.id} className="border border-[#E5E7EB] rounded-premium bg-white shadow-sm overflow-hidden transition-all duration-300">
-                            {/* Accordion Header */}
-                            <div 
-                              onClick={() => toggleSubtopic(sub.id)}
-                              className={`px-5 py-3.5 flex items-center justify-between cursor-pointer hover:bg-slate-50/30 transition select-none ${
-                                isSubExpanded ? 'border-l-4 border-l-primary' : ''
-                              }`}
-                            >
-                              <div className="flex items-center space-x-3 flex-1 min-w-0">
-                                <div className="text-slate-400">
-                                  {isSubExpanded ? <ChevronDown className="w-4.5 h-4.5" /> : <ChevronRight className="w-4.5 h-4.5" />}
-                                </div>
-                                <div className="min-w-0">
-                                  <h3 className="font-bold text-sm text-text truncate">{sub.name}</h3>
-                                  {sub.description && (
-                                    <p className="text-xs text-secondaryText truncate max-w-xl mt-0.5">{sub.description}</p>
-                                  )}
-                                </div>
-                              </div>
-
-                              <div className="flex items-center space-x-3.5 flex-shrink-0">
-                                <span className="text-[11px] font-bold text-secondaryText whitespace-nowrap">
-                                  {subSolvedCount} / {subProblemsCount} Solved
-                                </span>
-                                <div className="w-16 h-1.5 bg-secondaryBg rounded-full overflow-hidden border border-border hidden sm:block">
-                                  <div 
-                                    className="h-full bg-success rounded-full transition-all duration-300"
-                                    style={{ width: `${subProgressPercent}%` }}
-                                  />
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Subtopic Table */}
-                            {isSubExpanded && (
-                              <div className="p-4 bg-slate-50/10 border-t border-[#E5E7EB]">
-                                <QuestionTable
-                                  problems={sub.problems}
-                                  onSolveToggle={toggleSolved}
-                                  onBookmarkToggle={toggleBookmark}
-                                  onSolve={onSolve}
-                                />
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })
-                    )}
-                  </div>
-                )}
+        {extraTopics.length > 0 && (
+          <div className="relative flex-shrink-0" onClick={e => e.stopPropagation()}>
+            <button
+              onClick={() => setShowMoreTopics(v => !v)}
+              className="flex items-center gap-1 px-3.5 py-2 rounded-lg text-xs font-bold bg-white/[0.03] border border-white/[0.06] text-[#7B8AB8] hover:text-white transition-all whitespace-nowrap"
+            >
+              More <ChevronDown className="w-3 h-3" />
+            </button>
+            {showMoreTopics && (
+              <div className="absolute top-full left-0 mt-1 bg-[#0F1526] border border-white/[0.08] rounded-xl shadow-2xl shadow-black/50 z-30 min-w-[180px] p-1.5">
+                {extraTopics.map(t => (
+                  <button
+                    key={t.id}
+                    onClick={() => { setSelectedTopicId(t.id); setShowMoreTopics(false); }}
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold text-[#7B8AB8] hover:text-white hover:bg-white/[0.06] transition-all"
+                  >
+                    <span className="flex items-center gap-2"><span>{t.icon || '📋'}</span>{t.name}</span>
+                    <span className="text-[10px] text-[#4A5580]">{t.problemCount}</span>
+                  </button>
+                ))}
               </div>
-            );
-          })}
-        </div>
-
-        {/* Global Empty State for search filter */}
-        {hasActiveFilters && !hasAnyMatchingProblems && (
-          <div className="bg-white border border-[#E5E7EB] rounded-premium p-12 text-center shadow-card">
-            <HelpCircle className="w-12 h-12 text-muted mx-auto mb-3" />
-            <p className="font-bold text-base text-text">No Problems Match Your Filters</p>
-            <p className="text-xs text-secondaryText mt-1">Try adjusting the search query or difficulty filters.</p>
+            )}
           </div>
         )}
-
       </div>
+
+      {/* ── SEARCH + FILTERS ── */}
+      <div className="flex items-center gap-3" onClick={e => e.stopPropagation()}>
+        {/* Search */}
+        <div className="relative flex-1">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#4A5580] pointer-events-none" />
+          <input
+            type="text"
+            placeholder="Search problems..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 bg-[#0F1526] border border-white/[0.06] rounded-xl text-sm text-white placeholder-[#4A5580] focus:outline-none focus:border-[#4A6CF7]/40 transition-all"
+          />
+        </div>
+
+        {/* Difficulty Dropdown */}
+        <div className="relative">
+          <button
+            onClick={() => { setDiffOpen(v => !v); setStatusOpen(false); }}
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#0F1526] border border-white/[0.06] rounded-xl text-sm text-[#7B8AB8] hover:text-white transition-all whitespace-nowrap"
+          >
+            {difficulty} <ChevronDown className="w-3.5 h-3.5" />
+          </button>
+          {diffOpen && (
+            <div className="absolute top-full left-0 mt-1 bg-[#0F1526] border border-white/[0.08] rounded-xl shadow-2xl shadow-black/50 z-30 min-w-[160px] p-1.5">
+              {['All Difficulties', 'Easy', 'Medium', 'Hard'].map(d => (
+                <button
+                  key={d}
+                  onClick={() => { setDifficulty(d); setDiffOpen(false); }}
+                  className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
+                    difficulty === d ? 'text-white bg-white/[0.06]' : 'text-[#7B8AB8] hover:text-white hover:bg-white/[0.04]'
+                  }`}
+                >
+                  {d}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* All Companies (cosmetic) */}
+        <button className="flex items-center gap-2 px-4 py-2.5 bg-[#0F1526] border border-white/[0.06] rounded-xl text-sm text-[#7B8AB8] hover:text-white transition-all whitespace-nowrap">
+          All Companies <ChevronDown className="w-3.5 h-3.5" />
+        </button>
+
+        {/* Status Dropdown */}
+        <div className="relative">
+          <button
+            onClick={() => { setStatusOpen(v => !v); setDiffOpen(false); }}
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#0F1526] border border-white/[0.06] rounded-xl text-sm text-[#7B8AB8] hover:text-white transition-all whitespace-nowrap"
+          >
+            {statusFilter} <ChevronDown className="w-3.5 h-3.5" />
+          </button>
+          {statusOpen && (
+            <div className="absolute top-full left-0 mt-1 bg-[#0F1526] border border-white/[0.08] rounded-xl shadow-2xl shadow-black/50 z-30 min-w-[140px] p-1.5">
+              {['All Status', 'Solved', 'Unsolved'].map(s => (
+                <button
+                  key={s}
+                  onClick={() => { setStatusFilter(s); setStatusOpen(false); }}
+                  className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
+                    statusFilter === s ? 'text-white bg-white/[0.06]' : 'text-[#7B8AB8] hover:text-white hover:bg-white/[0.04]'
+                  }`}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Add Problem */}
+        <button className="flex items-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-[#4A6CF7] to-[#7C3AED] text-white rounded-xl text-sm font-bold shadow-lg shadow-[#4A6CF7]/25 hover:opacity-90 active:scale-95 transition-all whitespace-nowrap">
+          <Plus className="w-4 h-4" />
+          Add Problem
+        </button>
+      </div>
+
+      {/* ── TABLE ── */}
+      <div className="bg-[#0F1526] border border-white/[0.05] rounded-xl overflow-hidden">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr className="border-b border-white/[0.06]">
+              {/* Status */}
+              <th className="py-3.5 px-3 text-center text-[10px] font-bold text-[#4A5580] uppercase tracking-wider w-12">Status</th>
+              {/* Problem */}
+              <th className="py-3.5 px-4 text-left text-[10px] font-bold text-[#4A5580] uppercase tracking-wider">Problem</th>
+              {/* Solve */}
+              <th className="py-3.5 px-3 text-center text-[10px] font-bold text-[#4A5580] uppercase tracking-wider w-16">Solve</th>
+              {/* Resource */}
+              <th className="py-3.5 px-3 text-center text-[10px] font-bold text-[#4A5580] uppercase tracking-wider w-20">Resource</th>
+              {/* Practice */}
+              <th className="py-3.5 px-3 text-center text-[10px] font-bold text-[#4A5580] uppercase tracking-wider w-24">Practice</th>
+              {/* Note */}
+              <th className="py-3.5 px-3 text-center text-[10px] font-bold text-[#4A5580] uppercase tracking-wider w-16">Note</th>
+              {/* Companies */}
+              <th className="py-3.5 px-4 text-left text-[10px] font-bold text-[#4A5580] uppercase tracking-wider w-36">Companies</th>
+              {/* Difficulty */}
+              <th className="py-3.5 px-4 text-center text-[10px] font-bold text-[#4A5580] uppercase tracking-wider w-24">Difficulty</th>
+            </tr>
+          </thead>
+          <tbody>
+            {pagedProblems.length === 0 ? (
+              <tr>
+                <td colSpan={8} className="py-20 text-center">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="w-12 h-12 rounded-xl bg-white/[0.03] flex items-center justify-center">
+                      <Search className="w-5 h-5 text-[#4A5580]" />
+                    </div>
+                    <p className="text-[#7B8AB8] font-bold text-sm">No problems found</p>
+                    <p className="text-[#4A5580] text-xs">Try adjusting your filters</p>
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              pagedProblems.map((prob) => (
+                <tr
+                  key={prob.id}
+                  className="border-b border-white/[0.03] hover:bg-white/[0.025] transition-colors duration-150 group"
+                >
+                  {/* ── Status ── */}
+                  <td className="py-3 px-3 text-center align-middle">
+                    <button
+                      onClick={() => toggleSolved(prob.id)}
+                      className={`w-5 h-5 mx-auto rounded-full flex items-center justify-center border transition-all duration-200 hover:scale-105 active:scale-95 ${
+                        prob.solved
+                          ? 'bg-[#4ADE80]/10 border-[#4ADE80]/40 text-[#4ADE80]'
+                          : 'border-white/[0.10] text-transparent hover:border-[#4ADE80]/40 hover:text-[#4ADE80]/50'
+                      }`}
+                      title={prob.solved ? 'Mark as unsolved' : 'Mark as solved'}
+                    >
+                      <Check className="w-2.5 h-2.5 stroke-[3.5]" />
+                    </button>
+                  </td>
+
+                  {/* ── Problem Title ── */}
+                  <td className="py-3 px-4 align-middle">
+                    <span
+                      onClick={() => onSolve(prob)}
+                      className="text-[13px] font-semibold text-[#C8D1E8] group-hover:text-white cursor-pointer transition-colors duration-150"
+                    >
+                      {prob.title}
+                    </span>
+                  </td>
+
+                  {/* ── Solve Button ── */}
+                  <td className="py-3 px-3 text-center align-middle">
+                    <button
+                      onClick={() => onSolve(prob)}
+                      className="px-2.5 py-1 bg-[#4A6CF7]/10 hover:bg-[#4A6CF7] border border-[#4A6CF7]/30 hover:border-[#4A6CF7] text-[#4A6CF7] hover:text-white rounded-lg text-[9.5px] font-black uppercase tracking-wider transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-md hover:shadow-[#4A6CF7]/20"
+                    >
+                      Solve
+                    </button>
+                  </td>
+
+                  {/* ── Resource (notebook icon) ── */}
+                  <td className="py-3 px-3 text-center align-middle">
+                    <button
+                      onClick={() => onSolve(prob)}
+                      className="w-7 h-7 mx-auto rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-[#4A5580] hover:text-[#A78BFA] hover:border-[#A78BFA]/30 hover:bg-[#A78BFA]/5 transition-all duration-200 hover:scale-105 active:scale-95"
+                      title="Open Scratchpad & Resources"
+                    >
+                      <FileText className="w-3.5 h-3.5" />
+                    </button>
+                  </td>
+
+                  {/* ── Practice (LeetCode + GFG) ── */}
+                  <td className="py-3 px-3 text-center align-middle">
+                    <div className="flex items-center justify-center gap-2">
+                      {/* LeetCode */}
+                      {prob.leetcodeUrl ? (
+                        <a
+                          href={prob.leetcodeUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="Solve on LeetCode"
+                          className="block hover:scale-110 active:scale-95 transition-transform duration-200"
+                        >
+                          <LeetCodeLogo />
+                        </a>
+                      ) : (
+                        <span title="Not available on LeetCode" className="opacity-25 cursor-not-allowed">
+                          <LeetCodeLogo disabled />
+                        </span>
+                      )}
+                      {/* GFG */}
+                      {prob.gfgUrl ? (
+                        <a
+                          href={prob.gfgUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="Solve on GeeksForGeeks"
+                          className="block hover:scale-110 active:scale-95 transition-transform duration-200"
+                        >
+                          <GfgLogo />
+                        </a>
+                      ) : (
+                        <span title="Not available on GFG" className="opacity-25 cursor-not-allowed">
+                          <GfgLogo disabled />
+                        </span>
+                      )}
+                    </div>
+                  </td>
+
+                  {/* ── Note ── */}
+                  <td className="py-3 px-3 text-center align-middle">
+                    <button
+                      onClick={() => setActiveNoteProblem(prob)}
+                      className={`w-6 h-6 mx-auto rounded-full flex items-center justify-center border transition-all duration-200 hover:scale-105 active:scale-95 ${
+                        problemNotes[prob.id]
+                          ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400 shadow-sm shadow-yellow-500/10'
+                          : 'border-white/[0.08] text-[#4A5580] hover:border-[#4A6CF7]/40 hover:text-[#4A6CF7] hover:bg-[#4A6CF7]/5'
+                      }`}
+                      title={problemNotes[prob.id] ? 'View/Edit Note' : 'Add Note'}
+                    >
+                      <Plus className="w-3 h-3 stroke-[3]" />
+                    </button>
+                  </td>
+
+                  {/* ── Companies ── */}
+                  <td className="py-3 px-4 align-middle">
+                    <div className="flex items-center gap-1 flex-wrap">
+                      {prob.companies && prob.companies.length > 0 ? (
+                        prob.companies.slice(0, 4).map((c, i) => (
+                          <div key={i} className="relative group/logo">
+                            <CompanyLogo name={c} className="w-6 h-6" />
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 bg-black/90 text-[9px] font-bold text-white px-2 py-0.5 rounded whitespace-nowrap opacity-0 group-hover/logo:opacity-100 pointer-events-none transition-opacity duration-150 z-20 border border-white/10">
+                              {c}
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <span className="text-[10px] text-[#4A5580] italic font-medium">General</span>
+                      )}
+                    </div>
+                  </td>
+
+                  {/* ── Difficulty ── */}
+                  <td className="py-3 px-4 text-center align-middle">
+                    <span className={`inline-flex px-2.5 py-0.5 rounded-md text-[10px] font-bold tracking-wide ${getDiffBadge(prob.difficulty)}`}>
+                      {getDiffLabel(prob.difficulty)}
+                    </span>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* ── PAGINATION ── */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-1.5 py-2">
+          <button
+            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/[0.03] border border-white/[0.06] text-[#7B8AB8] hover:text-white hover:bg-white/[0.06] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+
+          {getPaginationNums().map((p, i) =>
+            p === '...' ? (
+              <span key={`e-${i}`} className="w-8 h-8 flex items-center justify-center text-[#4A5580] text-xs font-bold">
+                ...
+              </span>
+            ) : (
+              <button
+                key={p}
+                onClick={() => setCurrentPage(p as number)}
+                className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all duration-200 ${
+                  currentPage === p
+                    ? 'bg-[#4A6CF7] text-white shadow-lg shadow-[#4A6CF7]/25'
+                    : 'bg-white/[0.03] border border-white/[0.06] text-[#7B8AB8] hover:text-white hover:bg-white/[0.06]'
+                }`}
+              >
+                {p}
+              </button>
+            )
+          )}
+
+          <button
+            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/[0.03] border border-white/[0.06] text-[#7B8AB8] hover:text-white hover:bg-white/[0.06] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      {/* ── NOTE MODAL ── */}
+      {activeNoteProblem && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          onClick={() => setActiveNoteProblem(null)}
+        >
+          <div
+            className="bg-[#0D1224] border border-white/[0.08] w-full max-w-md rounded-2xl shadow-[0_0_60px_rgba(74,108,247,0.2)] overflow-hidden flex flex-col"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="px-5 py-4 border-b border-white/[0.05] flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-white">Problem Notes</h3>
+                <p className="text-[11px] text-[#7B8AB8] mt-0.5 line-clamp-1">{activeNoteProblem.title}</p>
+              </div>
+              <button
+                onClick={() => setActiveNoteProblem(null)}
+                className="p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/[0.04] transition-all"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-5">
+              <textarea
+                value={tempNoteText}
+                onChange={e => setTempNoteText(e.target.value)}
+                placeholder="Write your notes, hints, or solution approach here..."
+                className="w-full h-40 bg-white/[0.02] border border-white/[0.06] rounded-xl p-3 text-xs text-white placeholder-white/20 focus:outline-none focus:border-[#4A6CF7]/50 focus:bg-white/[0.03] transition-all resize-none font-medium leading-relaxed"
+                autoFocus
+              />
+            </div>
+            <div className="px-5 py-3.5 border-t border-white/[0.05] flex items-center justify-end gap-2.5">
+              <button
+                onClick={() => setActiveNoteProblem(null)}
+                className="px-3.5 py-1.5 border border-white/[0.08] hover:border-white/20 text-white/60 hover:text-white rounded-xl text-xs font-bold transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={saveNote}
+                className="px-4 py-1.5 bg-[#4A6CF7] hover:bg-[#4A6CF7]/90 text-white rounded-xl text-xs font-bold shadow-md shadow-[#4A6CF7]/25 transition-all active:scale-95"
+              >
+                Save Note
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

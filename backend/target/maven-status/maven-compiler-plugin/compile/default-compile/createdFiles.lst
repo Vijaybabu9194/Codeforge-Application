@@ -40,6 +40,7 @@ com/codeforge/security/JwtAuthFilter.class
 com/codeforge/dto/DashboardDto$TopicProgress$TopicProgressBuilder.class
 com/codeforge/dto/DashboardDto$ProgressResponse$ProgressResponseBuilder.class
 com/codeforge/repository/SubmissionRepository.class
+com/codeforge/config/DataSeeder$1.class
 com/codeforge/controller/DashboardController.class
 com/codeforge/dto/ProblemDto$TopicResponse.class
 com/codeforge/controller/AuthController.class
@@ -52,6 +53,7 @@ com/codeforge/config/SecurityConfig$1.class
 com/codeforge/dto/SubmissionRequestDto$CodeRunRequest.class
 com/codeforge/entity/User$UserBuilder.class
 com/codeforge/controller/CodeExecutionController.class
+com/codeforge/config/DataSeeder$SeedSubtopic.class
 com/codeforge/dto/SubmissionRequestDto$CodeRunResponse$CodeRunResponseBuilder.class
 com/codeforge/dto/AuthDto.class
 com/codeforge/entity/Bookmark.class
@@ -96,6 +98,7 @@ com/codeforge/dto/DashboardDto$ChartPoint$ChartPointBuilder.class
 com/codeforge/dto/DashboardDto$HeatmapEntry.class
 com/codeforge/dto/DashboardDto$HeatmapEntry$HeatmapEntryBuilder.class
 com/codeforge/entity/User.class
+com/codeforge/config/DataSeeder$SeedCompany.class
 com/codeforge/entity/Subtopic.class
 com/codeforge/dto/ProfileDto.class
 com/codeforge/service/DashboardService.class
@@ -108,8 +111,10 @@ com/codeforge/entity/Problem$ProblemBuilder.class
 com/codeforge/entity/Notification$NotificationBuilder.class
 com/codeforge/dto/NotificationDto$UnreadCountResponse.class
 com/codeforge/dto/DashboardDto$StatsResponse$StatsResponseBuilder.class
+com/codeforge/config/DataSeeder$SeedProblem.class
 com/codeforge/dto/AuthDto$UserInfo.class
 com/codeforge/dto/DashboardDto$ActivityItem$ActivityItemBuilder.class
+com/codeforge/config/DataSeeder$SeedTopic.class
 com/codeforge/dto/ProblemDto$ProblemListResponse.class
 com/codeforge/dto/CompanyDto$CompanyDetailResponse$CompanyDetailResponseBuilder.class
 com/codeforge/controller/ProblemController.class

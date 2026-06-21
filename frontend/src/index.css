@@ -195,3 +195,103 @@
   opacity: 1;
   visibility: visible;
 }
+
+/* ============================================
+   DASHBOARD — DARK THEME
+   ============================================ */
+
+.dash-card {
+  background: rgba(13, 18, 34, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  transition: all 0.25s ease;
+}
+.dash-card:hover {
+  border-color: rgba(74, 108, 247, 0.18) !important;
+  background: rgba(13, 18, 34, 0.7) !important;
+}
+
+/* Dashboard Shell Background Overrides */
+.bg-dash-bg {
+  background-color: #030712 !important;
+}
+.bg-dash-sidebar {
+  background-color: #050814 !important;
+}
+.border-dash-border {
+  border-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Dashboard Sidebar Nav Item */
+.dash-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #7B8AB8;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  user-select: none;
+}
+.dash-nav-item:hover {
+  color: #FFFFFF;
+  background: rgba(74, 108, 247, 0.08);
+}
+.dash-nav-item.active {
+  color: #FFFFFF;
+  background: #4A6CF7;
+  font-weight: 600;
+}
+
+/* Difficulty Badges */
+.dash-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.dash-badge-easy {
+  background: rgba(74, 222, 128, 0.12);
+  color: #4ADE80;
+}
+.dash-badge-medium {
+  background: rgba(245, 158, 11, 0.12);
+  color: #F59E0B;
+}
+.dash-badge-hard {
+  background: rgba(239, 68, 68, 0.12);
+  color: #EF4444;
+}
+
+/* Dashboard dark scrollbar */
+.dash-scroll::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.dash-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.dash-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+}
+.dash-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Slide-up animation for dropdowns */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-slide-up {
+  animation: slideUp 0.2s ease-out forwards;
+}

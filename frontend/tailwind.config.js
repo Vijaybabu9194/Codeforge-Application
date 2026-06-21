@@ -32,6 +32,23 @@ export default {
           textDim: '#4A5580',
           border: 'rgba(255,255,255,0.07)',
         },
+        // Dashboard dark theme
+        dash: {
+          bg: '#0B1120',
+          sidebar: '#0D1425',
+          card: '#111827',
+          cardHover: '#1A2238',
+          border: 'rgba(255,255,255,0.06)',
+          blue: '#4A6CF7',
+          cyan: '#22D3EE',
+          green: '#4ADE80',
+          amber: '#F59E0B',
+          red: '#EF4444',
+          purple: '#A78BFA',
+          textPrimary: '#FFFFFF',
+          textSecondary: '#7B8AB8',
+          textMuted: '#4A5580',
+        },
       },
       fontFamily: {
         sans: ['Geist', 'Inter', 'sans-serif'],

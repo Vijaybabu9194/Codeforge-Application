@@ -2,6 +2,38 @@ import React from 'react';
 import { ArrowRight, Play, Star } from 'lucide-react';
 import HeroDashboardProjector from './HeroDashboardProjector';
 
+const DevAvatar: React.FC<{ index: number }> = ({ index }) => {
+  const gradients = [
+    { from: '#4A6CF7', to: '#6B8AFF', shape: 'M 10 30 C 10 23 14 19 20 19 C 26 19 30 23 30 30 Z M 20 17 C 23 17 25.5 14.5 25.5 11.5 C 25.5 8.5 23 6 20 6 C 17 6 14.5 8.5 14.5 11.5 C 14.5 14.5 17 17 20 17 Z' },
+    { from: '#22D3EE', to: '#06B6D4', shape: 'M 10 30 C 10 23 14 19 20 19 C 26 19 30 23 30 30 Z M 20 17 C 23 17 25.5 14.5 25.5 11.5 C 25.5 8.5 23 6 20 6 C 17 6 14.5 8.5 14.5 11.5 C 14.5 14.5 17 17 20 17 Z' },
+    { from: '#A78BFA', to: '#8B5CF6', shape: 'M 10 30 C 10 23 14 19 20 19 C 26 19 30 23 30 30 Z M 20 17 C 23 17 25.5 14.5 25.5 11.5 C 25.5 8.5 23 6 20 6 C 17 6 14.5 8.5 14.5 11.5 C 14.5 14.5 17 17 20 17 Z' },
+  ];
+  
+  const g = gradients[index % gradients.length];
+  
+  return (
+    <svg className="w-9 h-9 rounded-full border-2 border-[#020205] shadow-[0_0_8px_rgba(0,0,0,0.4)] relative z-10" viewBox="0 0 40 40" fill="none">
+      <defs>
+        <linearGradient id={`avatarGrad-${index}`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor={g.from} />
+          <stop offset="100%" stopColor={g.to} />
+        </linearGradient>
+      </defs>
+      <circle cx="20" cy="20" r="20" fill={`url(#avatarGrad-${index})`} />
+      <path d={g.shape} fill="#FFFFFF" fillOpacity="0.85" />
+      {index === 0 && (
+        <path d="M 16 11 L 24 11" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round" />
+      )}
+      {index === 1 && (
+        <circle cx="20" cy="11.5" r="1.5" fill="#E0F2FE" />
+      )}
+      {index === 2 && (
+        <path d="M 17 11.5 A 1.5 1.5 0 0 0 23 11.5" stroke="#FFFFFF" strokeWidth="1" strokeLinecap="round" />
+      )}
+    </svg>
+  );
+};
+
 interface HeroSectionProps {
   onSignupClick: () => void;
   onDemoClick: () => void;
@@ -63,9 +95,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           {/* Avatar Stack */}
           <div className="flex items-center gap-3">
             <div className="flex -space-x-2.5">
-              <img src="https://i.pravatar.cc/40?img=12" alt="" className="w-9 h-9 rounded-full border-2 border-[#020205] object-cover shadow-[0_0_8px_rgba(0,0,0,0.4)]" />
-              <img src="https://i.pravatar.cc/40?img=32" alt="" className="w-9 h-9 rounded-full border-2 border-[#020205] object-cover shadow-[0_0_8px_rgba(0,0,0,0.4)]" />
-              <img src="https://i.pravatar.cc/40?img=47" alt="" className="w-9 h-9 rounded-full border-2 border-[#020205] object-cover shadow-[0_0_8px_rgba(0,0,0,0.4)]" />
+              <DevAvatar index={0} />
+              <DevAvatar index={1} />
+              <DevAvatar index={2} />
             </div>
             <div>
               <span className="text-white font-bold text-[16px] block leading-tight">10,000+</span>
