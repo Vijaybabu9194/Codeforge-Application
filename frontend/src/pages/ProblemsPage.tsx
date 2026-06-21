@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import {
   Search, Check,
   ChevronLeft, ChevronRight, Plus, X,
-  Clock, TrendingUp, Code2, CheckCircle2, FileText, ChevronDown, ChevronUp
+  Code2, FileText, ChevronDown
 } from 'lucide-react';
 import { CompanyLogo, LeetCodeLogo, GfgLogo } from '../components/CompanyLogos';
 
@@ -69,8 +69,7 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
 
   // Store full topic detail (with subtopics) for pattern-wise view
   const [topicDetailsMap, setTopicDetailsMap] = useState<Record<number, TopicDetails>>({});
-  // Track which subtopic sections are expanded (default: all collapsed)
-  const [expandedSubtopics, setExpandedSubtopics] = useState<Set<number>>(new Set());
+
 
   // Notes state
   const [problemNotes, setProblemNotes] = useState<Record<number, string>>({});
@@ -164,12 +163,6 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
   };
 
 
-  // Stats
-  const totalProblems = topics.reduce((acc, t) => acc + t.problemCount, 0);
-  const totalSolved = user?.problemsSolved || 0;
-  const avgAcceptance = allProblems.length > 0
-    ? (allProblems.reduce((s, p) => s + (p.acceptanceRate || 0), 0) / allProblems.length).toFixed(1)
-    : '0.0';
 
   // Filtered list
   const filteredProblems = useMemo(() => {
@@ -183,6 +176,22 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
     });
   }, [allProblems, selectedTopicId, search, difficulty, statusFilter]);
 
+  // Pinned/Extra Topics logic
+  const PINNED_NAMES = useMemo(() => ['array', 'string', 'binary search', 'stack', 'recursion'], []);
+  const pinnedTopics = useMemo(() => {
+    const pinned: Topic[] = [];
+    PINNED_NAMES.forEach(name => {
+      const match = topics.find(t => t.name.toLowerCase().includes(name));
+      if (match) pinned.push(match);
+    });
+    return pinned;
+  }, [topics, PINNED_NAMES]);
+
+  const extraTopics = useMemo(() => {
+    return topics.filter(t => !pinnedTopics.some(pt => pt.id === t.id));
+  }, [topics, pinnedTopics]);
+
+
   const totalPages = Math.max(1, Math.ceil(filteredProblems.length / ITEMS_PER_PAGE));
   const pagedProblems = filteredProblems.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
@@ -190,8 +199,7 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
   );
 
   useEffect(() => setCurrentPage(1), [search, difficulty, statusFilter, selectedTopicId]);
-  // Reset expanded state when topic changes (all start collapsed)
-  useEffect(() => { setExpandedSubtopics(new Set()); }, [selectedTopicId]);
+
 
   const getDiffBadge = (diff: string) => {
     const d = diff.toUpperCase();
@@ -261,154 +269,90 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
             Practice coding problems and improve your skills
           </p>
         </div>
-
-        {/* Stat Cards */}
-        <div className="flex items-stretch gap-3 flex-wrap">
-          {/* Total Problems */}
-          <div className="bg-[#0F1526] border border-white/[0.05] rounded-xl px-4 py-3 flex items-center gap-3 min-w-[130px]">
-            <div className="w-9 h-9 rounded-lg bg-[#4A6CF7]/10 border border-[#4A6CF7]/20 flex items-center justify-center flex-shrink-0">
-              <Code2 className="w-4 h-4 text-[#4A6CF7]" />
-            </div>
-            <div>
-              <p className="text-[9px] text-[#4A5580] font-bold uppercase tracking-wider">Total Problems</p>
-              <p className="text-[17px] font-black text-white leading-tight">{totalProblems.toLocaleString()}</p>
-              <p className="text-[9px] text-[#4ADE80] font-semibold">+ 128 this week</p>
-            </div>
-          </div>
-
-          {/* Solved */}
-          <div className="bg-[#0F1526] border border-white/[0.05] rounded-xl px-4 py-3 flex items-center gap-3 min-w-[130px]">
-            <div className="w-9 h-9 rounded-lg bg-[#4ADE80]/10 border border-[#4ADE80]/20 flex items-center justify-center flex-shrink-0">
-              <CheckCircle2 className="w-4 h-4 text-[#4ADE80]" />
-            </div>
-            <div>
-              <p className="text-[9px] text-[#4A5580] font-bold uppercase tracking-wider">Solved</p>
-              <p className="text-[17px] font-black text-white leading-tight">{totalSolved.toLocaleString()}</p>
-              <p className="text-[9px] text-[#4ADE80] font-semibold">+ 24 this week</p>
-            </div>
-          </div>
-
-          {/* Acceptance */}
-          <div className="bg-[#0F1526] border border-white/[0.05] rounded-xl px-4 py-3 flex items-center gap-3 min-w-[130px]">
-            <div className="w-9 h-9 rounded-lg bg-[#F59E0B]/10 border border-[#F59E0B]/20 flex items-center justify-center flex-shrink-0">
-              <TrendingUp className="w-4 h-4 text-[#F59E0B]" />
-            </div>
-            <div>
-              <p className="text-[9px] text-[#4A5580] font-bold uppercase tracking-wider">Acceptance</p>
-              <p className="text-[17px] font-black text-white leading-tight">{avgAcceptance}%</p>
-              <p className="text-[9px] text-[#4ADE80] font-semibold">+ 4.2% this week</p>
-            </div>
-          </div>
-
-          {/* Avg Time */}
-          <div className="bg-[#0F1526] border border-white/[0.05] rounded-xl px-4 py-3 flex items-center gap-3 min-w-[130px]">
-            <div className="w-9 h-9 rounded-lg bg-[#A78BFA]/10 border border-[#A78BFA]/20 flex items-center justify-center flex-shrink-0">
-              <Clock className="w-4 h-4 text-[#A78BFA]" />
-            </div>
-            <div>
-              <p className="text-[9px] text-[#4A5580] font-bold uppercase tracking-wider">Avg. Time</p>
-              <p className="text-[17px] font-black text-white leading-tight">24m</p>
-              <p className="text-[9px] text-[#EF4444] font-semibold">- 6m vs last week</p>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* ── TOPIC TABS ── */}
-      {(() => {
-        // Pinned topic names shown in the tab bar
-        const PINNED_NAMES = ['arrays', 'strings', 'binary search', 'stack', 'recursion'];
-        const pinnedTopics: Topic[] = [];
-        PINNED_NAMES.forEach(name => {
-          const match = topics.find(t => t.name.toLowerCase().includes(name));
-          if (match) pinnedTopics.push(match);
-        });
-        const extraTopics = topics.filter(t =>
-          !pinnedTopics.some(pt => pt.id === t.id)
-        );
-        return (
-          <div className="flex flex-wrap items-center gap-2" onClick={e => e.stopPropagation()}>
-            {/* All Topics */}
+      <div className="space-y-3" onClick={e => e.stopPropagation()}>
+        {/* Top row: Pinned topics + More button */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* All Problems */}
+          <button
+            onClick={() => { setSelectedTopicId(null); setShowMoreTopics(false); }}
+            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all duration-200 flex-shrink-0 ${
+              selectedTopicId === null
+                ? 'bg-[#4A6CF7] text-white shadow-lg shadow-[#4A6CF7]/25'
+                : 'bg-white/[0.03] border border-white/[0.06] text-[#7B8AB8] hover:text-white hover:bg-white/[0.06]'
+            }`}
+          >
+            <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor">
+              <rect x="1" y="1" width="6" height="6" rx="1" />
+              <rect x="9" y="1" width="6" height="6" rx="1" />
+              <rect x="1" y="9" width="6" height="6" rx="1" />
+              <rect x="9" y="9" width="6" height="6" rx="1" />
+            </svg>
+            All Problems
+          </button>
+
+          {/* Pinned topic tabs */}
+          {pinnedTopics.map(t => (
             <button
-              onClick={() => { setSelectedTopicId(null); setShowMoreTopics(false); }}
+              key={t.id}
+              onClick={() => { setSelectedTopicId(t.id); setShowMoreTopics(false); }}
               className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all duration-200 flex-shrink-0 ${
-                selectedTopicId === null
-                  ? 'bg-[#4A6CF7] text-white shadow-lg shadow-[#4A6CF7]/20'
+                selectedTopicId === t.id
+                  ? 'bg-[#4A6CF7] text-white shadow-lg shadow-[#4A6CF7]/25'
                   : 'bg-white/[0.03] border border-white/[0.06] text-[#7B8AB8] hover:text-white hover:bg-white/[0.06]'
               }`}
             >
-              <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor">
-                <rect x="1" y="1" width="6" height="6" rx="1" />
-                <rect x="9" y="1" width="6" height="6" rx="1" />
-                <rect x="1" y="9" width="6" height="6" rx="1" />
-                <rect x="9" y="9" width="6" height="6" rx="1" />
-              </svg>
-              All Topics
+              <span className="text-[11px]">{t.icon || '📋'}</span>
+              {t.name}
+              <span className={`text-[10px] font-black ml-0.5 ${selectedTopicId === t.id ? 'text-white/70' : 'text-[#4A5580]'}`}>
+                {t.problemCount}
+              </span>
             </button>
+          ))}
 
-            {/* Pinned topic tabs */}
-            {pinnedTopics.map(t => (
-              <button
-                key={t.id}
-                onClick={() => { setSelectedTopicId(t.id); setShowMoreTopics(false); }}
-                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all duration-200 flex-shrink-0 ${
-                  selectedTopicId === t.id
-                    ? 'bg-[#4A6CF7] text-white shadow-lg shadow-[#4A6CF7]/20'
-                    : 'bg-white/[0.03] border border-white/[0.06] text-[#7B8AB8] hover:text-white hover:bg-white/[0.06]'
-                }`}
-              >
-                <span className="text-[11px]">{t.icon || '📋'}</span>
-                {t.name}
-                <span className={`text-[10px] font-black ml-0.5 ${selectedTopicId === t.id ? 'text-white/70' : 'text-[#4A5580]'}`}>
-                  {t.problemCount}
-                </span>
-              </button>
-            ))}
+          {/* More button */}
+          {extraTopics.length > 0 && (
+            <button
+              onClick={e => { e.stopPropagation(); setShowMoreTopics(v => !v); }}
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all duration-200 ${
+                showMoreTopics || extraTopics.some(t => t.id === selectedTopicId)
+                  ? 'bg-[#4A6CF7] text-white shadow-lg shadow-[#4A6CF7]/25'
+                  : 'bg-white/[0.03] border border-white/[0.06] text-[#7B8AB8] hover:text-white hover:bg-white/[0.06]'
+              }`}
+            >
+              More <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${showMoreTopics ? 'rotate-180' : ''}`} />
+            </button>
+          )}
+        </div>
 
-            {/* More button with wrapped grid dropdown */}
-            {extraTopics.length > 0 && (
-              <div className="relative flex-shrink-0">
+        {/* Second row: Expanded extra topics (inline below the topics) */}
+        {extraTopics.length > 0 && showMoreTopics && (
+          <div 
+            className="bg-[#0D1224]/40 border border-white/[0.06] rounded-xl p-3"
+          >
+            <p className="text-[9px] font-bold text-[#4A5580] uppercase tracking-wider mb-2 px-1">Other Topics</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+              {extraTopics.map(t => (
                 <button
-                  onClick={e => { e.stopPropagation(); setShowMoreTopics(v => !v); }}
-                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all duration-200 ${
-                    showMoreTopics || extraTopics.some(t => t.id === selectedTopicId)
-                      ? 'bg-[#4A6CF7] text-white shadow-lg shadow-[#4A6CF7]/20'
-                      : 'bg-white/[0.03] border border-white/[0.06] text-[#7B8AB8] hover:text-white hover:bg-white/[0.06]'
+                  key={t.id}
+                  onClick={() => { setSelectedTopicId(t.id); }}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all text-left ${
+                    selectedTopicId === t.id
+                      ? 'bg-[#4A6CF7] text-white'
+                      : 'text-[#7B8AB8] hover:text-white hover:bg-white/[0.04] border border-white/[0.06] bg-[#0F1526]/50'
                   }`}
                 >
-                  More <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${showMoreTopics ? 'rotate-180' : ''}`} />
+                  <span className="text-[11px] flex-shrink-0">{t.icon || '📋'}</span>
+                  <span className="truncate">{t.name}</span>
+                  <span className="ml-auto text-[9px] font-black text-[#4A5580] flex-shrink-0">{t.problemCount}</span>
                 </button>
-
-                {showMoreTopics && (
-                  <div
-                    className="absolute top-full left-0 mt-2 bg-[#0D1224] border border-white/[0.08] rounded-2xl shadow-2xl shadow-black/60 z-40 p-3 w-[420px] max-w-[calc(100vw-280px)] md:max-w-[420px]"
-                    onClick={e => e.stopPropagation()}
-                  >
-                    <p className="text-[9px] font-bold text-[#4A5580] uppercase tracking-wider mb-2.5 px-1">All Topics</p>
-                    <div className="grid grid-cols-3 gap-1.5">
-                      {extraTopics.map(t => (
-                        <button
-                          key={t.id}
-                          onClick={() => { setSelectedTopicId(t.id); setShowMoreTopics(false); }}
-                          className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all text-left ${
-                            selectedTopicId === t.id
-                              ? 'bg-[#4A6CF7] text-white'
-                              : 'text-[#7B8AB8] hover:text-white hover:bg-white/[0.06] border border-white/[0.06]'
-                          }`}
-                        >
-                          <span className="text-[11px] flex-shrink-0">{t.icon || '📋'}</span>
-                          <span className="truncate">{t.name}</span>
-                          <span className="ml-auto text-[9px] font-black text-[#4A5580] flex-shrink-0">{t.problemCount}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
+              ))}
+            </div>
           </div>
-        );
-      })()}
+        )}
+      </div>
 
       {/* ── SEARCH + FILTERS ── */}
       <div className="flex items-center gap-3" onClick={e => e.stopPropagation()}>
@@ -478,12 +422,6 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
             </div>
           )}
         </div>
-
-        {/* Add Problem */}
-        <button className="flex items-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-[#4A6CF7] to-[#7C3AED] text-white rounded-xl text-sm font-bold shadow-lg shadow-[#4A6CF7]/25 hover:opacity-90 active:scale-95 transition-all whitespace-nowrap">
-          <Plus className="w-4 h-4" />
-          Add Problem
-        </button>
       </div>
 
       {/* ── PATTERN-WISE VIEW (topic selected) ── */}
@@ -512,22 +450,11 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
                   return true;
                 });
 
-              const isExpanded = expandedSubtopics.has(sub.id);
-              const toggleCollapse = () => {
-                setExpandedSubtopics(prev => {
-                  const next = new Set(prev);
-                  if (next.has(sub.id)) next.delete(sub.id);
-                  else next.add(sub.id);
-                  return next;
-                });
-              };
-
               return (
                 <div key={sub.id} className="bg-[#0F1526] border border-white/[0.05] rounded-xl overflow-hidden">
-                  {/* Pattern Header — clickable to collapse/expand */}
-                  <button
-                    onClick={toggleCollapse}
-                    className="w-full px-5 py-3.5 flex items-center justify-between bg-white/[0.015] hover:bg-white/[0.03] transition-colors duration-150 cursor-pointer"
+                  {/* Pattern Header */}
+                  <div
+                    className="w-full px-5 py-3.5 flex items-center justify-between bg-white/[0.015]"
                   >
                     <div className="flex items-center gap-2.5">
                       <div className="w-1.5 h-5 rounded-full bg-[#4A6CF7] flex-shrink-0" />
@@ -540,17 +467,25 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
                       <span className="text-[10px] font-black text-[#4A5580] uppercase tracking-wider">
                         {probs.length} problem{probs.length !== 1 ? 's' : ''}
                       </span>
-                      {isExpanded
-                        ? <ChevronUp className="w-3.5 h-3.5 text-[#4A5580]" />
-                        : <ChevronDown className="w-3.5 h-3.5 text-[#4A5580]" />
-                      }
                     </div>
-                  </button>
-                  {/* Divider only shown when expanded */}
-                  {isExpanded && <div className="border-t border-white/[0.06]" />}
+                  </div>
+                  <div className="border-t border-white/[0.06]" />
 
-                  {/* Problems table for this pattern — hidden when collapsed */}
-                  {isExpanded && <table className="w-full border-collapse"><tbody>
+                  {/* Problems table for this pattern */}
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="border-b border-white/[0.08] bg-white/[0.01]">
+                        <th className="py-2.5 px-3 text-center text-[9px] font-bold text-[#4A5580] uppercase tracking-wider w-12 border-r border-white/[0.05]">Status</th>
+                        <th className="py-2.5 px-4 text-left text-[9px] font-bold text-[#4A5580] uppercase tracking-wider border-r border-white/[0.05] w-[180px] max-w-[180px]">Problem</th>
+                        <th className="py-2.5 px-3 text-center text-[9px] font-bold text-[#4A5580] uppercase tracking-wider w-16 border-r border-white/[0.05]">Solve</th>
+                        <th className="py-2.5 px-3 text-center text-[9px] font-bold text-[#4A5580] uppercase tracking-wider w-16 border-r border-white/[0.05]">Resource</th>
+                        <th className="py-2.5 px-3 text-center text-[9px] font-bold text-[#4A5580] uppercase tracking-wider w-24 border-r border-white/[0.05]">Practice</th>
+                        <th className="py-2.5 px-3 text-center text-[9px] font-bold text-[#4A5580] uppercase tracking-wider w-14 border-r border-white/[0.05]">Note</th>
+                        <th className="py-2.5 px-4 text-left text-[9px] font-bold text-[#4A5580] uppercase tracking-wider w-36 border-r border-white/[0.05]">Companies</th>
+                        <th className="py-2.5 px-4 text-center text-[9px] font-bold text-[#4A5580] uppercase tracking-wider w-24">Difficulty</th>
+                      </tr>
+                    </thead>
+                    <tbody>
                       {probs.map((prob, idx) => (
                         <tr
                           key={prob.id}
@@ -574,7 +509,7 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
                           </td>
 
                           {/* Problem Title */}
-                          <td className="py-3 px-4 align-middle border-r border-white/[0.05] max-w-[240px]">
+                          <td className="py-3 px-4 align-middle border-r border-white/[0.05] w-[180px] max-w-[180px]">
                             <span
                               onClick={() => onSolve(prob)}
                               className="text-[13px] font-semibold text-[#C8D1E8] group-hover:text-white cursor-pointer transition-colors duration-150 truncate block"
@@ -607,7 +542,7 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
 
                           {/* Practice */}
                           <td className="py-3 px-3 text-center align-middle w-24 border-r border-white/[0.05]">
-                            <div className="flex items-center justify-center gap-4 scale-75 origin-center">
+                            <div className="flex items-center justify-center gap-6 scale-75 origin-center">
                               {prob.leetcodeUrl ? (
                                 <a href={prob.leetcodeUrl} target="_blank" rel="noopener noreferrer" title="Solve on LeetCode" className="block hover:scale-110 active:scale-95 transition-transform duration-200">
                                   <LeetCodeLogo />
@@ -642,7 +577,7 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
 
                           {/* Companies */}
                           <td className="py-3 px-4 align-middle w-36 border-r border-white/[0.05]">
-                            <div className="flex items-center gap-3 flex-wrap">
+                            <div className="flex items-center gap-4 flex-wrap">
                               {prob.companies && prob.companies.length > 0 ? (
                                 prob.companies.slice(0, 4).map((c, i) => (
                                   <div key={i} className="relative group/logo">
@@ -666,7 +601,7 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
                           </td>
                         </tr>
                       ))}
-                    </tbody></table>}
+                    </tbody></table>
                 </div>
               );
             })}
@@ -700,7 +635,7 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
               {/* Status */}
               <th className="py-3.5 px-3 text-center text-[10px] font-bold text-[#4A5580] uppercase tracking-wider w-12 border-r border-white/[0.05]">Status</th>
               {/* Problem */}
-              <th className="py-3.5 px-4 text-left text-[10px] font-bold text-[#4A5580] uppercase tracking-wider border-r border-white/[0.05] max-w-[240px]">Problem</th>
+              <th className="py-3.5 px-4 text-left text-[10px] font-bold text-[#4A5580] uppercase tracking-wider border-r border-white/[0.05] w-[180px] max-w-[180px]">Problem</th>
               {/* Solve */}
               <th className="py-3.5 px-3 text-center text-[10px] font-bold text-[#4A5580] uppercase tracking-wider w-16 border-r border-white/[0.05]">Solve</th>
               {/* Resource */}
@@ -750,7 +685,7 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
                   </td>
 
                   {/* ── Problem Title ── */}
-                  <td className="py-3 px-4 align-middle border-r border-white/[0.05] max-w-[240px]">
+                  <td className="py-3 px-4 align-middle border-r border-white/[0.05] w-[180px] max-w-[180px]">
                     <span
                       onClick={() => onSolve(prob)}
                       className="text-[13px] font-semibold text-[#C8D1E8] group-hover:text-white cursor-pointer transition-colors duration-150 truncate block"
@@ -783,7 +718,7 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
 
                   {/* ── Practice (LeetCode + GFG) ── */}
                   <td className="py-3 px-3 text-center align-middle border-r border-white/[0.05]">
-                    <div className="flex items-center justify-center gap-4 scale-75 origin-center">
+                    <div className="flex items-center justify-center gap-6 scale-75 origin-center">
                       {/* LeetCode */}
                       {prob.leetcodeUrl ? (
                         <a
@@ -836,7 +771,7 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
 
                   {/* ── Companies ── */}
                   <td className="py-3 px-4 align-middle border-r border-white/[0.05]">
-                    <div className="flex items-center gap-3 flex-wrap">
+                    <div className="flex items-center gap-4 flex-wrap">
                       {prob.companies && prob.companies.length > 0 ? (
                         prob.companies.slice(0, 4).map((c, i) => (
                           <div key={i} className="relative group/logo">
