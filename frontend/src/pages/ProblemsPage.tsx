@@ -259,7 +259,7 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
   }
 
   return (
-    <div className="space-y-5 select-none" onClick={() => { setDiffOpen(false); setStatusOpen(false); setShowMoreTopics(false); }}>
+    <div className="max-w-[1200px] mx-auto space-y-5 select-none" onClick={() => { setDiffOpen(false); setStatusOpen(false); setShowMoreTopics(false); }}>
 
       {/* ── HEADER ── */}
       <div className="flex items-start justify-between gap-6 flex-wrap">
@@ -475,14 +475,14 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
                   <table className="w-full border-collapse">
                     <thead>
                       <tr className="border-b border-white/[0.08] bg-white/[0.01]">
-                        <th className="py-2.5 px-3 text-center text-[9px] font-bold text-[#4A5580] uppercase tracking-wider w-12 border-r border-white/[0.05]">Status</th>
-                        <th className="py-2.5 px-4 text-left text-[9px] font-bold text-[#4A5580] uppercase tracking-wider border-r border-white/[0.05] w-[180px] max-w-[180px]">Problem</th>
-                        <th className="py-2.5 px-3 text-center text-[9px] font-bold text-[#4A5580] uppercase tracking-wider w-16 border-r border-white/[0.05]">Solve</th>
-                        <th className="py-2.5 px-3 text-center text-[9px] font-bold text-[#4A5580] uppercase tracking-wider w-16 border-r border-white/[0.05]">Resource</th>
-                        <th className="py-2.5 px-3 text-center text-[9px] font-bold text-[#4A5580] uppercase tracking-wider w-24 border-r border-white/[0.05]">Practice</th>
-                        <th className="py-2.5 px-3 text-center text-[9px] font-bold text-[#4A5580] uppercase tracking-wider w-14 border-r border-white/[0.05]">Note</th>
-                        <th className="py-2.5 px-4 text-left text-[9px] font-bold text-[#4A5580] uppercase tracking-wider w-36 border-r border-white/[0.05]">Companies</th>
-                        <th className="py-2.5 px-4 text-center text-[9px] font-bold text-[#4A5580] uppercase tracking-wider w-24">Difficulty</th>
+                        <th className="py-2.5 px-3 text-center text-[10px] font-extrabold text-[#7B8AB8] uppercase tracking-wider w-12 border-r border-white/[0.05]">Status</th>
+                        <th className="py-2.5 px-4 text-left text-[10px] font-extrabold text-[#7B8AB8] uppercase tracking-wider border-r border-white/[0.05] w-[180px] max-w-[180px]">Problem</th>
+                        <th className="py-2.5 px-3 text-center text-[10px] font-extrabold text-[#7B8AB8] uppercase tracking-wider w-16 border-r border-white/[0.05]">Solve</th>
+                        <th className="py-2.5 px-3 text-center text-[10px] font-extrabold text-[#7B8AB8] uppercase tracking-wider w-16 border-r border-white/[0.05]">Resource</th>
+                        <th className="py-2.5 px-3 text-center text-[10px] font-extrabold text-[#7B8AB8] uppercase tracking-wider w-24 border-r border-white/[0.05]">Practice</th>
+                        <th className="py-2.5 px-3 text-center text-[10px] font-extrabold text-[#7B8AB8] uppercase tracking-wider w-14 border-r border-white/[0.05]">Note</th>
+                        <th className="py-2.5 px-4 text-center text-[10px] font-extrabold text-[#7B8AB8] uppercase tracking-wider w-36 border-r border-white/[0.05]">Companies</th>
+                        <th className="py-2.5 px-4 text-center text-[10px] font-extrabold text-[#7B8AB8] uppercase tracking-wider w-24">Difficulty</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -577,7 +577,7 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
 
                           {/* Companies */}
                           <td className="py-3 px-4 align-middle w-36 border-r border-white/[0.05]">
-                            <div className="flex items-center gap-4 flex-wrap">
+                            <div className="flex items-center justify-center gap-4 flex-wrap">
                               {prob.companies && prob.companies.length > 0 ? (
                                 prob.companies.slice(0, 4).map((c, i) => (
                                   <div key={i} className="relative group/logo">
@@ -633,21 +633,21 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
           <thead>
             <tr className="border-b border-white/[0.08]">
               {/* Status */}
-              <th className="py-3.5 px-3 text-center text-[10px] font-bold text-[#4A5580] uppercase tracking-wider w-12 border-r border-white/[0.05]">Status</th>
+              <th className="py-3.5 px-3 text-center text-[11px] font-extrabold text-[#7B8AB8] uppercase tracking-wider w-12 border-r border-white/[0.05]">Status</th>
               {/* Problem */}
-              <th className="py-3.5 px-4 text-left text-[10px] font-bold text-[#4A5580] uppercase tracking-wider border-r border-white/[0.05] w-[180px] max-w-[180px]">Problem</th>
+              <th className="py-3.5 px-4 text-left text-[11px] font-extrabold text-[#7B8AB8] uppercase tracking-wider border-r border-white/[0.05] w-[180px] max-w-[180px]">Problem</th>
               {/* Solve */}
-              <th className="py-3.5 px-3 text-center text-[10px] font-bold text-[#4A5580] uppercase tracking-wider w-16 border-r border-white/[0.05]">Solve</th>
+              <th className="py-3.5 px-3 text-center text-[11px] font-extrabold text-[#7B8AB8] uppercase tracking-wider w-16 border-r border-white/[0.05]">Solve</th>
               {/* Resource */}
-              <th className="py-3.5 px-3 text-center text-[10px] font-bold text-[#4A5580] uppercase tracking-wider w-20 border-r border-white/[0.05]">Resource</th>
+              <th className="py-3.5 px-3 text-center text-[11px] font-extrabold text-[#7B8AB8] uppercase tracking-wider w-20 border-r border-white/[0.05]">Resource</th>
               {/* Practice */}
-              <th className="py-3.5 px-3 text-center text-[10px] font-bold text-[#4A5580] uppercase tracking-wider w-24 border-r border-white/[0.05]">Practice</th>
+              <th className="py-3.5 px-3 text-center text-[11px] font-extrabold text-[#7B8AB8] uppercase tracking-wider w-24 border-r border-white/[0.05]">Practice</th>
               {/* Note */}
-              <th className="py-3.5 px-3 text-center text-[10px] font-bold text-[#4A5580] uppercase tracking-wider w-16 border-r border-white/[0.05]">Note</th>
+              <th className="py-3.5 px-3 text-center text-[11px] font-extrabold text-[#7B8AB8] uppercase tracking-wider w-16 border-r border-white/[0.05]">Note</th>
               {/* Companies */}
-              <th className="py-3.5 px-4 text-left text-[10px] font-bold text-[#4A5580] uppercase tracking-wider w-36 border-r border-white/[0.05]">Companies</th>
+              <th className="py-3.5 px-4 text-center text-[11px] font-extrabold text-[#7B8AB8] uppercase tracking-wider w-36 border-r border-white/[0.05]">Companies</th>
               {/* Difficulty */}
-              <th className="py-3.5 px-4 text-center text-[10px] font-bold text-[#4A5580] uppercase tracking-wider w-24">Difficulty</th>
+              <th className="py-3.5 px-4 text-center text-[11px] font-extrabold text-[#7B8AB8] uppercase tracking-wider w-24">Difficulty</th>
             </tr>
           </thead>
           <tbody>
@@ -771,7 +771,7 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
 
                   {/* ── Companies ── */}
                   <td className="py-3 px-4 align-middle border-r border-white/[0.05]">
-                    <div className="flex items-center gap-4 flex-wrap">
+                    <div className="flex items-center justify-center gap-4 flex-wrap">
                       {prob.companies && prob.companies.length > 0 ? (
                         prob.companies.slice(0, 4).map((c, i) => (
                           <div key={i} className="relative group/logo">
