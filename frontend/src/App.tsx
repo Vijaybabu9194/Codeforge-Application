@@ -43,12 +43,12 @@ const DashboardContent: React.FC = () => {
       <DashboardSidebar activeTab={activeTab} onTabChange={(tab) => { setActiveTab(tab); setSelectedProblem(null); }} />
 
       {/* Right Content Area */}
-      <div className="flex-1 ml-[240px] flex flex-col min-h-screen">
+      <div className="flex-1 min-w-0 ml-[240px] flex flex-col min-h-screen overflow-x-hidden">
         {/* Top Navbar — Sticky */}
         <DashboardTopbar />
 
         {/* Scrollable Main Content */}
-        <main className="flex-1 p-6 lg:p-8 overflow-y-auto dash-scroll">
+        <main className="flex-1 p-6 lg:p-8 overflow-y-auto overflow-x-hidden dash-scroll">
           {renderActiveView()}
         </main>
       </div>

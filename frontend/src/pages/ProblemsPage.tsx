@@ -2,9 +2,9 @@ import React, { useState, useEffect, useMemo } from 'react';
 import api from '../lib/api';
 import { useAuth } from '../context/AuthContext';
 import {
-  Search, ChevronDown, Check,
+  Search, Check,
   ChevronLeft, ChevronRight, Plus, X,
-  Clock, TrendingUp, Code2, CheckCircle2, FileText
+  Clock, TrendingUp, Code2, CheckCircle2, FileText, ChevronDown, ChevronUp
 } from 'lucide-react';
 import { CompanyLogo, LeetCodeLogo, GfgLogo } from '../components/CompanyLogos';
 
@@ -62,10 +62,15 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
   const [difficulty, setDifficulty] = useState('All Difficulties');
   const [statusFilter, setStatusFilter] = useState('All Status');
   const [currentPage, setCurrentPage] = useState(1);
-  const [showMoreTopics, setShowMoreTopics] = useState(false);
 
   const [diffOpen, setDiffOpen] = useState(false);
   const [statusOpen, setStatusOpen] = useState(false);
+  const [showMoreTopics, setShowMoreTopics] = useState(false);
+
+  // Store full topic detail (with subtopics) for pattern-wise view
+  const [topicDetailsMap, setTopicDetailsMap] = useState<Record<number, TopicDetails>>({});
+  // Track which subtopic sections are expanded (default: all collapsed)
+  const [expandedSubtopics, setExpandedSubtopics] = useState<Set<number>>(new Set());
 
   // Notes state
   const [problemNotes, setProblemNotes] = useState<Record<number, string>>({});
@@ -129,8 +134,10 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
 
         const flat: Problem[] = [];
         const seen = new Set<number>();
+        const detailsMap: Record<number, TopicDetails> = {};
         detailResults.forEach(result => {
           if (!result) return;
+          detailsMap[result.topicId] = result.data;
           result.data.subtopics.forEach(sub => {
             sub.problems.forEach(p => {
               if (!seen.has(p.id)) {
@@ -141,6 +148,7 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
           });
         });
         setAllProblems(flat);
+        setTopicDetailsMap(detailsMap);
       } catch (err) {
         console.error('Failed to load problems:', err);
       } finally {
@@ -182,10 +190,8 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
   );
 
   useEffect(() => setCurrentPage(1), [search, difficulty, statusFilter, selectedTopicId]);
-
-  // Visible topic tabs
-  const visibleTopics = topics.slice(0, 5);
-  const extraTopics = topics.slice(5);
+  // Reset expanded state when topic changes (all start collapsed)
+  useEffect(() => { setExpandedSubtopics(new Set()); }, [selectedTopicId]);
 
   const getDiffBadge = (diff: string) => {
     const d = diff.toUpperCase();
@@ -309,67 +315,100 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
       </div>
 
       {/* ── TOPIC TABS ── */}
-      <div className="flex items-center gap-1.5 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-        <button
-          onClick={e => { e.stopPropagation(); setSelectedTopicId(null); }}
-          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all duration-200 ${
-            selectedTopicId === null
-              ? 'bg-[#4A6CF7] text-white shadow-lg shadow-[#4A6CF7]/20'
-              : 'bg-white/[0.03] border border-white/[0.06] text-[#7B8AB8] hover:text-white hover:bg-white/[0.06]'
-          }`}
-        >
-          <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor">
-            <rect x="1" y="1" width="6" height="6" rx="1" />
-            <rect x="9" y="1" width="6" height="6" rx="1" />
-            <rect x="1" y="9" width="6" height="6" rx="1" />
-            <rect x="9" y="9" width="6" height="6" rx="1" />
-          </svg>
-          All Topics
-        </button>
-
-        {visibleTopics.map(t => (
-          <button
-            key={t.id}
-            onClick={e => { e.stopPropagation(); setSelectedTopicId(t.id); }}
-            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all duration-200 ${
-              selectedTopicId === t.id
-                ? 'bg-[#4A6CF7] text-white shadow-lg shadow-[#4A6CF7]/20'
-                : 'bg-white/[0.03] border border-white/[0.06] text-[#7B8AB8] hover:text-white hover:bg-white/[0.06]'
-            }`}
-          >
-            <span className="text-[11px]">{t.icon || '📋'}</span>
-            {t.name}
-            <span className={`text-[10px] font-black ml-0.5 ${selectedTopicId === t.id ? 'text-white/70' : 'text-[#4A5580]'}`}>
-              {t.problemCount}
-            </span>
-          </button>
-        ))}
-
-        {extraTopics.length > 0 && (
-          <div className="relative flex-shrink-0" onClick={e => e.stopPropagation()}>
+      {(() => {
+        // Pinned topic names shown in the tab bar
+        const PINNED_NAMES = ['arrays', 'strings', 'binary search', 'stack', 'recursion'];
+        const pinnedTopics: Topic[] = [];
+        PINNED_NAMES.forEach(name => {
+          const match = topics.find(t => t.name.toLowerCase().includes(name));
+          if (match) pinnedTopics.push(match);
+        });
+        const extraTopics = topics.filter(t =>
+          !pinnedTopics.some(pt => pt.id === t.id)
+        );
+        return (
+          <div className="flex flex-wrap items-center gap-2" onClick={e => e.stopPropagation()}>
+            {/* All Topics */}
             <button
-              onClick={() => setShowMoreTopics(v => !v)}
-              className="flex items-center gap-1 px-3.5 py-2 rounded-lg text-xs font-bold bg-white/[0.03] border border-white/[0.06] text-[#7B8AB8] hover:text-white transition-all whitespace-nowrap"
+              onClick={() => { setSelectedTopicId(null); setShowMoreTopics(false); }}
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all duration-200 flex-shrink-0 ${
+                selectedTopicId === null
+                  ? 'bg-[#4A6CF7] text-white shadow-lg shadow-[#4A6CF7]/20'
+                  : 'bg-white/[0.03] border border-white/[0.06] text-[#7B8AB8] hover:text-white hover:bg-white/[0.06]'
+              }`}
             >
-              More <ChevronDown className="w-3 h-3" />
+              <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor">
+                <rect x="1" y="1" width="6" height="6" rx="1" />
+                <rect x="9" y="1" width="6" height="6" rx="1" />
+                <rect x="1" y="9" width="6" height="6" rx="1" />
+                <rect x="9" y="9" width="6" height="6" rx="1" />
+              </svg>
+              All Topics
             </button>
-            {showMoreTopics && (
-              <div className="absolute top-full left-0 mt-1 bg-[#0F1526] border border-white/[0.08] rounded-xl shadow-2xl shadow-black/50 z-30 min-w-[180px] p-1.5">
-                {extraTopics.map(t => (
-                  <button
-                    key={t.id}
-                    onClick={() => { setSelectedTopicId(t.id); setShowMoreTopics(false); }}
-                    className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold text-[#7B8AB8] hover:text-white hover:bg-white/[0.06] transition-all"
+
+            {/* Pinned topic tabs */}
+            {pinnedTopics.map(t => (
+              <button
+                key={t.id}
+                onClick={() => { setSelectedTopicId(t.id); setShowMoreTopics(false); }}
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all duration-200 flex-shrink-0 ${
+                  selectedTopicId === t.id
+                    ? 'bg-[#4A6CF7] text-white shadow-lg shadow-[#4A6CF7]/20'
+                    : 'bg-white/[0.03] border border-white/[0.06] text-[#7B8AB8] hover:text-white hover:bg-white/[0.06]'
+                }`}
+              >
+                <span className="text-[11px]">{t.icon || '📋'}</span>
+                {t.name}
+                <span className={`text-[10px] font-black ml-0.5 ${selectedTopicId === t.id ? 'text-white/70' : 'text-[#4A5580]'}`}>
+                  {t.problemCount}
+                </span>
+              </button>
+            ))}
+
+            {/* More button with wrapped grid dropdown */}
+            {extraTopics.length > 0 && (
+              <div className="relative flex-shrink-0">
+                <button
+                  onClick={e => { e.stopPropagation(); setShowMoreTopics(v => !v); }}
+                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all duration-200 ${
+                    showMoreTopics || extraTopics.some(t => t.id === selectedTopicId)
+                      ? 'bg-[#4A6CF7] text-white shadow-lg shadow-[#4A6CF7]/20'
+                      : 'bg-white/[0.03] border border-white/[0.06] text-[#7B8AB8] hover:text-white hover:bg-white/[0.06]'
+                  }`}
+                >
+                  More <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${showMoreTopics ? 'rotate-180' : ''}`} />
+                </button>
+
+                {showMoreTopics && (
+                  <div
+                    className="absolute top-full left-0 mt-2 bg-[#0D1224] border border-white/[0.08] rounded-2xl shadow-2xl shadow-black/60 z-40 p-3 w-[420px] max-w-[calc(100vw-280px)] md:max-w-[420px]"
+                    onClick={e => e.stopPropagation()}
                   >
-                    <span className="flex items-center gap-2"><span>{t.icon || '📋'}</span>{t.name}</span>
-                    <span className="text-[10px] text-[#4A5580]">{t.problemCount}</span>
-                  </button>
-                ))}
+                    <p className="text-[9px] font-bold text-[#4A5580] uppercase tracking-wider mb-2.5 px-1">All Topics</p>
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {extraTopics.map(t => (
+                        <button
+                          key={t.id}
+                          onClick={() => { setSelectedTopicId(t.id); setShowMoreTopics(false); }}
+                          className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all text-left ${
+                            selectedTopicId === t.id
+                              ? 'bg-[#4A6CF7] text-white'
+                              : 'text-[#7B8AB8] hover:text-white hover:bg-white/[0.06] border border-white/[0.06]'
+                          }`}
+                        >
+                          <span className="text-[11px] flex-shrink-0">{t.icon || '📋'}</span>
+                          <span className="truncate">{t.name}</span>
+                          <span className="ml-auto text-[9px] font-black text-[#4A5580] flex-shrink-0">{t.problemCount}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
-        )}
-      </div>
+        );
+      })()}
 
       {/* ── SEARCH + FILTERS ── */}
       <div className="flex items-center gap-3" onClick={e => e.stopPropagation()}>
@@ -447,25 +486,231 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
         </button>
       </div>
 
-      {/* ── TABLE ── */}
+      {/* ── PATTERN-WISE VIEW (topic selected) ── */}
+      {selectedTopicId !== null && topicDetailsMap[selectedTopicId] ? (
+        <div className="space-y-5">
+          {topicDetailsMap[selectedTopicId].subtopics
+            .filter(sub => {
+              const probs = sub.problems.filter(p => {
+                if (search.trim() && !p.title.toLowerCase().includes(search.toLowerCase())) return false;
+                if (difficulty !== 'All Difficulties' && p.difficulty.toUpperCase() !== difficulty.toUpperCase()) return false;
+                if (statusFilter === 'Solved' && !p.solved) return false;
+                if (statusFilter === 'Unsolved' && p.solved) return false;
+                return true;
+              });
+              return probs.length > 0;
+            })
+            .map(sub => {
+              // Use live solved state from allProblems
+              const probs = sub.problems
+                .map(p => allProblems.find(ap => ap.id === p.id) || p)
+                .filter(p => {
+                  if (search.trim() && !p.title.toLowerCase().includes(search.toLowerCase())) return false;
+                  if (difficulty !== 'All Difficulties' && p.difficulty.toUpperCase() !== difficulty.toUpperCase()) return false;
+                  if (statusFilter === 'Solved' && !p.solved) return false;
+                  if (statusFilter === 'Unsolved' && p.solved) return false;
+                  return true;
+                });
+
+              const isExpanded = expandedSubtopics.has(sub.id);
+              const toggleCollapse = () => {
+                setExpandedSubtopics(prev => {
+                  const next = new Set(prev);
+                  if (next.has(sub.id)) next.delete(sub.id);
+                  else next.add(sub.id);
+                  return next;
+                });
+              };
+
+              return (
+                <div key={sub.id} className="bg-[#0F1526] border border-white/[0.05] rounded-xl overflow-hidden">
+                  {/* Pattern Header — clickable to collapse/expand */}
+                  <button
+                    onClick={toggleCollapse}
+                    className="w-full px-5 py-3.5 flex items-center justify-between bg-white/[0.015] hover:bg-white/[0.03] transition-colors duration-150 cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-1.5 h-5 rounded-full bg-[#4A6CF7] flex-shrink-0" />
+                      <h3 className="text-[13px] font-bold text-white text-left">{sub.name}</h3>
+                      {sub.description && (
+                        <span className="text-[10px] text-[#4A5580] font-medium hidden sm:block">{sub.description}</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                      <span className="text-[10px] font-black text-[#4A5580] uppercase tracking-wider">
+                        {probs.length} problem{probs.length !== 1 ? 's' : ''}
+                      </span>
+                      {isExpanded
+                        ? <ChevronUp className="w-3.5 h-3.5 text-[#4A5580]" />
+                        : <ChevronDown className="w-3.5 h-3.5 text-[#4A5580]" />
+                      }
+                    </div>
+                  </button>
+                  {/* Divider only shown when expanded */}
+                  {isExpanded && <div className="border-t border-white/[0.06]" />}
+
+                  {/* Problems table for this pattern — hidden when collapsed */}
+                  {isExpanded && <table className="w-full border-collapse"><tbody>
+                      {probs.map((prob, idx) => (
+                        <tr
+                          key={prob.id}
+                          className={`border-b border-white/[0.04] hover:bg-white/[0.025] transition-colors duration-150 group ${
+                            idx === probs.length - 1 ? 'border-b-0' : ''
+                          }`}
+                        >
+                          {/* Status */}
+                          <td className="py-3 px-3 text-center align-middle w-12 border-r border-white/[0.05]">
+                            <button
+                              onClick={() => toggleSolved(prob.id)}
+                              className={`w-5 h-5 mx-auto rounded-full flex items-center justify-center border transition-all duration-200 hover:scale-105 active:scale-95 ${
+                                prob.solved
+                                  ? 'bg-[#4ADE80]/10 border-[#4ADE80]/40 text-[#4ADE80]'
+                                  : 'border-white/[0.10] text-transparent hover:border-[#4ADE80]/40 hover:text-[#4ADE80]/50'
+                              }`}
+                              title={prob.solved ? 'Mark as unsolved' : 'Mark as solved'}
+                            >
+                              <Check className="w-2.5 h-2.5 stroke-[3.5]" />
+                            </button>
+                          </td>
+
+                          {/* Problem Title */}
+                          <td className="py-3 px-4 align-middle border-r border-white/[0.05] max-w-[240px]">
+                            <span
+                              onClick={() => onSolve(prob)}
+                              className="text-[13px] font-semibold text-[#C8D1E8] group-hover:text-white cursor-pointer transition-colors duration-150 truncate block"
+                              title={prob.title}
+                            >
+                              {prob.title}
+                            </span>
+                          </td>
+
+                          {/* Solve */}
+                          <td className="py-3 px-3 text-center align-middle w-16 border-r border-white/[0.05]">
+                            <button
+                              onClick={() => onSolve(prob)}
+                              className="px-2.5 py-1 bg-[#4A6CF7]/10 hover:bg-[#4A6CF7] border border-[#4A6CF7]/30 hover:border-[#4A6CF7] text-[#4A6CF7] hover:text-white rounded-lg text-[9.5px] font-black uppercase tracking-wider transition-all duration-200 hover:scale-105 active:scale-95"
+                            >
+                              Solve
+                            </button>
+                          </td>
+
+                          {/* Resource */}
+                          <td className="py-3 px-3 text-center align-middle w-16 border-r border-white/[0.05]">
+                            <button
+                              onClick={() => onSolve(prob)}
+                              className="w-7 h-7 mx-auto rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-[#4A5580] hover:text-[#A78BFA] hover:border-[#A78BFA]/30 hover:bg-[#A78BFA]/5 transition-all duration-200 hover:scale-105 active:scale-95"
+                              title="Open Scratchpad & Resources"
+                            >
+                              <FileText className="w-3.5 h-3.5" />
+                            </button>
+                          </td>
+
+                          {/* Practice */}
+                          <td className="py-3 px-3 text-center align-middle w-24 border-r border-white/[0.05]">
+                            <div className="flex items-center justify-center gap-4 scale-75 origin-center">
+                              {prob.leetcodeUrl ? (
+                                <a href={prob.leetcodeUrl} target="_blank" rel="noopener noreferrer" title="Solve on LeetCode" className="block hover:scale-110 active:scale-95 transition-transform duration-200">
+                                  <LeetCodeLogo />
+                                </a>
+                              ) : (
+                                <span title="Not available on LeetCode" className="opacity-25 cursor-not-allowed"><LeetCodeLogo disabled /></span>
+                              )}
+                              {prob.gfgUrl ? (
+                                <a href={prob.gfgUrl} target="_blank" rel="noopener noreferrer" title="Solve on GeeksForGeeks" className="block hover:scale-110 active:scale-95 transition-transform duration-200">
+                                  <GfgLogo />
+                                </a>
+                              ) : (
+                                <span title="Not available on GFG" className="opacity-25 cursor-not-allowed"><GfgLogo disabled /></span>
+                              )}
+                            </div>
+                          </td>
+
+                          {/* Note */}
+                          <td className="py-3 px-3 text-center align-middle w-14 border-r border-white/[0.05]">
+                            <button
+                              onClick={() => setActiveNoteProblem(prob)}
+                              className={`w-6 h-6 mx-auto rounded-full flex items-center justify-center border transition-all duration-200 hover:scale-105 active:scale-95 ${
+                                problemNotes[prob.id]
+                                  ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400 shadow-sm shadow-yellow-500/10'
+                                  : 'border-white/[0.08] text-[#4A5580] hover:border-[#4A6CF7]/40 hover:text-[#4A6CF7] hover:bg-[#4A6CF7]/5'
+                              }`}
+                              title={problemNotes[prob.id] ? 'View/Edit Note' : 'Add Note'}
+                            >
+                              <Plus className="w-3 h-3 stroke-[3]" />
+                            </button>
+                          </td>
+
+                          {/* Companies */}
+                          <td className="py-3 px-4 align-middle w-36 border-r border-white/[0.05]">
+                            <div className="flex items-center gap-3 flex-wrap">
+                              {prob.companies && prob.companies.length > 0 ? (
+                                prob.companies.slice(0, 4).map((c, i) => (
+                                  <div key={i} className="relative group/logo">
+                                    <CompanyLogo name={c} className="w-6 h-6" />
+                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 bg-black/90 text-[9px] font-bold text-white px-2 py-0.5 rounded whitespace-nowrap opacity-0 group-hover/logo:opacity-100 pointer-events-none transition-opacity duration-150 z-20 border border-white/10">
+                                      {c}
+                                    </div>
+                                  </div>
+                                ))
+                              ) : (
+                                <span className="text-[10px] text-[#4A5580] italic font-medium">General</span>
+                              )}
+                            </div>
+                          </td>
+
+                          {/* Difficulty */}
+                          <td className="py-3 px-4 text-center align-middle w-24">
+                            <span className={`inline-flex px-2.5 py-0.5 rounded-md text-[10px] font-bold tracking-wide ${getDiffBadge(prob.difficulty)}`}>
+                              {getDiffLabel(prob.difficulty)}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody></table>}
+                </div>
+              );
+            })}
+          {/* Empty state for pattern view */}
+          {topicDetailsMap[selectedTopicId].subtopics.every(sub =>
+            sub.problems.filter(p => {
+              if (search.trim() && !p.title.toLowerCase().includes(search.toLowerCase())) return false;
+              if (difficulty !== 'All Difficulties' && p.difficulty.toUpperCase() !== difficulty.toUpperCase()) return false;
+              if (statusFilter === 'Solved' && !p.solved) return false;
+              if (statusFilter === 'Unsolved' && p.solved) return false;
+              return true;
+            }).length === 0
+          ) && (
+            <div className="bg-[#0F1526] border border-white/[0.05] rounded-xl py-20 text-center">
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-white/[0.03] flex items-center justify-center">
+                  <Search className="w-5 h-5 text-[#4A5580]" />
+                </div>
+                <p className="text-[#7B8AB8] font-bold text-sm">No problems found</p>
+                <p className="text-[#4A5580] text-xs">Try adjusting your filters</p>
+              </div>
+            </div>
+          )}
+        </div>
+      ) : selectedTopicId === null ? (
+        <>
       <div className="bg-[#0F1526] border border-white/[0.05] rounded-xl overflow-hidden">
         <table className="w-full border-collapse">
           <thead>
-            <tr className="border-b border-white/[0.06]">
+            <tr className="border-b border-white/[0.08]">
               {/* Status */}
-              <th className="py-3.5 px-3 text-center text-[10px] font-bold text-[#4A5580] uppercase tracking-wider w-12">Status</th>
+              <th className="py-3.5 px-3 text-center text-[10px] font-bold text-[#4A5580] uppercase tracking-wider w-12 border-r border-white/[0.05]">Status</th>
               {/* Problem */}
-              <th className="py-3.5 px-4 text-left text-[10px] font-bold text-[#4A5580] uppercase tracking-wider">Problem</th>
+              <th className="py-3.5 px-4 text-left text-[10px] font-bold text-[#4A5580] uppercase tracking-wider border-r border-white/[0.05] max-w-[240px]">Problem</th>
               {/* Solve */}
-              <th className="py-3.5 px-3 text-center text-[10px] font-bold text-[#4A5580] uppercase tracking-wider w-16">Solve</th>
+              <th className="py-3.5 px-3 text-center text-[10px] font-bold text-[#4A5580] uppercase tracking-wider w-16 border-r border-white/[0.05]">Solve</th>
               {/* Resource */}
-              <th className="py-3.5 px-3 text-center text-[10px] font-bold text-[#4A5580] uppercase tracking-wider w-20">Resource</th>
+              <th className="py-3.5 px-3 text-center text-[10px] font-bold text-[#4A5580] uppercase tracking-wider w-20 border-r border-white/[0.05]">Resource</th>
               {/* Practice */}
-              <th className="py-3.5 px-3 text-center text-[10px] font-bold text-[#4A5580] uppercase tracking-wider w-24">Practice</th>
+              <th className="py-3.5 px-3 text-center text-[10px] font-bold text-[#4A5580] uppercase tracking-wider w-24 border-r border-white/[0.05]">Practice</th>
               {/* Note */}
-              <th className="py-3.5 px-3 text-center text-[10px] font-bold text-[#4A5580] uppercase tracking-wider w-16">Note</th>
+              <th className="py-3.5 px-3 text-center text-[10px] font-bold text-[#4A5580] uppercase tracking-wider w-16 border-r border-white/[0.05]">Note</th>
               {/* Companies */}
-              <th className="py-3.5 px-4 text-left text-[10px] font-bold text-[#4A5580] uppercase tracking-wider w-36">Companies</th>
+              <th className="py-3.5 px-4 text-left text-[10px] font-bold text-[#4A5580] uppercase tracking-wider w-36 border-r border-white/[0.05]">Companies</th>
               {/* Difficulty */}
               <th className="py-3.5 px-4 text-center text-[10px] font-bold text-[#4A5580] uppercase tracking-wider w-24">Difficulty</th>
             </tr>
@@ -487,10 +732,10 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
               pagedProblems.map((prob) => (
                 <tr
                   key={prob.id}
-                  className="border-b border-white/[0.03] hover:bg-white/[0.025] transition-colors duration-150 group"
+                  className="border-b border-white/[0.06] hover:bg-white/[0.025] transition-colors duration-150 group"
                 >
                   {/* ── Status ── */}
-                  <td className="py-3 px-3 text-center align-middle">
+                  <td className="py-3 px-3 text-center align-middle border-r border-white/[0.05]">
                     <button
                       onClick={() => toggleSolved(prob.id)}
                       className={`w-5 h-5 mx-auto rounded-full flex items-center justify-center border transition-all duration-200 hover:scale-105 active:scale-95 ${
@@ -505,17 +750,18 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
                   </td>
 
                   {/* ── Problem Title ── */}
-                  <td className="py-3 px-4 align-middle">
+                  <td className="py-3 px-4 align-middle border-r border-white/[0.05] max-w-[240px]">
                     <span
                       onClick={() => onSolve(prob)}
-                      className="text-[13px] font-semibold text-[#C8D1E8] group-hover:text-white cursor-pointer transition-colors duration-150"
+                      className="text-[13px] font-semibold text-[#C8D1E8] group-hover:text-white cursor-pointer transition-colors duration-150 truncate block"
+                      title={prob.title}
                     >
                       {prob.title}
                     </span>
                   </td>
 
                   {/* ── Solve Button ── */}
-                  <td className="py-3 px-3 text-center align-middle">
+                  <td className="py-3 px-3 text-center align-middle border-r border-white/[0.05]">
                     <button
                       onClick={() => onSolve(prob)}
                       className="px-2.5 py-1 bg-[#4A6CF7]/10 hover:bg-[#4A6CF7] border border-[#4A6CF7]/30 hover:border-[#4A6CF7] text-[#4A6CF7] hover:text-white rounded-lg text-[9.5px] font-black uppercase tracking-wider transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-md hover:shadow-[#4A6CF7]/20"
@@ -525,7 +771,7 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
                   </td>
 
                   {/* ── Resource (notebook icon) ── */}
-                  <td className="py-3 px-3 text-center align-middle">
+                  <td className="py-3 px-3 text-center align-middle border-r border-white/[0.05]">
                     <button
                       onClick={() => onSolve(prob)}
                       className="w-7 h-7 mx-auto rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-[#4A5580] hover:text-[#A78BFA] hover:border-[#A78BFA]/30 hover:bg-[#A78BFA]/5 transition-all duration-200 hover:scale-105 active:scale-95"
@@ -536,8 +782,8 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
                   </td>
 
                   {/* ── Practice (LeetCode + GFG) ── */}
-                  <td className="py-3 px-3 text-center align-middle">
-                    <div className="flex items-center justify-center gap-2">
+                  <td className="py-3 px-3 text-center align-middle border-r border-white/[0.05]">
+                    <div className="flex items-center justify-center gap-4 scale-75 origin-center">
                       {/* LeetCode */}
                       {prob.leetcodeUrl ? (
                         <a
@@ -574,7 +820,7 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
                   </td>
 
                   {/* ── Note ── */}
-                  <td className="py-3 px-3 text-center align-middle">
+                  <td className="py-3 px-3 text-center align-middle border-r border-white/[0.05]">
                     <button
                       onClick={() => setActiveNoteProblem(prob)}
                       className={`w-6 h-6 mx-auto rounded-full flex items-center justify-center border transition-all duration-200 hover:scale-105 active:scale-95 ${
@@ -589,8 +835,8 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
                   </td>
 
                   {/* ── Companies ── */}
-                  <td className="py-3 px-4 align-middle">
-                    <div className="flex items-center gap-1 flex-wrap">
+                  <td className="py-3 px-4 align-middle border-r border-white/[0.05]">
+                    <div className="flex items-center gap-3 flex-wrap">
                       {prob.companies && prob.companies.length > 0 ? (
                         prob.companies.slice(0, 4).map((c, i) => (
                           <div key={i} className="relative group/logo">
@@ -619,44 +865,56 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
         </table>
       </div>
 
-      {/* ── PAGINATION ── */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-1.5 py-2">
-          <button
-            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
-            className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/[0.03] border border-white/[0.06] text-[#7B8AB8] hover:text-white hover:bg-white/[0.06] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
+        {/* ── PAGINATION ── */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-1.5 py-2">
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/[0.03] border border-white/[0.06] text-[#7B8AB8] hover:text-white hover:bg-white/[0.06] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
 
-          {getPaginationNums().map((p, i) =>
-            p === '...' ? (
-              <span key={`e-${i}`} className="w-8 h-8 flex items-center justify-center text-[#4A5580] text-xs font-bold">
-                ...
-              </span>
-            ) : (
-              <button
-                key={p}
-                onClick={() => setCurrentPage(p as number)}
-                className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all duration-200 ${
-                  currentPage === p
-                    ? 'bg-[#4A6CF7] text-white shadow-lg shadow-[#4A6CF7]/25'
-                    : 'bg-white/[0.03] border border-white/[0.06] text-[#7B8AB8] hover:text-white hover:bg-white/[0.06]'
-                }`}
-              >
-                {p}
-              </button>
-            )
-          )}
+            {getPaginationNums().map((p, i) =>
+              p === '...' ? (
+                <span key={`e-${i}`} className="w-8 h-8 flex items-center justify-center text-[#4A5580] text-xs font-bold">
+                  ...
+                </span>
+              ) : (
+                <button
+                  key={p}
+                  onClick={() => setCurrentPage(p as number)}
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all duration-200 ${
+                    currentPage === p
+                      ? 'bg-[#4A6CF7] text-white shadow-lg shadow-[#4A6CF7]/25'
+                      : 'bg-white/[0.03] border border-white/[0.06] text-[#7B8AB8] hover:text-white hover:bg-white/[0.06]'
+                  }`}
+                >
+                  {p}
+                </button>
+              )
+            )}
 
-          <button
-            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-            disabled={currentPage === totalPages}
-            className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/[0.03] border border-white/[0.06] text-[#7B8AB8] hover:text-white hover:bg-white/[0.06] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
+            <button
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/[0.03] border border-white/[0.06] text-[#7B8AB8] hover:text-white hover:bg-white/[0.06] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+        </>
+      ) : (
+        // Selected topic not yet loaded
+        <div className="bg-[#0F1526] border border-white/[0.05] rounded-xl py-20 text-center">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[#4A6CF7]/10 border border-[#4A6CF7]/20 flex items-center justify-center animate-pulse">
+              <Code2 className="w-5 h-5 text-[#4A6CF7]" />
+            </div>
+            <p className="text-[#7B8AB8] font-bold text-sm">Loading patterns...</p>
+          </div>
         </div>
       )}
 

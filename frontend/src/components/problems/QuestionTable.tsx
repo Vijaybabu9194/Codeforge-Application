@@ -53,7 +53,7 @@ export const QuestionTable: React.FC<QuestionTableProps> = ({
           <thead>
             <tr className="border-b border-[#E5E7EB] bg-[#F8FAFC] text-[9.5px] font-bold text-secondaryText uppercase tracking-wider select-none">
               <th className="py-2 px-2 w-10 text-center">Status</th>
-              <th className="py-2 px-2 text-left">Problem</th>
+              <th className="py-2 px-2 text-left max-w-[240px]">Problem</th>
               <th className="py-2 px-2 w-16 text-center">Solve</th>
               <th className="py-2 px-2 w-16 text-center">Resource</th>
               <th className="py-2 px-2 w-20 text-center">Practice</th>
@@ -81,8 +81,8 @@ export const QuestionTable: React.FC<QuestionTableProps> = ({
                   </td>
 
                   {/* Problem Title */}
-                  <td className="py-1.5 px-2 align-middle text-left font-bold text-text group-hover:text-primary cursor-pointer transition">
-                    <span onClick={() => onSolve(prob)}>
+                  <td className="py-1.5 px-2 align-middle text-left font-bold text-text group-hover:text-primary cursor-pointer transition max-w-[240px]">
+                    <span onClick={() => onSolve(prob)} className="truncate block" title={prob.title}>
                       {prob.title}
                     </span>
                   </td>
@@ -110,7 +110,7 @@ export const QuestionTable: React.FC<QuestionTableProps> = ({
 
                   {/* Practice Platforms Column */}
                   <td className="py-1.5 px-2 text-center align-middle w-20">
-                    <div className="flex items-center justify-center gap-1.5">
+                    <div className="flex items-center justify-center gap-4">
                       {prob.leetcodeUrl ? (
                         <a href={prob.leetcodeUrl} target="_blank" rel="noopener noreferrer" className="block scale-[0.8] origin-center">
                           <LeetCodeLogo />
@@ -145,7 +145,7 @@ export const QuestionTable: React.FC<QuestionTableProps> = ({
 
                   {/* Companies Logos */}
                   <td className="py-1.5 px-2 w-32 align-middle">
-                    <div className="flex items-center gap-1 flex-wrap">
+                    <div className="flex items-center gap-3 flex-wrap">
                       {prob.companyInfo && prob.companyInfo.length > 0 ? (
                         prob.companyInfo.slice(0, 4).map((comp, cIdx) => (
                           <div key={cIdx} className="tooltip-trigger relative">
