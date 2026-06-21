@@ -155,10 +155,6 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
     try { await api.post(`/problems/${id}/solve`); updateUserStats(); } catch {}
   };
 
-  const toggleBookmark = async (id: number) => {
-    setAllProblems(prev => prev.map(p => p.id === id ? { ...p, bookmarked: !p.bookmarked } : p));
-    try { await api.post(`/problems/${id}/bookmark`); updateUserStats(); } catch {}
-  };
 
   // Stats
   const totalProblems = topics.reduce((acc, t) => acc + t.problemCount, 0);

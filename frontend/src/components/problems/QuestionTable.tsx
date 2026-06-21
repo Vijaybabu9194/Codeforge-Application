@@ -25,7 +25,6 @@ interface Problem {
 interface QuestionTableProps {
   problems: Problem[];
   onSolveToggle: (id: number) => void;
-  onBookmarkToggle: (id: number) => void;
   onSolve: (problem: Problem) => void;
   onEditNote: (problem: Problem) => void;
   problemNotes: Record<number, string>;
@@ -34,7 +33,6 @@ interface QuestionTableProps {
 export const QuestionTable: React.FC<QuestionTableProps> = ({
   problems,
   onSolveToggle,
-  onBookmarkToggle,
   onSolve,
   onEditNote,
   problemNotes,

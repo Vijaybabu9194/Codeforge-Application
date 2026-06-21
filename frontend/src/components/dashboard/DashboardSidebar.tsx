@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Home, Code2, Building2, Trophy, MessageSquare, Map,
-  Bookmark, BarChart3, BookOpen, Settings
+  Home, Code2, Building2, Trophy, MessageSquare, Map
 } from 'lucide-react';
 import api from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
@@ -17,11 +16,7 @@ const navItems = [
   { id: 'companies', label: 'Companies', icon: Building2 },
   { id: 'contests', label: 'Contests', icon: Trophy },
   { id: 'discuss', label: 'Discuss', icon: MessageSquare },
-  { id: 'bookmarks', label: 'Bookmarks', icon: Bookmark },
   { id: 'roadmap', label: 'Roadmap', icon: Map },
-  { id: 'analytics', label: 'Analytics', icon: BarChart3 },
-  { id: 'notebook', label: 'Notebook', icon: BookOpen },
-  { id: 'settings', label: 'Settings', icon: Settings },
 ];
 
 export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ activeTab, onTabChange }) => {
