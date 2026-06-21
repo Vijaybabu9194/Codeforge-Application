@@ -512,7 +512,7 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
                           <td className="py-3 px-4 align-middle border-r border-white/[0.05] w-[180px] max-w-[180px]">
                             <span
                               onClick={() => onSolve(prob)}
-                              className="text-[13px] font-semibold text-[#C8D1E8] group-hover:text-white cursor-pointer transition-colors duration-150 truncate block"
+                              className="text-[14px] font-semibold text-[#C8D1E8] group-hover:text-white cursor-pointer transition-colors duration-150 truncate block"
                               title={prob.title}
                             >
                               {prob.title}
@@ -523,7 +523,7 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
                           <td className="py-3 px-3 text-center align-middle w-16 border-r border-white/[0.05]">
                             <button
                               onClick={() => onSolve(prob)}
-                              className="px-2.5 py-1 bg-[#4A6CF7]/10 hover:bg-[#4A6CF7] border border-[#4A6CF7]/30 hover:border-[#4A6CF7] text-[#4A6CF7] hover:text-white rounded-lg text-[9.5px] font-black uppercase tracking-wider transition-all duration-200 hover:scale-105 active:scale-95"
+                              className="px-2.5 py-1 bg-[#4A6CF7]/10 hover:bg-[#4A6CF7] border border-[#4A6CF7]/30 hover:border-[#4A6CF7] text-[#4A6CF7] hover:text-white rounded-lg text-[10px] font-black uppercase tracking-wider transition-all duration-200 hover:scale-105 active:scale-95"
                             >
                               Solve
                             </button>
@@ -595,7 +595,7 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
 
                           {/* Difficulty */}
                           <td className="py-3 px-4 text-center align-middle w-24">
-                            <span className={`inline-flex px-2.5 py-0.5 rounded-md text-[10px] font-bold tracking-wide ${getDiffBadge(prob.difficulty)}`}>
+                            <span className={`inline-flex px-2.5 py-0.5 rounded-md text-[11px] font-bold tracking-wide ${getDiffBadge(prob.difficulty)}`}>
                               {getDiffLabel(prob.difficulty)}
                             </span>
                           </td>
@@ -688,7 +688,7 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
                   <td className="py-3 px-4 align-middle border-r border-white/[0.05] w-[180px] max-w-[180px]">
                     <span
                       onClick={() => onSolve(prob)}
-                      className="text-[13px] font-semibold text-[#C8D1E8] group-hover:text-white cursor-pointer transition-colors duration-150 truncate block"
+                      className="text-[14px] font-semibold text-[#C8D1E8] group-hover:text-white cursor-pointer transition-colors duration-150 truncate block"
                       title={prob.title}
                     >
                       {prob.title}
@@ -699,7 +699,7 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
                   <td className="py-3 px-3 text-center align-middle border-r border-white/[0.05]">
                     <button
                       onClick={() => onSolve(prob)}
-                      className="px-2.5 py-1 bg-[#4A6CF7]/10 hover:bg-[#4A6CF7] border border-[#4A6CF7]/30 hover:border-[#4A6CF7] text-[#4A6CF7] hover:text-white rounded-lg text-[9.5px] font-black uppercase tracking-wider transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-md hover:shadow-[#4A6CF7]/20"
+                      className="px-2.5 py-1 bg-[#4A6CF7]/10 hover:bg-[#4A6CF7] border border-[#4A6CF7]/30 hover:border-[#4A6CF7] text-[#4A6CF7] hover:text-white rounded-lg text-[10px] font-black uppercase tracking-wider transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-md hover:shadow-[#4A6CF7]/20"
                     >
                       Solve
                     </button>
@@ -789,7 +789,7 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
 
                   {/* ── Difficulty ── */}
                   <td className="py-3 px-4 text-center align-middle">
-                    <span className={`inline-flex px-2.5 py-0.5 rounded-md text-[10px] font-bold tracking-wide ${getDiffBadge(prob.difficulty)}`}>
+                    <span className={`inline-flex px-2.5 py-0.5 rounded-md text-[11px] font-bold tracking-wide ${getDiffBadge(prob.difficulty)}`}>
                       {getDiffLabel(prob.difficulty)}
                     </span>
                   </td>
