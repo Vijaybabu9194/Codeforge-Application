@@ -34,16 +34,27 @@ public class DashboardService {
         int attemptedCount = (int) submissionRepository.countByUserId(user.getId());
         int totalProblems = (int) problemRepository.count();
         
-        int contestRating = user.getContestRating();
-        if (!profiles.isEmpty()) {
-            contestRating = profiles.stream()
-                    .mapToInt(PlatformProfile::getContestRating)
-                    .max()
-                    .orElse(contestRating);
+        int contestRating = user.getContestRating(); // 0 if no contests participated
+
+        List<Submission> solvedSubmissions = submissionRepository.findByUserIdAndSolvedTrue(user.getId());
+        int easySolved = 0;
+        int mediumSolved = 0;
+        int hardSolved = 0;
+        for (Submission sub : solvedSubmissions) {
+            if (sub.getProblem() != null && sub.getProblem().getDifficulty() != null) {
+                Problem.Difficulty diff = sub.getProblem().getDifficulty();
+                if (diff == Problem.Difficulty.EASY) {
+                    easySolved++;
+                } else if (diff == Problem.Difficulty.MEDIUM) {
+                    mediumSolved++;
+                } else if (diff == Problem.Difficulty.HARD) {
+                    hardSolved++;
+                }
+            }
         }
 
         return DashboardDto.StatsResponse.builder()
-                .problemsSolved(solvedCount + platformSolved)
+                .problemsSolved(solvedCount)
                 .contestRating(contestRating)
                 .currentStreak(user.getCurrentStreak())
                 .companiesCovered(user.getCompaniesCovered())
@@ -51,6 +62,9 @@ public class DashboardService {
                 .bookmarks((int) bookmarkCount)
                 .totalProblems(totalProblems)
                 .attempted(attemptedCount)
+                .easySolved(easySolved)
+                .mediumSolved(mediumSolved)
+                .hardSolved(hardSolved)
                 .build();
     }
 
@@ -73,21 +87,12 @@ public class DashboardService {
         
         // 1. Contest rating trend
         List<DashboardDto.ChartPoint> contestTrend = new ArrayList<>();
-        int rating = user.getContestRating();
-        if (!profiles.isEmpty()) {
-            rating = profiles.stream()
-                    .mapToInt(PlatformProfile::getContestRating)
-                    .max()
-                    .orElse(rating);
-        }
-        
+        int solvedCount = (int) submissionRepository.countSolvedByUserId(user.getId());
+        int rating = user.getContestRating(); // actual rating, 0 if no contests
+
         String[] months = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-        int startRating = Math.max(rating - 150, 0);
-        int step = (rating - startRating) / 11;
         for (int i = 0; i < 12; i++) {
-            int val = (rating == 0) ? 0 : (startRating + i * step);
-            if (i == 11) val = rating;
-            contestTrend.add(DashboardDto.ChartPoint.builder().label(months[i]).value(val).build());
+            contestTrend.add(DashboardDto.ChartPoint.builder().label(months[i]).value(rating).build());
         }
 
         // 2. Questions solved trend
@@ -104,7 +109,7 @@ public class DashboardService {
             }
         }
         
-        int cumulative = platformSolved; // start with platform solved as base
+        int cumulative = 0; // start with 0 base
         for (Submission sub : solvedSubmissions) {
             if (sub.getSubmittedAt() != null && sub.getSubmittedAt().getYear() < currentYear) {
                 cumulative++;

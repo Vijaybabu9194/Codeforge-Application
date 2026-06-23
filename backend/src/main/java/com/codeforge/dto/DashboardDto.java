@@ -15,6 +15,9 @@ public class DashboardDto {
         private Integer bookmarks;
         private Integer totalProblems;
         private Integer attempted;
+        private Integer easySolved;
+        private Integer mediumSolved;
+        private Integer hardSolved;
     }
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder

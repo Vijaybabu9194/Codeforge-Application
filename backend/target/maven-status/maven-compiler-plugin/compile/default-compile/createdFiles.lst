@@ -19,6 +19,7 @@ com/codeforge/dto/ProblemDto$ProblemListResponse$ProblemListResponseBuilder.clas
 com/codeforge/controller/CompanyController.class
 com/codeforge/dto/NotificationDto$Response$ResponseBuilder.class
 com/codeforge/entity/PlatformProfile$PlatformProfileBuilder.class
+com/codeforge/InspectDB.class
 com/codeforge/entity/CompanyProblem$Frequency.class
 com/codeforge/entity/DailyActivity.class
 com/codeforge/controller/ProfileController.class
@@ -125,3 +126,4 @@ com/codeforge/dto/ProblemDto.class
 com/codeforge/dto/CompanyDto$CompanyListItem.class
 com/codeforge/dto/ProblemDto$SubtopicResponse.class
 com/codeforge/dto/CompanyDto$CompanyListItem$CompanyListItemBuilder.class
+com/codeforge/TestDB.class
