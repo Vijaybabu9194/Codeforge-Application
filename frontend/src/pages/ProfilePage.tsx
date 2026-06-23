@@ -437,7 +437,7 @@ export const ProfilePage: React.FC = () => {
     };
 
     return (
-      <div ref={heatmapScrollRef} className="flex select-none overflow-x-auto pt-6 pb-2 w-full dash-scroll">
+      <div ref={heatmapScrollRef} className="flex select-none overflow-x-auto pt-10 pb-2 w-full dash-scroll">
         <div className="flex gap-[14px] md:gap-[18px] min-w-max pb-1">
           {monthsList.map(({ year, month }, mIdx) => {
             const firstDay = new Date(year, month, 1);
@@ -465,7 +465,14 @@ export const ProfilePage: React.FC = () => {
               else if (count <= 8) level = 3;
               else level = 4;
 
-              currentWeek[dayOfWeek] = { date: dateStr, count, level };
+              const currentDateOnly = new Date(yyyy, currentDate.getMonth(), currentDate.getDate());
+              const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+              if (currentDateOnly > todayOnly) {
+                currentWeek[dayOfWeek] = null;
+              } else {
+                currentWeek[dayOfWeek] = { date: dateStr, count, level };
+              }
 
               if (dayOfWeek === 6 || d === totalDays) {
                 weeks.push(currentWeek);
@@ -568,6 +575,71 @@ export const ProfilePage: React.FC = () => {
         <span className="text-[9px] font-bold text-[#7B8AB8] mt-1.5 text-center leading-tight truncate w-16 group-hover:text-white transition duration-200">
           {name}
         </span>
+      </div>
+    );
+  };
+
+  const renderPlatformStats = (extraClasses: string = "") => {
+    return (
+      <div className={`bg-[#090D1A]/60 border border-white/[0.04] rounded-2xl p-5 flex flex-col space-y-4 ${extraClasses}`}>
+        <h2 className="text-[13px] font-bold text-white uppercase tracking-wider">
+          {selectedPlatformTab === 'CODEFORGE' ? 'Codeforge' : selectedPlatformTab.charAt(0) + selectedPlatformTab.slice(1).toLowerCase()} Stats
+        </h2>
+        
+        {!isTabPlatformConnected ? (
+          <div className="flex-1 flex items-center justify-center">
+            {renderConnectPrompt(selectedPlatformTab.charAt(0) + selectedPlatformTab.slice(1).toLowerCase())}
+          </div>
+        ) : (
+          <>
+            <div className="flex items-center justify-between flex-1">
+              <div className="h-32 w-32 relative mx-auto lg:mx-0">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={activeBreakdownData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={36}
+                      outerRadius={48}
+                      paddingAngle={3}
+                      dataKey="value"
+                    >
+                      {activeBreakdownData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                  <span className="text-[16px] font-extrabold text-white leading-none">{activeTotal}</span>
+                  <span className="text-[8px] text-[#7B8AB8] font-bold uppercase mt-1">Total</span>
+                </div>
+              </div>
+
+              <div className="flex-1 space-y-2.5 pl-4">
+                <div className="flex justify-between items-center text-[10px] font-bold text-[#7B8AB8]">
+                  <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-[#4ADE80]" /> Easy</span>
+                  <span className="text-white">{activeEasyPct}% ({activeEasy})</span>
+                </div>
+                <div className="flex justify-between items-center text-[10px] font-bold text-[#7B8AB8]">
+                  <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B]" /> Medium</span>
+                  <span className="text-white">{activeMediumPct}% ({activeMedium})</span>
+                </div>
+                <div className="flex justify-between items-center text-[10px] font-bold text-[#7B8AB8]">
+                  <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-[#EF4444]" /> Hard</span>
+                  <span className="text-white">{activeHardPct}% ({activeHard})</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between text-[9px] font-bold tracking-tight pt-3.5 border-t border-white/[0.03]">
+              <span className="text-emerald-400">Easy Solved: {activeEasy}</span>
+              <span className="text-amber-400">Med. Solved: {activeMedium}</span>
+              <span className="text-[#818CF8]">Rating: {selectedPlatformTab === 'CODEFORGE' ? contestRating : (getPlatformRating(selectedPlatformTab) || 'N/A')}</span>
+            </div>
+          </>
+        )}
       </div>
     );
   };
@@ -864,62 +936,68 @@ export const ProfilePage: React.FC = () => {
           </div>
         </div>
 
-        {/* RATING PROGRESS CHART */}
-        <div className="bg-[#090D1A]/60 border border-white/[0.04] rounded-2xl p-5 lg:col-span-2 flex flex-col space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-[13px] font-bold text-white uppercase tracking-wider">Rating Progress</h2>
-            
-            <button className="flex items-center gap-1 px-3 py-1 bg-white/[0.02] border border-white/[0.05] rounded-lg text-[10px] text-white font-bold">
-              <span>All Contests</span>
-              <ChevronDown className="w-3 h-3 text-[#7B8AB8]" />
-            </button>
-          </div>
+        {/* lg:col-span-2 section */}
+        {selectedPlatformTab === 'CODEFORGE' ? (
+          /* RATING PROGRESS CHART */
+          <div className="bg-[#090D1A]/60 border border-white/[0.04] rounded-2xl p-5 lg:col-span-2 flex flex-col space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-[13px] font-bold text-white uppercase tracking-wider">Rating Progress</h2>
+              
+              <button className="flex items-center gap-1 px-3 py-1 bg-white/[0.02] border border-white/[0.05] rounded-lg text-[10px] text-white font-bold">
+                <span>All Contests</span>
+                <ChevronDown className="w-3 h-3 text-[#7B8AB8]" />
+              </button>
+            </div>
 
-          <div className="flex items-baseline justify-between mb-1">
-            <div>
-              <span className="text-[8px] font-bold text-[#4A5580] uppercase tracking-wider">Highest Rating</span>
-              <div className="text-[16px] font-extrabold text-purple-400 mt-0.5">
-                {contestRating > 0 ? contestRating : 'N/A'}
+            <div className="flex items-baseline justify-between mb-1">
+              <div>
+                <span className="text-[8px] font-bold text-[#4A5580] uppercase tracking-wider">Highest Rating</span>
+                <div className="text-[16px] font-extrabold text-purple-400 mt-0.5">
+                  {contestRating > 0 ? contestRating : 'N/A'}
+                </div>
+              </div>
+              <div className="text-right">
+                <span className="text-[8px] font-bold text-[#4A5580] uppercase tracking-wider">Current Rating</span>
+                <div className="text-[16px] font-extrabold text-blue-400 mt-0.5">
+                  {contestRating > 0 ? contestRating : 'N/A'}
+                </div>
               </div>
             </div>
-            <div className="text-right">
-              <span className="text-[8px] font-bold text-[#4A5580] uppercase tracking-wider">Current Rating</span>
-              <div className="text-[16px] font-extrabold text-blue-400 mt-0.5">
-                {contestRating > 0 ? contestRating : 'N/A'}
-              </div>
+
+            <div className="h-36 w-full relative">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={ratingTrendData} margin={{ top: 10, right: 5, left: -25, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="ratingGlow" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.25}/>
+                      <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.02)" />
+                  <XAxis dataKey="label" stroke="#4A5580" fontSize={8} tickLine={false} />
+                  <YAxis stroke="#4A5580" fontSize={8} tickLine={false} domain={['auto', 'auto']} />
+                  <Area 
+                    type="monotone" 
+                    dataKey="rating" 
+                    stroke="#8B5CF6" 
+                    strokeWidth={2} 
+                    fillOpacity={1} 
+                    fill="url(#ratingGlow)"
+                    dot={{ r: 2.5, strokeWidth: 1.5, stroke: '#8B5CF6', fill: '#090D1A' }}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
           </div>
-
-          <div className="h-36 w-full relative">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={ratingTrendData} margin={{ top: 10, right: 5, left: -25, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="ratingGlow" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.25}/>
-                    <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.02)" />
-                <XAxis dataKey="label" stroke="#4A5580" fontSize={8} tickLine={false} />
-                <YAxis stroke="#4A5580" fontSize={8} tickLine={false} domain={['auto', 'auto']} />
-                <Area 
-                  type="monotone" 
-                  dataKey="rating" 
-                  stroke="#8B5CF6" 
-                  strokeWidth={2} 
-                  fillOpacity={1} 
-                  fill="url(#ratingGlow)"
-                  dot={{ r: 2.5, strokeWidth: 1.5, stroke: '#8B5CF6', fill: '#090D1A' }}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+        ) : (
+          renderPlatformStats("lg:col-span-2")
+        )}
 
       </div>
 
       {/* 4. SOLVED PROGRESS (DONUTS & PLATFORM HORIZONTAL BARS) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {selectedPlatformTab === 'CODEFORGE' ? (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         
         {/* CODEFORGE SHEET STATS */}
         <div className="bg-[#090D1A]/60 border border-white/[0.04] rounded-2xl p-5 flex flex-col space-y-4">
@@ -1051,177 +1129,120 @@ export const ProfilePage: React.FC = () => {
         </div>
 
         {/* SELECTED PLATFORM STATS */}
-        <div className="bg-[#090D1A]/60 border border-white/[0.04] rounded-2xl p-5 flex flex-col space-y-4">
-          <h2 className="text-[13px] font-bold text-white uppercase tracking-wider">
-            {selectedPlatformTab === 'CODEFORGE' ? 'Codeforge' : selectedPlatformTab.charAt(0) + selectedPlatformTab.slice(1).toLowerCase()} Stats
-          </h2>
-          
-          {!isTabPlatformConnected ? (
-            <div className="flex-1 flex items-center justify-center">
-              {renderConnectPrompt(selectedPlatformTab.charAt(0) + selectedPlatformTab.slice(1).toLowerCase())}
-            </div>
-          ) : (
-            <>
-              <div className="flex items-center justify-between flex-1">
-                <div className="h-32 w-32 relative">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={activeBreakdownData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={36}
-                        outerRadius={48}
-                        paddingAngle={3}
-                        dataKey="value"
-                      >
-                        {activeBreakdownData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                    </PieChart>
-                  </ResponsiveContainer>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                    <span className="text-[16px] font-extrabold text-white leading-none">{activeTotal}</span>
-                    <span className="text-[8px] text-[#7B8AB8] font-bold uppercase mt-1">Total</span>
-                  </div>
-                </div>
-
-                <div className="flex-1 space-y-2.5 pl-4">
-                  <div className="flex justify-between items-center text-[10px] font-bold text-[#7B8AB8]">
-                    <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-[#4ADE80]" /> Easy</span>
-                    <span className="text-white">{activeEasyPct}% ({activeEasy})</span>
-                  </div>
-                  <div className="flex justify-between items-center text-[10px] font-bold text-[#7B8AB8]">
-                    <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B]" /> Medium</span>
-                    <span className="text-white">{activeMediumPct}% ({activeMedium})</span>
-                  </div>
-                  <div className="flex justify-between items-center text-[10px] font-bold text-[#7B8AB8]">
-                    <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-[#EF4444]" /> Hard</span>
-                    <span className="text-white">{activeHardPct}% ({activeHard})</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap items-center justify-between text-[9px] font-bold tracking-tight pt-3.5 border-t border-white/[0.03]">
-                <span className="text-emerald-400">Easy Solved: {activeEasy}</span>
-                <span className="text-amber-400">Med. Solved: {activeMedium}</span>
-                <span className="text-[#818CF8]">Rating: {selectedPlatformTab === 'CODEFORGE' ? contestRating : (getPlatformRating(selectedPlatformTab) || 'N/A')}</span>
-              </div>
-            </>
-          )}
-        </div>
-
+        {renderPlatformStats()}
       </div>
+    ) : null}
 
       {/* 5. RECENT LISTS & BADGES GRID */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* RECENT CONTESTS */}
-        <div className="bg-[#090D1A]/60 border border-white/[0.04] rounded-2xl p-5 flex flex-col space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-[13px] font-bold text-white uppercase tracking-wider">Recent Contests</h2>
-            <button className="text-[10px] font-bold text-[#4A6CF7] hover:underline">View all</button>
-          </div>
-
-          <div className="flex-1 space-y-3.5 pt-1 overflow-y-auto max-h-[220px]">
-            {dynamicContests.length === 0 ? (
-              <div className="text-center text-xs text-[#7B8AB8] py-12 font-medium">
-                No contest history linked yet
-              </div>
-            ) : (
-              dynamicContests.map((contest) => (
-                <div key={contest.id} className="flex items-center justify-between text-xs pb-3 border-b border-white/[0.03] last:border-b-0 last:pb-0">
-                  <div className="space-y-0.5">
-                    <h4 className="font-extrabold text-white">{contest.name}</h4>
-                    <p className="text-[10px] text-[#7B8AB8] font-bold uppercase tracking-wider">{contest.platform}</p>
-                  </div>
-                  <div className="text-right">
-                    <span className={`text-[11px] font-extrabold ${contest.isPositive ? 'text-green-400' : 'text-red-400'}`}>
-                      {contest.change}
-                    </span>
-                    <p className="text-[9px] text-[#4A5580] font-bold mt-0.5">Rating: {contest.rating}</p>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
-        {/* BADGES SECTION */}
-        <div className="bg-[#090D1A]/60 border border-white/[0.04] rounded-2xl p-5 flex flex-col space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5">
-              <Award className="w-4 h-4 text-[#A78BFA]" />
-              <h2 className="text-[13px] font-bold text-white uppercase tracking-wider">Badges</h2>
+      {selectedPlatformTab === 'CODEFORGE' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          {/* RECENT CONTESTS */}
+          <div className="bg-[#090D1A]/60 border border-white/[0.04] rounded-2xl p-5 flex flex-col space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-[13px] font-bold text-white uppercase tracking-wider">Recent Contests</h2>
+              <button className="text-[10px] font-bold text-[#4A6CF7] hover:underline">View all</button>
             </div>
-            <button className="text-[10px] font-bold text-[#4A6CF7] hover:underline">View all</button>
-          </div>
 
-          {/* Hexagonal Badges grid 3x3 layout */}
-          <div className="flex-1 grid grid-cols-3 gap-y-4.5 gap-x-2 pt-2 items-center justify-center overflow-y-auto max-h-[220px]">
-            {dynamicBadges.length === 0 ? (
-              <div className="col-span-3 text-center text-xs text-[#7B8AB8] py-12 font-medium">
-                No achievement badges unlocked yet
-              </div>
-            ) : (
-              dynamicBadges.map(badge => (
-                <React.Fragment key={badge.id}>
-                  {renderHexagon(badge.icon, badge.color, badge.name, badge.id)}
-                </React.Fragment>
-              ))
-            )}
-          </div>
-        </div>
-
-        {/* RECENT ACTIVITY TIMELINE */}
-        <div className="bg-[#090D1A]/60 border border-white/[0.04] rounded-2xl p-5 flex flex-col space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-[13px] font-bold text-white uppercase tracking-wider">Recent Activity</h2>
-            <button className="text-[10px] font-bold text-[#4A6CF7] hover:underline">View all</button>
-          </div>
-
-          <div className="flex-1 space-y-3.5 relative pl-6 pt-1.5 overflow-y-auto max-h-[220px]">
-            {recentActivityList.length === 0 ? (
-              <div className="text-center text-xs text-[#7B8AB8] py-12 font-medium">No recent activity logged</div>
-            ) : (
-              <>
-                <div className="absolute left-[4px] top-2.5 bottom-2.5 w-[1.5px] bg-[#1E293B] pointer-events-none" />
-                {recentActivityList.map((item, idx) => {
-                  let badgeTheme = 'bg-[#4ADE80]/10 text-[#4ADE80] border-[#4ADE80]/20';
-                  let dotColor = 'bg-emerald-500';
-                  
-                  if (item.difficulty?.toUpperCase() === 'MEDIUM') {
-                    badgeTheme = 'bg-[#F59E0B]/10 text-[#F59E0B] border-[#F59E0B]/20';
-                    dotColor = 'bg-[#F59E0B]';
-                  } else if (item.difficulty?.toUpperCase() === 'HARD') {
-                    badgeTheme = 'bg-[#EF4444]/10 text-[#EF4444] border-[#EF4444]/20';
-                    dotColor = 'bg-rose-500';
-                  }
-
-                  return (
-                    <div key={item.id || idx} className="flex justify-between items-center text-xs relative">
-                      <div className={`absolute -left-[24px] w-2.5 h-2.5 rounded-full border-[2.5px] border-[#030712] ${dotColor}`} />
-                      <div className="space-y-0.5">
-                        <span className="font-extrabold text-white">{item.description}</span>
-                        <p className="text-[9px] text-[#4A5580] font-bold">
-                          {new Date(item.createdAt).toLocaleDateString()}
-                        </p>
-                      </div>
-                      {item.difficulty && (
-                        <span className={`${badgeTheme} px-2 py-0.5 border rounded-md text-[9px] font-extrabold uppercase`}>
-                          {item.difficulty.toLowerCase()}
-                        </span>
-                      )}
+            <div className="flex-1 space-y-3.5 pt-1 overflow-y-auto max-h-[220px]">
+              {dynamicContests.length === 0 ? (
+                <div className="text-center text-xs text-[#7B8AB8] py-12 font-medium">
+                  No contest history linked yet
+                </div>
+              ) : (
+                dynamicContests.map((contest) => (
+                  <div key={contest.id} className="flex items-center justify-between text-xs pb-3 border-b border-white/[0.03] last:border-b-0 last:pb-0">
+                    <div className="space-y-0.5">
+                      <h4 className="font-extrabold text-white">{contest.name}</h4>
+                      <p className="text-[10px] text-[#7B8AB8] font-bold uppercase tracking-wider">{contest.platform}</p>
                     </div>
-                  );
-                })}
-              </>
-            )}
+                    <div className="text-right">
+                      <span className={`text-[11px] font-extrabold ${contest.isPositive ? 'text-green-400' : 'text-red-400'}`}>
+                        {contest.change}
+                      </span>
+                      <p className="text-[9px] text-[#4A5580] font-bold mt-0.5">Rating: {contest.rating}</p>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
-        </div>
 
-      </div>
+          {/* BADGES SECTION */}
+          <div className="bg-[#090D1A]/60 border border-white/[0.04] rounded-2xl p-5 flex flex-col space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <Award className="w-4 h-4 text-[#A78BFA]" />
+                <h2 className="text-[13px] font-bold text-white uppercase tracking-wider">Badges</h2>
+              </div>
+              <button className="text-[10px] font-bold text-[#4A6CF7] hover:underline">View all</button>
+            </div>
+
+            {/* Hexagonal Badges grid 3x3 layout */}
+            <div className="flex-1 grid grid-cols-3 gap-y-4.5 gap-x-2 pt-2 items-center justify-center overflow-y-auto max-h-[220px]">
+              {dynamicBadges.length === 0 ? (
+                <div className="col-span-3 text-center text-xs text-[#7B8AB8] py-12 font-medium">
+                  No achievement badges unlocked yet
+                </div>
+              ) : (
+                dynamicBadges.map(badge => (
+                  <React.Fragment key={badge.id}>
+                    {renderHexagon(badge.icon, badge.color, badge.name, badge.id)}
+                  </React.Fragment>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* RECENT ACTIVITY TIMELINE */}
+          <div className="bg-[#090D1A]/60 border border-white/[0.04] rounded-2xl p-5 flex flex-col space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-[13px] font-bold text-white uppercase tracking-wider">Recent Activity</h2>
+              <button className="text-[10px] font-bold text-[#4A6CF7] hover:underline">View all</button>
+            </div>
+
+            <div className="flex-1 space-y-3.5 relative pl-6 pt-1.5 overflow-y-auto max-h-[220px]">
+              {recentActivityList.length === 0 ? (
+                <div className="text-center text-xs text-[#7B8AB8] py-12 font-medium">No recent activity logged</div>
+              ) : (
+                <>
+                  <div className="absolute left-[4px] top-2.5 bottom-2.5 w-[1.5px] bg-[#1E293B] pointer-events-none" />
+                  {recentActivityList.map((item, idx) => {
+                    let badgeTheme = 'bg-[#4ADE80]/10 text-[#4ADE80] border-[#4ADE80]/20';
+                    let dotColor = 'bg-emerald-500';
+                    
+                    if (item.difficulty?.toUpperCase() === 'MEDIUM') {
+                      badgeTheme = 'bg-[#F59E0B]/10 text-[#F59E0B] border-[#F59E0B]/20';
+                      dotColor = 'bg-[#F59E0B]';
+                    } else if (item.difficulty?.toUpperCase() === 'HARD') {
+                      badgeTheme = 'bg-[#EF4444]/10 text-[#EF4444] border-[#EF4444]/20';
+                      dotColor = 'bg-rose-500';
+                    }
+
+                    return (
+                      <div key={item.id || idx} className="flex justify-between items-center text-xs relative">
+                        <div className={`absolute -left-[24px] w-2.5 h-2.5 rounded-full border-[2.5px] border-[#030712] ${dotColor}`} />
+                        <div className="space-y-0.5">
+                          <span className="font-extrabold text-white">{item.description}</span>
+                          <p className="text-[9px] text-[#4A5580] font-bold">
+                            {new Date(item.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        {item.difficulty && (
+                          <span className={`${badgeTheme} px-2 py-0.5 border rounded-md text-[9px] font-extrabold uppercase`}>
+                            {item.difficulty.toLowerCase()}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </>
+              )}
+            </div>
+          </div>
+
+        </div>
+      )}
 
       {/* EDIT PROFILE MODAL */}
       {isEditModalOpen && (
