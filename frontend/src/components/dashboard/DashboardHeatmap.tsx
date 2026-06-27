@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTheme } from '../../context/ThemeContext';
 
 interface HeatmapEntry {
   date: string;
@@ -11,20 +12,22 @@ interface DashboardHeatmapProps {
 
 const days = ['Mon', '', 'Wed', '', 'Fri', '', ''];
 
-const getColor = (level: number) => {
-  switch (level) {
-    case 0: return '#1A2238'; // Dark backdrop
-    case 1: return '#064E3B'; // Darkest green
-    case 2: return '#047857'; // Dark green
-    case 3: return '#10B981'; // Green
-    case 4: return '#4ADE80'; // Neon green
-    default: return '#1A2238';
-  }
-};
-
 export const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({ heatmapData = [] }) => {
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
   const today = new Date();
   
+  const getColor = (level: number) => {
+    switch (level) {
+      case 0: return isLight ? '#E2E8F0' : '#1A2238'; // Light gray in light mode, dark backdrop in dark mode
+      case 1: return isLight ? '#A7F3D0' : '#064E3B'; // Soft green / Darkest green
+      case 2: return isLight ? '#34D399' : '#047857'; // Medium green / Dark green
+      case 3: return '#10B981'; // Green
+      case 4: return isLight ? '#059669' : '#4ADE80'; // Deep green / Neon green
+      default: return isLight ? '#E2E8F0' : '#1A2238';
+    }
+  };
+
   // Format dynamic month labels based on the current date
   const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const getMonthLabels = () => {

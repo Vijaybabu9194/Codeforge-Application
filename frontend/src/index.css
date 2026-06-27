@@ -295,3 +295,182 @@
 .animate-slide-up {
   animation: slideUp 0.2s ease-out forwards;
 }
+
+/* ============================================
+   LIGHT THEME OVERRIDES (Full Visibility & Blend)
+   ============================================ */
+.light-theme {
+  color-scheme: light;
+}
+
+/* App Shell & Main Backgrounds */
+.light-theme body,
+.light-theme #root,
+.light-theme main,
+.light-theme .bg-dash-bg,
+.light-theme .bg-\[\#020205\],
+.light-theme .bg-\[\#030712\],
+.light-theme .bg-\[\#060912\],
+.light-theme .bg-\[\#0B1120\] {
+  background-color: #F8FAFC !important;
+  color: #0F172A !important;
+}
+
+/* Topbar, Sidebar & Headers */
+.light-theme header,
+.light-theme aside,
+.light-theme .bg-dash-sidebar,
+.light-theme .bg-\[\#050814\],
+.light-theme .bg-\[\#0D1425\] {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+}
+
+/* Dashboard Cards & Surfaces */
+.light-theme .dash-card,
+.light-theme .feature-card,
+.light-theme .bg-dash-card,
+.light-theme .bg-\[\#080C1E\],
+.light-theme .bg-\[\#090D1A\],
+.light-theme .bg-\[\#0B1026\],
+.light-theme .bg-\[\#0C1222\],
+.light-theme .bg-\[\#0D1222\],
+.light-theme .bg-\[\#0D1224\],
+.light-theme .bg-\[\#0D1326\],
+.light-theme .bg-\[\#0E1326\],
+.light-theme .bg-\[\#0F1526\],
+.light-theme .bg-\[\#0F172A\],
+.light-theme .bg-\[\#101629\],
+.light-theme .bg-\[\#111827\],
+.light-theme .bg-\[\#131B36\],
+.light-theme .bg-\[\#1A2238\],
+.light-theme .bg-slate-900,
+.light-theme .bg-slate-800 {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+  border-color: #E2E8F0 !important;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04) !important;
+}
+
+/* Translucent Overlays & Sub-panels Inside Cards */
+.light-theme .bg-white\/\[0\.01\],
+.light-theme .bg-white\/\[0\.015\],
+.light-theme .bg-white\/\[0\.02\],
+.light-theme .bg-white\/\[0\.03\],
+.light-theme .bg-white\/\[0\.04\],
+.light-theme .bg-white\/\[0\.05\],
+.light-theme .bg-white\/\[0\.06\],
+.light-theme .bg-white\/\[0\.08\],
+.light-theme .bg-white\/\[0\.1\],
+.light-theme .bg-white\/5,
+.light-theme .bg-white\/10 {
+  background-color: #F1F5F9 !important;
+  border-color: #E2E8F0 !important;
+}
+
+/* Developer Illustration Gradient Blends in DashboardGreeting */
+.light-theme .from-\[\#030712\] {
+  --tw-gradient-from: #F8FAFC !important;
+  --tw-gradient-to: rgb(248 250 252 / 0) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+.light-theme .via-\[\#030712\]\/40 {
+  --tw-gradient-stops: var(--tw-gradient-from), rgb(248 250 252 / 0.4), var(--tw-gradient-to) !important;
+}
+.light-theme .from-\[\#030712\]\/20 {
+  --tw-gradient-from: rgb(248 250 252 / 0.2) !important;
+  --tw-gradient-to: rgb(248 250 252 / 0) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+/* General Borders */
+.light-theme .border-dash-border,
+.light-theme .border-white\/\[0\.04\],
+.light-theme .border-white\/\[0\.05\],
+.light-theme .border-white\/\[0\.06\],
+.light-theme .border-white\/\[0\.07\],
+.light-theme .border-white\/\[0\.08\],
+.light-theme .border-white\/\[0\.1\],
+.light-theme .border-white\/\[0\.15\],
+.light-theme .border-white\/\[0\.2\],
+.light-theme .border-white\/10,
+.light-theme .border-white\/20 {
+  border-color: #E2E8F0 !important;
+}
+
+/* 100% Text Visibility Across All Components & Pages */
+.light-theme .text-white,
+.light-theme .text-slate-100,
+.light-theme .text-slate-200,
+.light-theme .text-gray-100,
+.light-theme .text-gray-200,
+.light-theme .text-dash-textPrimary {
+  color: #0F172A !important;
+}
+
+/* Re-grant White Text to Colored Primary Buttons, Badges, & Active States */
+.light-theme button.bg-dash-blue,
+.light-theme button.bg-\[\#4A6CF7\],
+.light-theme button.bg-primary,
+.light-theme button.bg-indigo-600,
+.light-theme button.bg-blue-600,
+.light-theme button.bg-emerald-600,
+.light-theme .btn-landing-primary,
+.light-theme .dash-nav-item.active,
+.light-theme .bg-[#4A6CF7],
+.light-theme .bg-dash-blue,
+.light-theme .bg-primary {
+  color: #FFFFFF !important;
+}
+.light-theme button.bg-dash-blue *,
+.light-theme button.bg-\[\#4A6CF7\] *,
+.light-theme button.bg-primary *,
+.light-theme button.bg-indigo-600 *,
+.light-theme button.bg-blue-600 *,
+.light-theme button.bg-emerald-600 *,
+.light-theme .btn-landing-primary *,
+.light-theme .dash-nav-item.active *,
+.light-theme .bg-[#4A6CF7] *,
+.light-theme .bg-dash-blue *,
+.light-theme .bg-primary * {
+  color: #FFFFFF !important;
+}
+
+/* Secondary & Muted Text Overrides for High Contrast readability */
+.light-theme .text-\[\#7B8AB8\],
+.light-theme .text-dash-textSecondary,
+.light-theme .text-slate-300,
+.light-theme .text-slate-400,
+.light-theme .text-gray-300,
+.light-theme .text-gray-400,
+.light-theme .text-\[\#94A3B8\] {
+  color: #334155 !important;
+}
+
+.light-theme .text-\[\#4A5580\],
+.light-theme .text-dash-textMuted,
+.light-theme .text-slate-500,
+.light-theme .text-gray-500 {
+  color: #64748B !important;
+}
+
+/* Inputs & Form Controls */
+.light-theme input,
+.light-theme select,
+.light-theme textarea {
+  background-color: #F8FAFC !important;
+  color: #0F172A !important;
+  border-color: #CBD5E1 !important;
+}
+.light-theme input::placeholder {
+  color: #94A3B8 !important;
+}
+
+/* Navigation Items */
+.light-theme .dash-nav-item {
+  color: #475569 !important;
+}
+.light-theme .dash-nav-item:hover {
+  color: #0F172A !important;
+  background: #F1F5F9 !important;
+}

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import LandingPage from './pages/LandingPage';
 import HomePage from './pages/HomePage';
 import ProblemsPage from './pages/ProblemsPage';
@@ -91,9 +92,11 @@ const AuthenticatedApp: React.FC = () => {
 
 function App() {
   return (
-    <AuthProvider>
-      <AuthenticatedApp />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <AuthenticatedApp />
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

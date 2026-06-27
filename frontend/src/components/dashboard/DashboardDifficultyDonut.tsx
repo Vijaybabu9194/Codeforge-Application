@@ -1,10 +1,13 @@
 import React from 'react';
+import { useTheme } from '../../context/ThemeContext';
 
 interface DashboardDifficultyDonutProps {
   problemsSolved?: number;
 }
 
 export const DashboardDifficultyDonut: React.FC<DashboardDifficultyDonutProps> = ({ problemsSolved = 0 }) => {
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
   const total = problemsSolved;
   
   // Calculate dynamic segment sizes based on standard design ratios (42%, 38%, 20%)
@@ -41,7 +44,7 @@ export const DashboardDifficultyDonut: React.FC<DashboardDifficultyDonutProps> =
         <div className="relative flex-shrink-0">
           <svg width="150" height="150" viewBox="0 0 150 150">
             {/* Background ring */}
-            <circle cx={cx} cy={cy} r={radius} fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth={strokeWidth} />
+            <circle cx={cx} cy={cy} r={radius} fill="none" stroke={isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.04)'} strokeWidth={strokeWidth} />
             
             {/* Segments */}
             {segments.map((seg) => {
@@ -68,11 +71,11 @@ export const DashboardDifficultyDonut: React.FC<DashboardDifficultyDonutProps> =
               );
             })}
 
-            {/* Center text */}
-            <text x={cx} y={cy - 4} fill="#FFFFFF" fontSize="20" fontWeight="800" textAnchor="middle" fontFamily="sans-serif">
+            {/* Center text with dynamic theme colors */}
+            <text x={cx} y={cy - 4} fill={isLight ? '#0F172A' : '#FFFFFF'} fontSize="20" fontWeight="800" textAnchor="middle" fontFamily="sans-serif">
               {total.toLocaleString()}
             </text>
-            <text x={cx} y={cy + 12} fill="#7B8AB8" fontSize="10" fontWeight="600" textAnchor="middle" fontFamily="sans-serif">
+            <text x={cx} y={cy + 12} fill={isLight ? '#475569' : '#7B8AB8'} fontSize="10" fontWeight="600" textAnchor="middle" fontFamily="sans-serif">
               Solved
             </text>
           </svg>

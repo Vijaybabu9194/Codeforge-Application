@@ -1,5 +1,6 @@
 import React from 'react';
 import { ChevronDown } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 
 interface ChartPoint {
   label: string;
@@ -23,6 +24,9 @@ const defaultDataPoints = [
 ];
 
 export const DashboardContestPerformance: React.FC<DashboardContestPerformanceProps> = ({ progress }) => {
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
+
   const trendData = progress?.contestTrend && progress.contestTrend.length > 0
     ? progress.contestTrend.slice(-7) // Show last 7 data points
     : defaultDataPoints;
@@ -75,20 +79,20 @@ export const DashboardContestPerformance: React.FC<DashboardContestPerformancePr
             </linearGradient>
           </defs>
 
-          {/* Y-axis labels & grid lines */}
+          {/* Y-axis labels & clear grid lines */}
           {yLabels.map((label) => {
             const y = chartH - ((label - minY) / range) * chartH;
             return (
               <g key={label}>
-                <text x="-12" y={y + 4} fill="#4A5580" fontSize="10" textAnchor="end" fontFamily="sans-serif">{label}</text>
-                <line x1="0" y1={y} x2={chartW} y2={y} stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
+                <text x="-12" y={y + 4} fill={isLight ? '#64748B' : '#4A5580'} fontSize="10" textAnchor="end" fontFamily="sans-serif">{label}</text>
+                <line x1="0" y1={y} x2={chartW} y2={y} stroke={isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.06)'} strokeWidth="1" strokeDasharray="4 4" />
               </g>
             );
           })}
 
           {/* X-axis labels */}
           {points.map((p) => (
-            <text key={p.month} x={p.x} y={chartH + 20} fill="#4A5580" fontSize="10" textAnchor="middle" fontFamily="sans-serif">{p.month}</text>
+            <text key={p.month} x={p.x} y={chartH + 20} fill={isLight ? '#64748B' : '#4A5580'} fontSize="10" textAnchor="middle" fontFamily="sans-serif">{p.month}</text>
           ))}
 
           {/* Area fill */}
@@ -99,15 +103,15 @@ export const DashboardContestPerformance: React.FC<DashboardContestPerformancePr
 
           {/* Data points */}
           {points.map((p, i) => (
-            <circle key={i} cx={p.x} cy={p.y} r="3.5" fill="#0B1120" stroke="#4A6CF7" strokeWidth="2" />
+            <circle key={i} cx={p.x} cy={p.y} r="3.5" fill={isLight ? '#FFFFFF' : '#0B1120'} stroke="#4A6CF7" strokeWidth="2" />
           ))}
 
           {/* Tooltip for latest point */}
           {tooltipPoint && (
             <g>
-              <rect x={Math.max(10, Math.min(chartW - 100, tooltipPoint.x - 45))} y={Math.max(10, tooltipPoint.y - 55)} width="90" height="42" rx="8" fill="#1E293B" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
+              <rect x={Math.max(10, Math.min(chartW - 100, tooltipPoint.x - 45))} y={Math.max(10, tooltipPoint.y - 55)} width="90" height="42" rx="8" fill={isLight ? '#0F172A' : '#1E293B'} stroke={isLight ? '#CBD5E1' : 'rgba(255,255,255,0.08)'} strokeWidth="1" />
               <text x={Math.max(55, Math.min(chartW - 55, tooltipPoint.x))} y={Math.max(10, tooltipPoint.y - 55) + 17} fill="#FFFFFF" fontSize="10" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">Current</text>
-              <text x={Math.max(55, Math.min(chartW - 55, tooltipPoint.x))} y={Math.max(10, tooltipPoint.y - 55) + 30} fill="#7B8AB8" fontSize="9" textAnchor="middle" fontFamily="sans-serif">Rating: {tooltipPoint.value}</text>
+              <text x={Math.max(55, Math.min(chartW - 55, tooltipPoint.x))} y={Math.max(10, tooltipPoint.y - 55) + 30} fill="#94A3B8" fontSize="9" textAnchor="middle" fontFamily="sans-serif">Rating: {tooltipPoint.value}</text>
             </g>
           )}
         </svg>

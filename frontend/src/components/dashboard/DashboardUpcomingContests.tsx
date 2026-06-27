@@ -57,17 +57,20 @@ export const DashboardUpcomingContests: React.FC = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {contests.map((contest) => (
-          <div key={contest.name} className="p-4 rounded-xl bg-white/[0.02] border border-dash-border hover:border-dash-blue/15 transition group">
-            <div className="flex items-start gap-3 mb-3">
-              <ContestIcon colors={contest.iconColors} type={contest.iconType} />
-              <div className="min-w-0">
-                <h3 className="text-[13px] font-bold text-white truncate">{contest.name}</h3>
-                <span className="text-[11px] text-dash-textSecondary font-medium">{contest.inDays}</span>
+          <div key={contest.name} className="p-4 rounded-xl bg-white/[0.02] border border-dash-border hover:border-dash-blue/15 transition group flex flex-col justify-between">
+            <div>
+              <div className="flex items-start gap-3 mb-3">
+                <ContestIcon colors={contest.iconColors} type={contest.iconType} />
+                <div className="min-w-0">
+                  <h3 className="text-[13px] font-bold text-white truncate">{contest.name}</h3>
+                  <span className="text-[11px] text-dash-textSecondary font-medium">{contest.inDays}</span>
+                </div>
               </div>
             </div>
-            <div className="flex items-center justify-between">
+
+            <div className="flex items-center justify-between mt-3 pt-2 border-t border-dash-border/40">
               <span className="text-[11px] text-dash-textMuted font-medium">{contest.date}</span>
-              <button className="px-3 py-1.5 rounded-lg bg-white/[0.05] text-[11px] text-white font-semibold hover:bg-dash-blue hover:text-white transition">
+              <button className="px-3.5 py-1.5 rounded-lg bg-[#4A6CF7] text-[11px] text-white font-bold hover:bg-[#3B5BEB] transition shadow-sm active:scale-95">
                 Register
               </button>
             </div>

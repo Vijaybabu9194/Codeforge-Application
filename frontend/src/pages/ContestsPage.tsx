@@ -372,8 +372,8 @@ export const ContestsPage: React.FC = () => {
                         disabled={contest.registerUrl === '#'}
                         className={`mt-auto w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all duration-200 active:scale-95 ${
                           contest.registerUrl === '#'
-                            ? 'bg-white/[0.04] border border-white/[0.06] text-[#4A5580] cursor-not-allowed'
-                            : `${meta.bg} border ${meta.border} ${meta.color} hover:opacity-80 hover:scale-[1.02]`
+                            ? 'bg-dash-border/40 text-dash-textMuted cursor-not-allowed'
+                            : 'bg-[#4A6CF7] text-white hover:bg-[#3B5BEB] shadow-sm hover:scale-[1.02]'
                         }`}
                       >
                         {contest.registerUrl === '#' ? (

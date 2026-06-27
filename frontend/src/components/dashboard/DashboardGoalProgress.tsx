@@ -1,5 +1,6 @@
 import React from 'react';
 import { Calendar } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 
 interface DashboardGoalProgressProps {
   current?: number;
@@ -10,6 +11,9 @@ export const DashboardGoalProgress: React.FC<DashboardGoalProgressProps> = ({
   current = 0,
   target = 200,
 }) => {
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
+
   const percentage = target > 0 ? Math.min(100, Math.round((current / target) * 100)) : 0;
   const radius = 60;
   const strokeWidth = 10;
@@ -49,7 +53,7 @@ export const DashboardGoalProgress: React.FC<DashboardGoalProgressProps> = ({
               cy={cy}
               r={radius}
               fill="none"
-              stroke="rgba(255,255,255,0.04)"
+              stroke={isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.04)'}
               strokeWidth={strokeWidth}
             />
             {/* Progress ring */}
@@ -67,11 +71,11 @@ export const DashboardGoalProgress: React.FC<DashboardGoalProgressProps> = ({
               className="transition-all duration-700"
               style={{ filter: 'drop-shadow(0 0 6px rgba(74, 108, 247, 0.4))' }}
             />
-            {/* Center text */}
-            <text x={cx} y={cy - 4} fill="#FFFFFF" fontSize="28" fontWeight="800" textAnchor="middle" fontFamily="sans-serif">
+            {/* Center text with dynamic theme colors */}
+            <text x={cx} y={cy - 4} fill={isLight ? '#0F172A' : '#FFFFFF'} fontSize="28" fontWeight="800" textAnchor="middle" fontFamily="sans-serif">
               {percentage}%
             </text>
-            <text x={cx} y={cy + 14} fill="#7B8AB8" fontSize="11" fontWeight="600" textAnchor="middle" fontFamily="sans-serif">
+            <text x={cx} y={cy + 14} fill={isLight ? '#475569' : '#7B8AB8'} fontSize="11" fontWeight="600" textAnchor="middle" fontFamily="sans-serif">
               {current} / {target}
             </text>
           </svg>

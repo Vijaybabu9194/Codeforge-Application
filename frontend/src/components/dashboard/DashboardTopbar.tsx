@@ -1,7 +1,10 @@
 import React from 'react';
-import { Search, Bell, Command, Menu } from 'lucide-react';
+import { Search, Bell, Command, Menu, Sun, Moon } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 
 export const DashboardTopbar: React.FC = () => {
+  const { theme, toggleTheme } = useTheme();
+
   return (
     <header className="h-[68px] bg-dash-sidebar border-b border-dash-border flex items-center justify-between px-8 sticky top-0 z-20 select-none">
       {/* Left side: Hamburger + Search Bar */}
@@ -24,7 +27,20 @@ export const DashboardTopbar: React.FC = () => {
       </div>
 
       {/* Right side */}
-      <div className="flex items-center gap-5">
+      <div className="flex items-center gap-3">
+        {/* Theme Toggle Button */}
+        <button
+          onClick={toggleTheme}
+          className="p-2.5 rounded-xl hover:bg-white/[0.08] text-dash-textSecondary hover:text-white transition-all duration-200 flex items-center justify-center border border-transparent hover:border-white/[0.08]"
+          title={theme === 'dark' ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
+        >
+          {theme === 'dark' ? (
+            <Sun className="w-5 h-5 text-amber-400 fill-amber-400/20" />
+          ) : (
+            <Moon className="w-5 h-5 text-indigo-600 fill-indigo-600/20" />
+          )}
+        </button>
+
         {/* Notification Bell */}
         <button className="relative p-2.5 rounded-xl hover:bg-white/[0.05] transition">
           <Bell className="w-5 h-5 text-dash-textSecondary" />
