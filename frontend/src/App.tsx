@@ -6,6 +6,8 @@ import ProblemsPage from './pages/ProblemsPage';
 import CompanyQuestionsPage from './pages/CompanyQuestionsPage';
 import ProfilePage from './pages/ProfilePage';
 import ProblemEditorPage from './pages/ProblemEditorPage';
+import ContestsPage from './pages/ContestsPage';
+import DiscussPage from './pages/DiscussPage';
 import DashboardSidebar from './components/dashboard/DashboardSidebar';
 import DashboardTopbar from './components/dashboard/DashboardTopbar';
 
@@ -32,6 +34,12 @@ const DashboardContent: React.FC = () => {
         return <CompanyQuestionsPage />;
       case 'profile':
         return <ProfilePage />;
+      case 'contests':
+        return <ContestsPage />;
+      case 'discuss':
+        return <DiscussPage />;
+      case 'roadmap':
+        return <DiscussPage />;
       default:
         return <HomePage />;
     }

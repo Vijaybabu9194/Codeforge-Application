@@ -1,5 +1,6 @@
 import React from 'react';
-import { Check, Search, TrendingUp, Zap } from 'lucide-react';
+import { Check, Search, Zap } from 'lucide-react';
+import { LeetCodeLogo, GfgLogo } from '../CompanyLogos';
 
 interface CompanyQuestion {
   id: number;
@@ -9,6 +10,8 @@ interface CompanyQuestion {
   frequency: string;
   acceptanceRate: number;
   solved: boolean;
+  leetcodeUrl?: string;
+  gfgUrl?: string;
 }
 
 interface CompanyQuestionTableProps {
@@ -29,17 +32,22 @@ export const CompanyQuestionTable: React.FC<CompanyQuestionTableProps> = ({
 
   const getFreqBadge = (freq: string) => {
     if (!freq) return 'text-[#7B8AB8] bg-white/[0.04] border border-white/[0.06]';
-    const f = freq.toLowerCase();
+    const f = freq.replace(/_/g, ' ').toLowerCase();
     if (f.includes('very high')) return 'text-[#EF4444] bg-[#EF4444]/10 border border-[#EF4444]/20';
     if (f.includes('high')) return 'text-[#F59E0B] bg-[#F59E0B]/10 border border-[#F59E0B]/20';
     if (f.includes('medium')) return 'text-[#4A6CF7] bg-[#4A6CF7]/10 border border-[#4A6CF7]/20';
     return 'text-[#7B8AB8] bg-white/[0.04] border border-white/[0.06]';
   };
 
+  const getFreqLabel = (freq: string) => {
+    if (!freq) return 'Normal';
+    return freq.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  };
+
   const getFreqIcon = (freq: string) => {
     if (!freq) return null;
     const f = freq.toLowerCase();
-    if (f.includes('very high')) return '🔥';
+    if (f.includes('very_high') || f.includes('very high')) return '🔥';
     if (f.includes('high')) return '⚡';
     return null;
   };
@@ -56,7 +64,7 @@ export const CompanyQuestionTable: React.FC<CompanyQuestionTableProps> = ({
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <TrendingUp className="w-3.5 h-3.5 text-[#4A5580]" />
+          <Zap className="w-3.5 h-3.5 text-[#4A5580]" />
           <span className="text-[10px] text-[#4A5580] font-semibold">Sorted by frequency</span>
         </div>
       </div>
@@ -72,6 +80,9 @@ export const CompanyQuestionTable: React.FC<CompanyQuestionTableProps> = ({
               <th className="py-2.5 px-4 text-left text-[10px] font-extrabold text-[#7B8AB8] uppercase tracking-wider border-r border-white/[0.05]">
                 Question
               </th>
+              <th className="py-2.5 px-4 text-center text-[10px] font-extrabold text-[#7B8AB8] uppercase tracking-wider w-24 border-r border-white/[0.05]">
+                Practice
+              </th>
               <th className="py-2.5 px-4 text-center text-[10px] font-extrabold text-[#7B8AB8] uppercase tracking-wider w-28 border-r border-white/[0.05]">
                 Times Asked
               </th>
@@ -81,7 +92,7 @@ export const CompanyQuestionTable: React.FC<CompanyQuestionTableProps> = ({
               <th className="py-2.5 px-4 text-center text-[10px] font-extrabold text-[#7B8AB8] uppercase tracking-wider w-28 border-r border-white/[0.05]">
                 Difficulty
               </th>
-              <th className="py-2.5 px-4 text-center text-[10px] font-extrabold text-[#7B8AB8] uppercase tracking-wider w-28">
+              <th className="py-2.5 px-4 text-center text-[10px] font-extrabold text-[#7B8AB8] uppercase tracking-wider w-24">
                 Acceptance
               </th>
             </tr>
@@ -89,7 +100,7 @@ export const CompanyQuestionTable: React.FC<CompanyQuestionTableProps> = ({
           <tbody>
             {questions.length === 0 ? (
               <tr>
-                <td colSpan={6} className="py-20 text-center">
+                <td colSpan={7} className="py-20 text-center">
                   <div className="flex flex-col items-center gap-3">
                     <div className="w-12 h-12 rounded-xl bg-white/[0.03] flex items-center justify-center">
                       <Search className="w-5 h-5 text-[#4A5580]" />
@@ -129,6 +140,42 @@ export const CompanyQuestionTable: React.FC<CompanyQuestionTableProps> = ({
                     </span>
                   </td>
 
+                  {/* Practice — LeetCode + GFG icons */}
+                  <td className="py-3 px-4 text-center align-middle w-24 border-r border-white/[0.05]">
+                    <div className="flex items-center justify-center gap-5 scale-75 origin-center">
+                      {q.leetcodeUrl ? (
+                        <a
+                          href={q.leetcodeUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="Solve on LeetCode"
+                          className="block hover:scale-110 active:scale-95 transition-transform duration-200"
+                        >
+                          <LeetCodeLogo />
+                        </a>
+                      ) : (
+                        <span title="Not on LeetCode" className="opacity-25 cursor-not-allowed">
+                          <LeetCodeLogo disabled />
+                        </span>
+                      )}
+                      {q.gfgUrl ? (
+                        <a
+                          href={q.gfgUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="Solve on GeeksForGeeks"
+                          className="block hover:scale-110 active:scale-95 transition-transform duration-200"
+                        >
+                          <GfgLogo />
+                        </a>
+                      ) : (
+                        <span title="Not on GFG" className="opacity-25 cursor-not-allowed">
+                          <GfgLogo disabled />
+                        </span>
+                      )}
+                    </div>
+                  </td>
+
                   {/* Times Asked */}
                   <td className="py-3 px-4 text-center align-middle w-28 border-r border-white/[0.05]">
                     <div className="flex items-center justify-center gap-1">
@@ -141,7 +188,7 @@ export const CompanyQuestionTable: React.FC<CompanyQuestionTableProps> = ({
                   <td className="py-3 px-4 text-center align-middle w-32 border-r border-white/[0.05]">
                     <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-bold tracking-wide ${getFreqBadge(q.frequency)}`}>
                       {getFreqIcon(q.frequency) && <span>{getFreqIcon(q.frequency)}</span>}
-                      {q.frequency || 'Normal'}
+                      {getFreqLabel(q.frequency)}
                     </span>
                   </td>
 
@@ -153,7 +200,7 @@ export const CompanyQuestionTable: React.FC<CompanyQuestionTableProps> = ({
                   </td>
 
                   {/* Acceptance */}
-                  <td className="py-3 px-4 text-center align-middle w-28">
+                  <td className="py-3 px-4 text-center align-middle w-24">
                     <span className="text-[12px] font-bold text-[#7B8AB8] group-hover:text-[#C8D1E8] transition-colors">
                       {q.acceptanceRate != null ? `${q.acceptanceRate.toFixed(1)}%` : '—'}
                     </span>

@@ -42,5 +42,7 @@ public class CompanyDto {
         private String frequency;
         private Double acceptanceRate;
         private Boolean solved;
+        private String leetcodeUrl;
+        private String gfgUrl;
     }
 }

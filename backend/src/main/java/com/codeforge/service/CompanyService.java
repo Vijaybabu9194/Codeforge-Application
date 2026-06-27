@@ -85,6 +85,8 @@ public class CompanyService {
                         .frequency(cp.getFrequency().name())
                         .acceptanceRate(cp.getProblem().getAcceptanceRate())
                         .solved(solvedIds.contains(cp.getProblem().getId()))
+                        .leetcodeUrl(cp.getProblem().getLeetcodeUrl())
+                        .gfgUrl(cp.getProblem().getGfgUrl())
                         .build())
                 .collect(Collectors.toList());
     }
