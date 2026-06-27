@@ -26,17 +26,25 @@ export const DashboardGreeting: React.FC<DashboardGreetingProps> = ({ name = 'Vi
         </p>
       </div>
 
-      {/* Developer illustration */}
-      <div className="hidden md:block absolute right-0 top-[-80px] w-[420px] h-[360px] rounded-2xl overflow-hidden shadow-lg z-0 border border-dash-border">
+      {/* Developer illustration (glassy floating layout with balanced edge blends) */}
+      <div className="hidden md:block absolute right-0 top-[-100px] w-[420px] h-[420px] rounded-2xl overflow-hidden pointer-events-none z-0">
         <img
-          src={isLight ? "/images/dashboard_developer_light_user.jpg" : "/images/dashboard_developer.png"}
-          alt="Developer workstation"
+          src={isLight ? "/images/dashboard_developer_light_seamless.png" : "/images/dashboard_developer_transparent.png"}
+          alt="Developer working"
           className="w-full h-full object-cover object-center"
         />
-        {/* Soft edge blend for seamless integration */}
+        {/* Dynamic blend gradients matching exact background for seamless glassy edge balance */}
         <div 
-          className="absolute inset-y-0 left-0 w-12 pointer-events-none"
-          style={{ background: `linear-gradient(to right, ${fadeColor} 0%, transparent 100%)` }}
+          className="absolute inset-y-0 left-0 w-20 pointer-events-none"
+          style={{ background: `linear-gradient(to right, ${fadeColor} 0%, ${fadeColor}cc 35%, transparent 100%)` }}
+        />
+        <div 
+          className="absolute inset-x-0 bottom-0 h-20 pointer-events-none"
+          style={{ background: `linear-gradient(to top, ${fadeColor} 0%, ${fadeColor}cc 35%, transparent 100%)` }}
+        />
+        <div 
+          className="absolute inset-x-0 top-0 h-14 pointer-events-none"
+          style={{ background: `linear-gradient(to bottom, ${fadeColor}88 0%, transparent 100%)` }}
         />
       </div>
     </div>
