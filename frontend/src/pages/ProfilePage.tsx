@@ -103,7 +103,9 @@ export const ProfilePage: React.FC = () => {
   // Fetch all profile and dashboard data dynamically from API
   const fetchProfileData = async () => {
     try {
-      setLoading(true);
+      if (!localStorage.getItem('cf_prof_platforms')) {
+        setLoading(true);
+      }
       const [platRes, statsRes, heatRes, progRes, actRes] = await Promise.all([
         api.get<PlatformItem[]>('/profile/platforms'),
         api.get<StatsResponse>('/dashboard/stats'),
@@ -118,7 +120,16 @@ export const ProfilePage: React.FC = () => {
       setProgress(progRes.data);
       setRecentActivityList(actRes.data);
 
-      // Fetch dashboard details for each connected platform to aggregate badges and contest history
+      localStorage.setItem('cf_prof_platforms', JSON.stringify(platRes.data));
+      localStorage.setItem('cf_prof_stats', JSON.stringify(statsRes.data));
+      localStorage.setItem('cf_prof_heatmap', JSON.stringify(heatRes.data));
+      localStorage.setItem('cf_prof_progress', JSON.stringify(progRes.data));
+      localStorage.setItem('cf_prof_activity', JSON.stringify(actRes.data));
+
+      // UNBLOCK LOADING IMMEDIATELY! Render profile UI instantly!
+      setLoading(false);
+
+      // Fetch connected platform dashboards asynchronously in background without blocking UI
       const connected = platRes.data.filter(p => p.connected);
       if (connected.length > 0) {
         const dashPromises = connected.map(p => 
@@ -130,9 +141,12 @@ export const ProfilePage: React.FC = () => {
             })
         );
         const dashDataList = await Promise.all(dashPromises);
-        setPlatformDashboards(dashDataList.filter(d => d !== null));
+        const validDashboards = dashDataList.filter(d => d !== null);
+        setPlatformDashboards(validDashboards);
+        localStorage.setItem('cf_prof_dashboards', JSON.stringify(validDashboards));
       } else {
         setPlatformDashboards([]);
+        localStorage.setItem('cf_prof_dashboards', JSON.stringify([]));
       }
 
     } catch (err) {
