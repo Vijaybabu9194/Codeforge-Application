@@ -240,12 +240,13 @@
 }
 .dash-nav-item:hover {
   color: #FFFFFF;
-  background: rgba(74, 108, 247, 0.08);
+  background: rgba(14, 165, 233, 0.15);
 }
 .dash-nav-item.active {
-  color: #FFFFFF;
-  background: #4A6CF7;
-  font-weight: 600;
+  color: #FFFFFF !important;
+  background: #0284C7 !important; /* Rich, vibrant, punchy Electric Sky Blue */
+  font-weight: 700 !important;
+  box-shadow: 0 4px 16px rgba(2, 132, 199, 0.4) !important;
 }
 
 /* Difficulty Badges */
@@ -307,11 +308,7 @@
 .light-theme body,
 .light-theme #root,
 .light-theme main,
-.light-theme .bg-dash-bg,
-.light-theme .bg-\[\#020205\],
-.light-theme .bg-\[\#030712\],
-.light-theme .bg-\[\#060912\],
-.light-theme .bg-\[\#0B1120\] {
+.light-theme .bg-dash-bg {
   background-color: #F8FAFC !important;
   color: #0F172A !important;
 }
@@ -319,9 +316,7 @@
 /* Topbar, Sidebar & Headers */
 .light-theme header,
 .light-theme aside,
-.light-theme .bg-dash-sidebar,
-.light-theme .bg-\[\#050814\],
-.light-theme .bg-\[\#0D1425\] {
+.light-theme .bg-dash-sidebar {
   background-color: #FFFFFF !important;
   border-color: #E2E8F0 !important;
 }
@@ -329,108 +324,52 @@
 /* Dashboard Cards & Surfaces */
 .light-theme .dash-card,
 .light-theme .feature-card,
-.light-theme .bg-dash-card,
-.light-theme .bg-\[\#080C1E\],
-.light-theme .bg-\[\#090D1A\],
-.light-theme .bg-\[\#0B1026\],
-.light-theme .bg-\[\#0C1222\],
-.light-theme .bg-\[\#0D1222\],
-.light-theme .bg-\[\#0D1224\],
-.light-theme .bg-\[\#0D1326\],
-.light-theme .bg-\[\#0E1326\],
-.light-theme .bg-\[\#0F1526\],
-.light-theme .bg-\[\#0F172A\],
-.light-theme .bg-\[\#101629\],
-.light-theme .bg-\[\#111827\],
-.light-theme .bg-\[\#131B36\],
-.light-theme .bg-\[\#1A2238\],
-.light-theme .bg-slate-900,
-.light-theme .bg-slate-800 {
+.light-theme .bg-dash-card {
   background-color: #FFFFFF !important;
   color: #0F172A !important;
   border-color: #E2E8F0 !important;
   box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04) !important;
 }
 
-/* Translucent Overlays & Sub-panels Inside Cards */
-.light-theme .bg-white\/\[0\.01\],
-.light-theme .bg-white\/\[0\.015\],
-.light-theme .bg-white\/\[0\.02\],
-.light-theme .bg-white\/\[0\.03\],
-.light-theme .bg-white\/\[0\.04\],
-.light-theme .bg-white\/\[0\.05\],
-.light-theme .bg-white\/\[0\.06\],
-.light-theme .bg-white\/\[0\.08\],
-.light-theme .bg-white\/\[0\.1\],
-.light-theme .bg-white\/5,
-.light-theme .bg-white\/10 {
-  background-color: #F1F5F9 !important;
-  border-color: #E2E8F0 !important;
-}
-
-/* Developer Illustration Gradient Blends in DashboardGreeting */
-.light-theme .from-\[\#030712\] {
-  --tw-gradient-from: #F8FAFC !important;
-  --tw-gradient-to: rgb(248 250 252 / 0) !important;
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
-}
-.light-theme .via-\[\#030712\]\/40 {
-  --tw-gradient-stops: var(--tw-gradient-from), rgb(248 250 252 / 0.4), var(--tw-gradient-to) !important;
-}
-.light-theme .from-\[\#030712\]\/20 {
-  --tw-gradient-from: rgb(248 250 252 / 0.2) !important;
-  --tw-gradient-to: rgb(248 250 252 / 0) !important;
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
-}
-
 /* General Borders */
-.light-theme .border-dash-border,
-.light-theme .border-white\/\[0\.04\],
-.light-theme .border-white\/\[0\.05\],
-.light-theme .border-white\/\[0\.06\],
-.light-theme .border-white\/\[0\.07\],
-.light-theme .border-white\/\[0\.08\],
-.light-theme .border-white\/\[0\.1\],
-.light-theme .border-white\/\[0\.15\],
-.light-theme .border-white\/\[0\.2\],
-.light-theme .border-white\/10,
-.light-theme .border-white\/20 {
+.light-theme .border-dash-border {
   border-color: #E2E8F0 !important;
 }
 
-/* 100% Text Visibility Across All Components & Pages */
-.light-theme .text-white,
-.light-theme .text-slate-100,
-.light-theme .text-slate-200,
-.light-theme .text-gray-100,
-.light-theme .text-gray-200,
-.light-theme .text-dash-textPrimary {
+/* 100% Text Visibility Across All Components & Pages (Excluding company logos, badges & tooltips) */
+.light-theme .text-white:not([class*="company-logo"] *):not([data-company-logo] *):not(.tooltip-content *):not([class*="tooltip"] *),
+.light-theme .text-slate-100:not([class*="company-logo"] *):not([class*="tooltip"] *),
+.light-theme .text-slate-200:not([class*="company-logo"] *):not([class*="tooltip"] *),
+.light-theme .text-gray-100:not([class*="company-logo"] *):not([class*="tooltip"] *),
+.light-theme .text-gray-200:not([class*="company-logo"] *):not([class*="tooltip"] *),
+.light-theme .text-dash-textPrimary:not([class*="company-logo"] *):not([class*="tooltip"] *) {
   color: #0F172A !important;
 }
 
-/* Re-grant White Text to Colored Primary Buttons, Badges, & Active States */
-.light-theme button.bg-dash-blue,
-.light-theme button.bg-\[\#4A6CF7\],
-.light-theme button.bg-primary,
-.light-theme button.bg-indigo-600,
-.light-theme button.bg-blue-600,
-.light-theme button.bg-emerald-600,
-.light-theme .btn-landing-primary,
+/* Enforce pure white text on dark tooltips */
+.tooltip-content,
+[class*="tooltip-content"] {
+  color: #FFFFFF !important;
+}
+.tooltip-content *,
+[class*="tooltip-content"] * {
+  color: #FFFFFF !important;
+}
+
+/* Re-grant White Text & Sky Blue Background to Active Buttons, Badges, & Active States in Light Theme */
 .light-theme .dash-nav-item.active,
-.light-theme .bg-[#4A6CF7],
+.light-theme button.bg-dash-blue,
+.light-theme button.bg-primary,
+.light-theme .btn-landing-primary,
 .light-theme .bg-dash-blue,
 .light-theme .bg-primary {
+  background-color: #0284C7 !important; /* Vibrant punchy Electric Sky Blue */
   color: #FFFFFF !important;
 }
 .light-theme button.bg-dash-blue *,
-.light-theme button.bg-\[\#4A6CF7\] *,
 .light-theme button.bg-primary *,
-.light-theme button.bg-indigo-600 *,
-.light-theme button.bg-blue-600 *,
-.light-theme button.bg-emerald-600 *,
 .light-theme .btn-landing-primary *,
 .light-theme .dash-nav-item.active *,
-.light-theme .bg-[#4A6CF7] *,
 .light-theme .bg-dash-blue *,
 .light-theme .bg-primary * {
   color: #FFFFFF !important;

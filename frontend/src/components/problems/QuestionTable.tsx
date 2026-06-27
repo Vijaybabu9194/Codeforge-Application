@@ -47,33 +47,33 @@ export const QuestionTable: React.FC<QuestionTableProps> = ({
   }
 
   return (
-    <div className="bg-white border border-[#E5E7EB] rounded-premium shadow-card overflow-hidden">
+    <div className="dash-card border rounded-2xl shadow-sm overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse min-w-[800px]">
           <thead>
-            <tr className="border-b border-[#E5E7EB] bg-[#F8FAFC] text-[9.5px] font-bold text-secondaryText uppercase tracking-wider select-none">
-              <th className="py-2 px-2 w-10 text-center">Status</th>
-              <th className="py-2 px-2 text-left max-w-[240px]">Problem</th>
-              <th className="py-2 px-2 w-16 text-center">Solve</th>
-              <th className="py-2 px-2 w-16 text-center">Resource</th>
-              <th className="py-2 px-2 w-20 text-center">Practice</th>
-              <th className="py-2 px-2 w-12 text-center">Note</th>
-              <th className="py-2 px-2 w-32">Companies</th>
-              <th className="py-2 px-2 w-20 text-center">Difficulty</th>
+            <tr className="border-b border-dash-border bg-white/[0.02] text-[10px] font-extrabold text-dash-textMuted uppercase tracking-wider select-none">
+              <th className="py-2.5 px-2 w-10 text-center">Status</th>
+              <th className="py-2.5 px-2 text-left max-w-[240px]">Problem</th>
+              <th className="py-2.5 px-2 w-16 text-center">Solve</th>
+              <th className="py-2.5 px-2 w-16 text-center">Resource</th>
+              <th className="py-2.5 px-2 w-20 text-center">Practice</th>
+              <th className="py-2.5 px-2 w-12 text-center">Note</th>
+              <th className="py-2.5 px-2 w-32">Companies</th>
+              <th className="py-2.5 px-2 w-20 text-center">Difficulty</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#E5E7EB] text-[11.5px] font-semibold text-[#111827]">
+          <tbody className="divide-y divide-dash-border text-[11.5px] font-semibold text-slate-900 dark:text-white">
             {problems.map((prob) => {
               return (
-                <tr key={prob.id} className="hover:bg-[#FAFBFC] transition group">
+                <tr key={prob.id} className="hover:bg-white/[0.04] transition group">
                   {/* Status Checkbox */}
-                  <td className="py-1 px-1 text-center align-middle w-10">
+                  <td className="py-1.5 px-2 text-center align-middle w-10">
                     <button
                       onClick={() => onSolveToggle(prob.id)}
                       className={`w-4.5 h-4.5 mx-auto rounded-md border flex items-center justify-center transition hover:scale-105 active:scale-95 ${
                         prob.solved
-                          ? 'bg-success/15 border-success text-success'
-                          : 'border-slate-300 hover:border-success text-transparent hover:text-success/50'
+                          ? 'bg-emerald-500/15 border-emerald-500 text-emerald-500'
+                          : 'border-slate-300 dark:border-white/20 text-transparent hover:border-emerald-500 hover:text-emerald-500/50'
                       }`}
                     >
                       <Check className="w-2.5 h-2.5 stroke-[3.5]" />
@@ -81,7 +81,7 @@ export const QuestionTable: React.FC<QuestionTableProps> = ({
                   </td>
 
                   {/* Problem Title */}
-                  <td className="py-1.5 px-2 align-middle text-left font-bold text-text group-hover:text-primary cursor-pointer transition max-w-[240px]">
+                  <td className="py-1.5 px-2 align-middle text-left font-bold text-slate-900 dark:text-white group-hover:text-[#4A6CF7] cursor-pointer transition max-w-[240px]">
                     <span onClick={() => onSolve(prob)} className="truncate block" title={prob.title}>
                       {prob.title}
                     </span>
@@ -150,7 +150,7 @@ export const QuestionTable: React.FC<QuestionTableProps> = ({
                         prob.companyInfo.slice(0, 4).map((comp, cIdx) => (
                           <div key={cIdx} className="tooltip-trigger relative">
                             <CompanyLogo name={comp.name} logoUrl={comp.logoUrl} className="w-5.5 h-5.5" />
-                            <div className="tooltip-content absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 bg-black/95 text-[9px] font-bold text-white px-2 py-0.5 rounded border border-white/10 whitespace-nowrap opacity-0 pointer-events-none transition duration-150 z-20">
+                            <div className="tooltip-content absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 bg-black/95 text-[9px] font-bold px-2 py-0.5 rounded border border-white/20 whitespace-nowrap opacity-0 pointer-events-none transition duration-150 z-20 shadow-lg" style={{ color: '#FFFFFF' }}>
                               {comp.name}
                             </div>
                           </div>
@@ -159,7 +159,7 @@ export const QuestionTable: React.FC<QuestionTableProps> = ({
                         prob.companies.slice(0, 4).map((cName, cIdx) => (
                           <div key={cIdx} className="tooltip-trigger relative">
                             <CompanyLogo name={cName} className="w-5.5 h-5.5" />
-                            <div className="tooltip-content absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 bg-black/95 text-[9px] font-bold text-white px-2 py-0.5 rounded border border-white/10 whitespace-nowrap opacity-0 pointer-events-none transition duration-150 z-20">
+                            <div className="tooltip-content absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 bg-black/95 text-[9px] font-bold px-2 py-0.5 rounded border border-white/20 whitespace-nowrap opacity-0 pointer-events-none transition duration-150 z-20 shadow-lg" style={{ color: '#FFFFFF' }}>
                               {cName}
                             </div>
                           </div>

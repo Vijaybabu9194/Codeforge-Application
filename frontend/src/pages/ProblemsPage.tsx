@@ -327,13 +327,13 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
               onClick={() => { setSelectedTopicId(t.id); setShowMoreTopics(false); }}
               className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all duration-200 flex-shrink-0 ${
                 selectedTopicId === t.id
-                  ? 'bg-[#4A6CF7] text-white shadow-lg shadow-[#4A6CF7]/25'
-                  : 'bg-white/[0.03] border border-white/[0.06] text-[#7B8AB8] hover:text-white hover:bg-white/[0.06]'
+                  ? 'bg-[#0EA5E9] text-white shadow-lg shadow-[#0EA5E9]/25'
+                  : 'dash-card border text-slate-700 dark:text-[#7B8AB8] hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06]'
               }`}
             >
               <span className="text-[11px]">{t.icon || '📋'}</span>
               {t.name}
-              <span className={`text-[10px] font-black ml-0.5 ${selectedTopicId === t.id ? 'text-white/70' : 'text-[#4A5580]'}`}>
+              <span className={`text-[10px] font-black ml-0.5 ${selectedTopicId === t.id ? 'text-white/80' : 'text-slate-500 dark:text-[#4A5580]'}`}>
                 {t.problemCount}
               </span>
             </button>
@@ -345,8 +345,8 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
               onClick={e => { e.stopPropagation(); setShowMoreTopics(v => !v); }}
               className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-all duration-200 ${
                 showMoreTopics || extraTopics.some(t => t.id === selectedTopicId)
-                  ? 'bg-[#4A6CF7] text-white shadow-lg shadow-[#4A6CF7]/25'
-                  : 'bg-white/[0.03] border border-white/[0.06] text-[#7B8AB8] hover:text-white hover:bg-white/[0.06]'
+                  ? 'bg-[#0EA5E9] text-white shadow-lg shadow-[#0EA5E9]/25'
+                  : 'dash-card border text-slate-700 dark:text-[#7B8AB8] hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06]'
               }`}
             >
               More <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${showMoreTopics ? 'rotate-180' : ''}`} />
@@ -357,9 +357,9 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
         {/* Second row: Expanded extra topics (inline below the topics) */}
         {extraTopics.length > 0 && showMoreTopics && (
           <div 
-            className="bg-[#0D1224]/40 border border-white/[0.06] rounded-xl p-3"
+            className="dash-card border rounded-xl p-3 shadow-md"
           >
-            <p className="text-[9px] font-bold text-[#4A5580] uppercase tracking-wider mb-2 px-1">Other Topics</p>
+            <p className="text-[10px] font-extrabold text-slate-500 dark:text-[#4A5580] uppercase tracking-wider mb-2 px-1">Other Topics</p>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
               {extraTopics.map(t => (
                 <button
@@ -367,13 +367,13 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
                   onClick={() => { setSelectedTopicId(t.id); }}
                   className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all text-left ${
                     selectedTopicId === t.id
-                      ? 'bg-[#4A6CF7] text-white'
-                      : 'text-[#7B8AB8] hover:text-white hover:bg-white/[0.04] border border-white/[0.06] bg-[#0F1526]/50'
+                      ? 'bg-[#0EA5E9] text-white'
+                      : 'text-slate-700 dark:text-[#7B8AB8] hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.04] border border-dash-border bg-slate-50 dark:bg-[#0F1526]/50'
                   }`}
                 >
                   <span className="text-[11px] flex-shrink-0">{t.icon || '📋'}</span>
                   <span className="truncate">{t.name}</span>
-                  <span className="ml-auto text-[9px] font-black text-[#4A5580] flex-shrink-0">{t.problemCount}</span>
+                  <span className="ml-auto text-[9px] font-black text-slate-500 dark:text-[#4A5580] flex-shrink-0">{t.problemCount}</span>
                 </button>
               ))}
             </div>
@@ -385,13 +385,13 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
       <div className="flex items-center gap-3" onClick={e => e.stopPropagation()}>
         {/* Search */}
         <div className="relative flex-1">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#4A5580] pointer-events-none" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-[#4A5580] pointer-events-none" />
           <input
             type="text"
             placeholder="Search problems..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-[#0F1526] border border-white/[0.06] rounded-xl text-sm text-white placeholder-[#4A5580] focus:outline-none focus:border-[#4A6CF7]/40 transition-all"
+            className="w-full pl-10 pr-4 py-2.5 dash-card border rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-[#4A5580] focus:outline-none focus:border-[#0EA5E9] transition-all"
           />
         </div>
 
@@ -399,18 +399,18 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
         <div className="relative">
           <button
             onClick={() => { setDiffOpen(v => !v); setStatusOpen(false); }}
-            className="flex items-center gap-2 px-4 py-2.5 bg-[#0F1526] border border-white/[0.06] rounded-xl text-sm text-[#7B8AB8] hover:text-white transition-all whitespace-nowrap"
+            className="flex items-center gap-2 px-4 py-2.5 dash-card border rounded-xl text-sm text-slate-700 dark:text-[#7B8AB8] hover:text-slate-900 dark:hover:text-white transition-all whitespace-nowrap"
           >
             {difficulty} <ChevronDown className="w-3.5 h-3.5" />
           </button>
           {diffOpen && (
-            <div className="absolute top-full left-0 mt-1 bg-[#0F1526] border border-white/[0.08] rounded-xl shadow-2xl shadow-black/50 z-30 min-w-[160px] p-1.5">
+            <div className="absolute top-full left-0 mt-1 dash-card border rounded-xl shadow-2xl z-30 min-w-[160px] p-1.5">
               {['All Difficulties', 'Easy', 'Medium', 'Hard'].map(d => (
                 <button
                   key={d}
                   onClick={() => { setDifficulty(d); setDiffOpen(false); }}
                   className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
-                    difficulty === d ? 'text-white bg-white/[0.06]' : 'text-[#7B8AB8] hover:text-white hover:bg-white/[0.04]'
+                    difficulty === d ? 'text-white bg-[#0EA5E9]' : 'text-slate-700 dark:text-[#7B8AB8] hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.04]'
                   }`}
                 >
                   {d}
@@ -421,7 +421,7 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
         </div>
 
         {/* All Companies (cosmetic) */}
-        <button className="flex items-center gap-2 px-4 py-2.5 bg-[#0F1526] border border-white/[0.06] rounded-xl text-sm text-[#7B8AB8] hover:text-white transition-all whitespace-nowrap">
+        <button className="flex items-center gap-2 px-4 py-2.5 dash-card border rounded-xl text-sm text-slate-700 dark:text-[#7B8AB8] hover:text-slate-900 dark:hover:text-white transition-all whitespace-nowrap">
           All Companies <ChevronDown className="w-3.5 h-3.5" />
         </button>
 
@@ -429,18 +429,18 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
         <div className="relative">
           <button
             onClick={() => { setStatusOpen(v => !v); setDiffOpen(false); }}
-            className="flex items-center gap-2 px-4 py-2.5 bg-[#0F1526] border border-white/[0.06] rounded-xl text-sm text-[#7B8AB8] hover:text-white transition-all whitespace-nowrap"
+            className="flex items-center gap-2 px-4 py-2.5 dash-card border rounded-xl text-sm text-slate-700 dark:text-[#7B8AB8] hover:text-slate-900 dark:hover:text-white transition-all whitespace-nowrap"
           >
             {statusFilter} <ChevronDown className="w-3.5 h-3.5" />
           </button>
           {statusOpen && (
-            <div className="absolute top-full left-0 mt-1 bg-[#0F1526] border border-white/[0.08] rounded-xl shadow-2xl shadow-black/50 z-30 min-w-[140px] p-1.5">
+            <div className="absolute top-full left-0 mt-1 dash-card border rounded-xl shadow-2xl z-30 min-w-[140px] p-1.5">
               {['All Status', 'Solved', 'Unsolved'].map(s => (
                 <button
                   key={s}
                   onClick={() => { setStatusFilter(s); setStatusOpen(false); }}
                   className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
-                    statusFilter === s ? 'text-white bg-white/[0.06]' : 'text-[#7B8AB8] hover:text-white hover:bg-white/[0.04]'
+                    statusFilter === s ? 'text-white bg-[#0EA5E9]' : 'text-slate-700 dark:text-[#7B8AB8] hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.04]'
                   }`}
                 >
                   {s}
@@ -478,56 +478,56 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
                 });
 
               return (
-                <div key={sub.id} className="bg-[#0F1526] border border-white/[0.05] rounded-xl overflow-hidden">
+                <div key={sub.id} className="dash-card border rounded-xl overflow-hidden shadow-sm">
                   {/* Pattern Header */}
                   <div
-                    className="w-full px-5 py-3.5 flex items-center justify-between bg-white/[0.015]"
+                    className="w-full px-5 py-3.5 flex items-center justify-between bg-white/[0.02]"
                   >
                     <div className="flex items-center gap-2.5">
-                      <div className="w-1.5 h-5 rounded-full bg-[#4A6CF7] flex-shrink-0" />
-                      <h3 className="text-[13px] font-bold text-white text-left">{sub.name}</h3>
+                      <div className="w-1.5 h-5 rounded-full bg-[#0EA5E9] flex-shrink-0" />
+                      <h3 className="text-[13px] font-bold text-slate-900 dark:text-white text-left">{sub.name}</h3>
                       {sub.description && (
-                        <span className="text-[10px] text-[#4A5580] font-medium hidden sm:block">{sub.description}</span>
+                        <span className="text-[10px] text-slate-500 dark:text-[#4A5580] font-medium hidden sm:block">{sub.description}</span>
                       )}
                     </div>
                     <div className="flex items-center gap-3 flex-shrink-0">
-                      <span className="text-[10px] font-black text-[#4A5580] uppercase tracking-wider">
+                      <span className="text-[10px] font-black text-slate-500 dark:text-[#4A5580] uppercase tracking-wider">
                         {probs.length} problem{probs.length !== 1 ? 's' : ''}
                       </span>
                     </div>
                   </div>
-                  <div className="border-t border-white/[0.06]" />
+                  <div className="border-t border-dash-border" />
 
                   {/* Problems table for this pattern */}
                   <table className="w-full border-collapse">
                     <thead>
-                      <tr className="border-b border-white/[0.08] bg-white/[0.01]">
-                        <th className="py-2.5 px-3 text-center text-[10px] font-extrabold text-[#7B8AB8] uppercase tracking-wider w-12 border-r border-white/[0.05]">Status</th>
-                        <th className="py-2.5 px-4 text-left text-[10px] font-extrabold text-[#7B8AB8] uppercase tracking-wider border-r border-white/[0.05] w-[180px] max-w-[180px]">Problem</th>
-                        <th className="py-2.5 px-3 text-center text-[10px] font-extrabold text-[#7B8AB8] uppercase tracking-wider w-16 border-r border-white/[0.05]">Solve</th>
-                        <th className="py-2.5 px-3 text-center text-[10px] font-extrabold text-[#7B8AB8] uppercase tracking-wider w-16 border-r border-white/[0.05]">Resource</th>
-                        <th className="py-2.5 px-3 text-center text-[10px] font-extrabold text-[#7B8AB8] uppercase tracking-wider w-24 border-r border-white/[0.05]">Practice</th>
-                        <th className="py-2.5 px-3 text-center text-[10px] font-extrabold text-[#7B8AB8] uppercase tracking-wider w-14 border-r border-white/[0.05]">Note</th>
-                        <th className="py-2.5 px-4 text-center text-[10px] font-extrabold text-[#7B8AB8] uppercase tracking-wider w-36 border-r border-white/[0.05]">Companies</th>
-                        <th className="py-2.5 px-4 text-center text-[10px] font-extrabold text-[#7B8AB8] uppercase tracking-wider w-24">Difficulty</th>
+                      <tr className="border-b border-dash-border bg-white/[0.02]">
+                        <th className="py-2.5 px-3 text-center text-[10px] font-extrabold text-dash-textMuted uppercase tracking-wider w-12 border-r border-dash-border">Status</th>
+                        <th className="py-2.5 px-4 text-left text-[10px] font-extrabold text-dash-textMuted uppercase tracking-wider border-r border-dash-border w-[180px] max-w-[180px]">Problem</th>
+                        <th className="py-2.5 px-3 text-center text-[10px] font-extrabold text-dash-textMuted uppercase tracking-wider w-16 border-r border-dash-border">Solve</th>
+                        <th className="py-2.5 px-3 text-center text-[10px] font-extrabold text-dash-textMuted uppercase tracking-wider w-16 border-r border-dash-border">Resource</th>
+                        <th className="py-2.5 px-3 text-center text-[10px] font-extrabold text-dash-textMuted uppercase tracking-wider w-24 border-r border-dash-border">Practice</th>
+                        <th className="py-2.5 px-3 text-center text-[10px] font-extrabold text-dash-textMuted uppercase tracking-wider w-14 border-r border-dash-border">Note</th>
+                        <th className="py-2.5 px-4 text-center text-[10px] font-extrabold text-dash-textMuted uppercase tracking-wider w-36 border-r border-dash-border">Companies</th>
+                        <th className="py-2.5 px-4 text-center text-[10px] font-extrabold text-dash-textMuted uppercase tracking-wider w-24">Difficulty</th>
                       </tr>
                     </thead>
                     <tbody>
                       {probs.map((prob, idx) => (
                         <tr
                           key={prob.id}
-                          className={`border-b border-white/[0.04] hover:bg-white/[0.025] transition-colors duration-150 group ${
+                          className={`border-b border-dash-border hover:bg-white/[0.025] transition-colors duration-150 group ${
                             idx === probs.length - 1 ? 'border-b-0' : ''
                           }`}
                         >
                           {/* Status */}
-                          <td className="py-3 px-3 text-center align-middle w-12 border-r border-white/[0.05]">
+                          <td className="py-3 px-3 text-center align-middle w-12 border-r border-dash-border">
                             <button
                               onClick={() => toggleSolved(prob.id)}
                               className={`w-5 h-5 mx-auto rounded-full flex items-center justify-center border transition-all duration-200 hover:scale-105 active:scale-95 ${
                                 prob.solved
-                                  ? 'bg-[#4ADE80]/10 border-[#4ADE80]/40 text-[#4ADE80]'
-                                  : 'border-white/[0.10] text-transparent hover:border-[#4ADE80]/40 hover:text-[#4ADE80]/50'
+                                  ? 'bg-emerald-500/15 border-emerald-500 text-emerald-500'
+                                  : 'border-slate-300 dark:border-white/[0.15] text-transparent hover:border-emerald-500/40 hover:text-emerald-500/50'
                               }`}
                               title={prob.solved ? 'Mark as unsolved' : 'Mark as solved'}
                             >
@@ -536,10 +536,10 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
                           </td>
 
                           {/* Problem Title */}
-                          <td className="py-3 px-4 align-middle border-r border-white/[0.05] w-[180px] max-w-[180px]">
+                          <td className="py-3 px-4 align-middle border-r border-dash-border w-[180px] max-w-[180px]">
                             <span
                               onClick={() => onSolve(prob)}
-                              className="text-[14px] font-semibold text-[#C8D1E8] group-hover:text-white cursor-pointer transition-colors duration-150 truncate block"
+                              className="text-[14px] font-bold text-slate-900 dark:text-[#C8D1E8] group-hover:text-[#0EA5E9] dark:group-hover:text-white cursor-pointer transition-colors duration-150 truncate block"
                               title={prob.title}
                             >
                               {prob.title}
@@ -547,20 +547,20 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
                           </td>
 
                           {/* Solve */}
-                          <td className="py-3 px-3 text-center align-middle w-16 border-r border-white/[0.05]">
+                          <td className="py-3 px-3 text-center align-middle w-16 border-r border-dash-border">
                             <button
                               onClick={() => onSolve(prob)}
-                              className="px-2.5 py-1 bg-[#4A6CF7]/10 hover:bg-[#4A6CF7] border border-[#4A6CF7]/30 hover:border-[#4A6CF7] text-[#4A6CF7] hover:text-white rounded-lg text-[10px] font-black uppercase tracking-wider transition-all duration-200 hover:scale-105 active:scale-95"
+                              className="px-2.5 py-1 bg-[#0EA5E9]/10 hover:bg-[#0EA5E9] border border-[#0EA5E9]/30 hover:border-[#0EA5E9] text-[#0EA5E9] hover:text-white rounded-lg text-[10px] font-black uppercase tracking-wider transition-all duration-200 hover:scale-105 active:scale-95"
                             >
                               Solve
                             </button>
                           </td>
 
                           {/* Resource */}
-                          <td className="py-3 px-3 text-center align-middle w-16 border-r border-white/[0.05]">
+                          <td className="py-3 px-3 text-center align-middle w-16 border-r border-dash-border">
                             <button
                               onClick={() => onSolve(prob)}
-                              className="w-7 h-7 mx-auto rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-[#4A5580] hover:text-[#A78BFA] hover:border-[#A78BFA]/30 hover:bg-[#A78BFA]/5 transition-all duration-200 hover:scale-105 active:scale-95"
+                              className="w-7 h-7 mx-auto rounded-lg bg-white/[0.03] border border-dash-border flex items-center justify-center text-[#4A5580] hover:text-[#0EA5E9] hover:border-[#0EA5E9]/30 hover:bg-[#0EA5E9]/5 transition-all duration-200 hover:scale-105 active:scale-95"
                               title="Open Scratchpad & Resources"
                             >
                               <FileText className="w-3.5 h-3.5" />
@@ -568,7 +568,7 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
                           </td>
 
                           {/* Practice */}
-                          <td className="py-3 px-3 text-center align-middle w-24 border-r border-white/[0.05]">
+                          <td className="py-3 px-3 text-center align-middle w-24 border-r border-dash-border">
                             <div className="flex items-center justify-center gap-6 scale-75 origin-center">
                               {prob.leetcodeUrl ? (
                                 <a href={prob.leetcodeUrl} target="_blank" rel="noopener noreferrer" title="Solve on LeetCode" className="block hover:scale-110 active:scale-95 transition-transform duration-200">
@@ -588,13 +588,13 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
                           </td>
 
                           {/* Note */}
-                          <td className="py-3 px-3 text-center align-middle w-14 border-r border-white/[0.05]">
+                          <td className="py-3 px-3 text-center align-middle w-14 border-r border-dash-border">
                             <button
                               onClick={() => setActiveNoteProblem(prob)}
                               className={`w-6 h-6 mx-auto rounded-full flex items-center justify-center border transition-all duration-200 hover:scale-105 active:scale-95 ${
                                 problemNotes[prob.id]
                                   ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400 shadow-sm shadow-yellow-500/10'
-                                  : 'border-white/[0.08] text-[#4A5580] hover:border-[#4A6CF7]/40 hover:text-[#4A6CF7] hover:bg-[#4A6CF7]/5'
+                                  : 'border-slate-300 dark:border-white/[0.08] text-[#4A5580] hover:border-[#0EA5E9]/40 hover:text-[#0EA5E9] hover:bg-[#0EA5E9]/5'
                               }`}
                               title={problemNotes[prob.id] ? 'View/Edit Note' : 'Add Note'}
                             >
@@ -609,7 +609,7 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
                                 prob.companies.slice(0, 4).map((c, i) => (
                                   <div key={i} className="relative group/logo">
                                     <CompanyLogo name={c} className="w-6 h-6" />
-                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 bg-black/90 text-[9px] font-bold text-white px-2 py-0.5 rounded whitespace-nowrap opacity-0 group-hover/logo:opacity-100 pointer-events-none transition-opacity duration-150 z-20 border border-white/10">
+                                    <div className="tooltip-content absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 bg-black/95 text-[9px] font-bold px-2 py-0.5 rounded whitespace-nowrap opacity-0 group-hover/logo:opacity-100 pointer-events-none transition-opacity duration-150 z-20 border border-white/20 shadow-lg" style={{ color: '#FFFFFF' }}>
                                       {c}
                                     </div>
                                   </div>
@@ -655,26 +655,26 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
         </div>
       ) : selectedTopicId === null ? (
         <>
-      <div className="bg-[#0F1526] border border-white/[0.05] rounded-xl overflow-hidden">
+      <div className="dash-card border rounded-xl overflow-hidden shadow-sm">
         <table className="w-full border-collapse">
           <thead>
-            <tr className="border-b border-white/[0.08]">
+            <tr className="border-b border-dash-border bg-white/[0.02]">
               {/* Status */}
-              <th className="py-3.5 px-3 text-center text-[11px] font-extrabold text-[#7B8AB8] uppercase tracking-wider w-12 border-r border-white/[0.05]">Status</th>
+              <th className="py-3.5 px-3 text-center text-[11px] font-extrabold text-dash-textMuted uppercase tracking-wider w-12 border-r border-dash-border">Status</th>
               {/* Problem */}
-              <th className="py-3.5 px-4 text-left text-[11px] font-extrabold text-[#7B8AB8] uppercase tracking-wider border-r border-white/[0.05] w-[180px] max-w-[180px]">Problem</th>
+              <th className="py-3.5 px-4 text-left text-[11px] font-extrabold text-dash-textMuted uppercase tracking-wider border-r border-dash-border w-[180px] max-w-[180px]">Problem</th>
               {/* Solve */}
-              <th className="py-3.5 px-3 text-center text-[11px] font-extrabold text-[#7B8AB8] uppercase tracking-wider w-16 border-r border-white/[0.05]">Solve</th>
+              <th className="py-3.5 px-3 text-center text-[11px] font-extrabold text-dash-textMuted uppercase tracking-wider w-16 border-r border-dash-border">Solve</th>
               {/* Resource */}
-              <th className="py-3.5 px-3 text-center text-[11px] font-extrabold text-[#7B8AB8] uppercase tracking-wider w-20 border-r border-white/[0.05]">Resource</th>
+              <th className="py-3.5 px-3 text-center text-[11px] font-extrabold text-dash-textMuted uppercase tracking-wider w-20 border-r border-dash-border">Resource</th>
               {/* Practice */}
-              <th className="py-3.5 px-3 text-center text-[11px] font-extrabold text-[#7B8AB8] uppercase tracking-wider w-24 border-r border-white/[0.05]">Practice</th>
+              <th className="py-3.5 px-3 text-center text-[11px] font-extrabold text-dash-textMuted uppercase tracking-wider w-24 border-r border-dash-border">Practice</th>
               {/* Note */}
-              <th className="py-3.5 px-3 text-center text-[11px] font-extrabold text-[#7B8AB8] uppercase tracking-wider w-16 border-r border-white/[0.05]">Note</th>
+              <th className="py-3.5 px-3 text-center text-[11px] font-extrabold text-dash-textMuted uppercase tracking-wider w-16 border-r border-dash-border">Note</th>
               {/* Companies */}
-              <th className="py-3.5 px-4 text-center text-[11px] font-extrabold text-[#7B8AB8] uppercase tracking-wider w-36 border-r border-white/[0.05]">Companies</th>
+              <th className="py-3.5 px-4 text-center text-[11px] font-extrabold text-dash-textMuted uppercase tracking-wider w-36 border-r border-dash-border">Companies</th>
               {/* Difficulty */}
-              <th className="py-3.5 px-4 text-center text-[11px] font-extrabold text-[#7B8AB8] uppercase tracking-wider w-24">Difficulty</th>
+              <th className="py-3.5 px-4 text-center text-[11px] font-extrabold text-dash-textMuted uppercase tracking-wider w-24">Difficulty</th>
             </tr>
           </thead>
           <tbody>
@@ -697,13 +697,13 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
                   className="border-b border-white/[0.06] hover:bg-white/[0.025] transition-colors duration-150 group"
                 >
                   {/* ── Status ── */}
-                  <td className="py-3 px-3 text-center align-middle border-r border-white/[0.05]">
+                  <td className="py-3 px-3 text-center align-middle border-r border-dash-border">
                     <button
                       onClick={() => toggleSolved(prob.id)}
                       className={`w-5 h-5 mx-auto rounded-full flex items-center justify-center border transition-all duration-200 hover:scale-105 active:scale-95 ${
                         prob.solved
-                          ? 'bg-[#4ADE80]/10 border-[#4ADE80]/40 text-[#4ADE80]'
-                          : 'border-white/[0.10] text-transparent hover:border-[#4ADE80]/40 hover:text-[#4ADE80]/50'
+                          ? 'bg-emerald-500/15 border-emerald-500 text-emerald-500'
+                          : 'border-slate-300 dark:border-white/[0.15] text-transparent hover:border-emerald-500/40 hover:text-emerald-500/50'
                       }`}
                       title={prob.solved ? 'Mark as unsolved' : 'Mark as solved'}
                     >
@@ -712,10 +712,10 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
                   </td>
 
                   {/* ── Problem Title ── */}
-                  <td className="py-3 px-4 align-middle border-r border-white/[0.05] w-[180px] max-w-[180px]">
+                  <td className="py-3 px-4 align-middle border-r border-dash-border w-[180px] max-w-[180px]">
                     <span
                       onClick={() => onSolve(prob)}
-                      className="text-[14px] font-semibold text-[#C8D1E8] group-hover:text-white cursor-pointer transition-colors duration-150 truncate block"
+                      className="text-[14px] font-bold text-slate-900 dark:text-[#C8D1E8] group-hover:text-[#0EA5E9] dark:group-hover:text-white cursor-pointer transition-colors duration-150 truncate block"
                       title={prob.title}
                     >
                       {prob.title}
@@ -723,20 +723,20 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
                   </td>
 
                   {/* ── Solve Button ── */}
-                  <td className="py-3 px-3 text-center align-middle border-r border-white/[0.05]">
+                  <td className="py-3 px-3 text-center align-middle border-r border-dash-border">
                     <button
                       onClick={() => onSolve(prob)}
-                      className="px-2.5 py-1 bg-[#4A6CF7]/10 hover:bg-[#4A6CF7] border border-[#4A6CF7]/30 hover:border-[#4A6CF7] text-[#4A6CF7] hover:text-white rounded-lg text-[10px] font-black uppercase tracking-wider transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-md hover:shadow-[#4A6CF7]/20"
+                      className="px-2.5 py-1 bg-[#0EA5E9]/10 hover:bg-[#0EA5E9] border border-[#0EA5E9]/30 hover:border-[#0EA5E9] text-[#0EA5E9] hover:text-white rounded-lg text-[10px] font-black uppercase tracking-wider transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-md hover:shadow-[#0EA5E9]/20"
                     >
                       Solve
                     </button>
                   </td>
 
                   {/* ── Resource (notebook icon) ── */}
-                  <td className="py-3 px-3 text-center align-middle border-r border-white/[0.05]">
+                  <td className="py-3 px-3 text-center align-middle border-r border-dash-border">
                     <button
                       onClick={() => onSolve(prob)}
-                      className="w-7 h-7 mx-auto rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-[#4A5580] hover:text-[#A78BFA] hover:border-[#A78BFA]/30 hover:bg-[#A78BFA]/5 transition-all duration-200 hover:scale-105 active:scale-95"
+                      className="w-7 h-7 mx-auto rounded-lg bg-white/[0.03] border border-dash-border flex items-center justify-center text-[#4A5580] hover:text-[#0EA5E9] hover:border-[#0EA5E9]/30 hover:bg-[#0EA5E9]/5 transition-all duration-200 hover:scale-105 active:scale-95"
                       title="Open Scratchpad & Resources"
                     >
                       <FileText className="w-3.5 h-3.5" />
@@ -744,7 +744,7 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
                   </td>
 
                   {/* ── Practice (LeetCode + GFG) ── */}
-                  <td className="py-3 px-3 text-center align-middle border-r border-white/[0.05]">
+                  <td className="py-3 px-3 text-center align-middle border-r border-dash-border">
                     <div className="flex items-center justify-center gap-6 scale-75 origin-center">
                       {/* LeetCode */}
                       {prob.leetcodeUrl ? (
@@ -782,13 +782,13 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
                   </td>
 
                   {/* ── Note ── */}
-                  <td className="py-3 px-3 text-center align-middle border-r border-white/[0.05]">
+                  <td className="py-3 px-3 text-center align-middle border-r border-dash-border">
                     <button
                       onClick={() => setActiveNoteProblem(prob)}
                       className={`w-6 h-6 mx-auto rounded-full flex items-center justify-center border transition-all duration-200 hover:scale-105 active:scale-95 ${
                         problemNotes[prob.id]
                           ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400 shadow-sm shadow-yellow-500/10'
-                          : 'border-white/[0.08] text-[#4A5580] hover:border-[#4A6CF7]/40 hover:text-[#4A6CF7] hover:bg-[#4A6CF7]/5'
+                          : 'border-slate-300 dark:border-white/[0.08] text-[#4A5580] hover:border-[#0EA5E9]/40 hover:text-[#0EA5E9] hover:bg-[#0EA5E9]/5'
                       }`}
                       title={problemNotes[prob.id] ? 'View/Edit Note' : 'Add Note'}
                     >
@@ -797,13 +797,13 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
                   </td>
 
                   {/* ── Companies ── */}
-                  <td className="py-3 px-4 align-middle border-r border-white/[0.05]">
+                  <td className="py-3 px-4 align-middle border-r border-dash-border">
                     <div className="flex items-center justify-center gap-4 flex-wrap">
                       {prob.companies && prob.companies.length > 0 ? (
                         prob.companies.slice(0, 4).map((c, i) => (
                           <div key={i} className="relative group/logo">
                             <CompanyLogo name={c} className="w-6 h-6" />
-                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 bg-black/90 text-[9px] font-bold text-white px-2 py-0.5 rounded whitespace-nowrap opacity-0 group-hover/logo:opacity-100 pointer-events-none transition-opacity duration-150 z-20 border border-white/10">
+                            <div className="tooltip-content absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 bg-black/95 text-[9px] font-bold px-2 py-0.5 rounded whitespace-nowrap opacity-0 group-hover/logo:opacity-100 pointer-events-none transition-opacity duration-150 z-20 border border-white/20 shadow-lg" style={{ color: '#FFFFFF' }}>
                               {c}
                             </div>
                           </div>
