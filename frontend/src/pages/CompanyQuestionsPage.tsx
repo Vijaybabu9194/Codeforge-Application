@@ -176,15 +176,15 @@ export const CompanyQuestionsPage: React.FC = () => {
                       onClick={() => handleSelectCompany(c.id)}
                       className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-200 flex-shrink-0 ${
                         isActive
-                          ? 'bg-[#0284C7] text-white shadow-lg shadow-[#0284C7]/25'
-                          : 'dash-card border border-dash-border text-slate-700 dark:text-[#7B8AB8] hover:text-slate-900 dark:hover:text-white'
+                          ? 'bg-[#4A6CF7] text-white shadow-lg shadow-[#4A6CF7]/25'
+                          : 'bg-white/[0.03] border border-white/[0.06] text-[#7B8AB8] hover:text-white hover:bg-white/[0.06]'
                       }`}
                     >
                       <span className={`flex-shrink-0 ${isActive ? 'opacity-100' : 'opacity-80'}`}>
                         <CompanyLogo name={c.name} logoUrl={c.logoUrl} className="w-5 h-5" />
                       </span>
                       <span>{c.name}</span>
-                      <span className={`text-[10px] font-black ml-0.5 ${isActive ? 'text-white/70' : 'text-slate-500 dark:text-[#4A5580]'}`}>
+                      <span className={`text-[10px] font-black ml-0.5 ${isActive ? 'text-white/70' : 'text-[#4A5580]'}`}>
                         {c.totalQuestions}
                       </span>
                     </button>
@@ -197,8 +197,8 @@ export const CompanyQuestionsPage: React.FC = () => {
                     onClick={e => { e.stopPropagation(); setShowMoreCompanies(v => !v); }}
                     className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-200 ${
                       showMoreCompanies || extraCompanies.some(c => c.id === selectedCompanyId)
-                        ? 'bg-[#0284C7] text-white shadow-lg shadow-[#0284C7]/25'
-                        : 'dash-card border border-dash-border text-slate-700 dark:text-[#7B8AB8] hover:text-slate-900 dark:hover:text-white'
+                        ? 'bg-[#4A6CF7] text-white shadow-lg shadow-[#4A6CF7]/25'
+                        : 'bg-white/[0.03] border border-white/[0.06] text-[#7B8AB8] hover:text-white hover:bg-white/[0.06]'
                     }`}
                   >
                     More ({extraCompanies.length})
@@ -211,8 +211,8 @@ export const CompanyQuestionsPage: React.FC = () => {
 
           {/* Row 2: Inline expanded companies — horizontal flex-wrap below Row 1 */}
           {!loadingList && showMoreCompanies && extraCompanies.length > 0 && (
-            <div className="dash-card border border-dash-border rounded-2xl p-3">
-              <p className="text-[9px] font-bold text-slate-500 dark:text-[#4A5580] uppercase tracking-wider mb-2 px-1">
+            <div className="bg-[#0D1224]/50 border border-white/[0.06] rounded-2xl p-3">
+              <p className="text-[9px] font-bold text-[#4A5580] uppercase tracking-wider mb-2 px-1">
                 More Companies
               </p>
               <div className="flex flex-wrap gap-2">
@@ -224,8 +224,8 @@ export const CompanyQuestionsPage: React.FC = () => {
                       onClick={() => handleSelectCompany(c.id)}
                       className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-200 ${
                         isActive
-                          ? 'bg-[#0284C7] text-white shadow-lg shadow-[#0284C7]/25'
-                          : 'dash-card border border-dash-border text-slate-700 dark:text-[#7B8AB8] hover:text-slate-900 dark:hover:text-white'
+                          ? 'bg-[#4A6CF7] text-white shadow-lg shadow-[#4A6CF7]/25'
+                          : 'text-[#7B8AB8] hover:text-white hover:bg-white/[0.06] border border-white/[0.06] bg-[#0F1526]/50'
                       }`}
                     >
                       <span className="flex-shrink-0">

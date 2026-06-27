@@ -539,7 +539,7 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
                           <td className="py-3 px-4 align-middle border-r border-dash-border w-[180px] max-w-[180px]">
                             <span
                               onClick={() => onSolve(prob)}
-                              className="text-[14px] font-bold text-slate-900 dark:text-[#C8D1E8] group-hover:text-[#0EA5E9] dark:group-hover:text-white cursor-pointer transition-colors duration-150 truncate block"
+                              className="text-[14px] font-medium text-slate-900 dark:text-white group-hover:text-[#0EA5E9] dark:group-hover:text-[#38BDF8] cursor-pointer transition-colors duration-150 truncate block"
                               title={prob.title}
                             >
                               {prob.title}
@@ -700,10 +700,10 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
                   <td className="py-3 px-3 text-center align-middle border-r border-dash-border">
                     <button
                       onClick={() => toggleSolved(prob.id)}
-                      className={`w-5 h-5 mx-auto rounded-full flex items-center justify-center border transition-all duration-200 hover:scale-105 active:scale-95 ${
+                      className={`w-5 h-5 mx-auto rounded-full flex items-center justify-center border-2 transition-all duration-200 hover:scale-110 active:scale-95 ${
                         prob.solved
-                          ? 'bg-emerald-500/15 border-emerald-500 text-emerald-500'
-                          : 'border-slate-300 dark:border-white/[0.15] text-transparent hover:border-emerald-500/40 hover:text-emerald-500/50'
+                          ? 'bg-emerald-500 border-emerald-500 text-white shadow-sm'
+                          : 'border-slate-400 dark:border-white/[0.20] bg-white/50 dark:bg-transparent text-transparent hover:border-emerald-500 hover:text-emerald-500'
                       }`}
                       title={prob.solved ? 'Mark as unsolved' : 'Mark as solved'}
                     >
@@ -715,7 +715,7 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
                   <td className="py-3 px-4 align-middle border-r border-dash-border w-[180px] max-w-[180px]">
                     <span
                       onClick={() => onSolve(prob)}
-                      className="text-[14px] font-bold text-slate-900 dark:text-[#C8D1E8] group-hover:text-[#0EA5E9] dark:group-hover:text-white cursor-pointer transition-colors duration-150 truncate block"
+                      className="text-[14px] font-extrabold text-slate-900 dark:text-white group-hover:text-[#0EA5E9] dark:group-hover:text-[#38BDF8] cursor-pointer transition-colors duration-150 truncate block"
                       title={prob.title}
                     >
                       {prob.title}

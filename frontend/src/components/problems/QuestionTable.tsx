@@ -81,7 +81,7 @@ export const QuestionTable: React.FC<QuestionTableProps> = ({
                   </td>
 
                   {/* Problem Title */}
-                  <td className="py-1.5 px-2 align-middle text-left font-bold text-slate-900 dark:text-white group-hover:text-[#4A6CF7] cursor-pointer transition max-w-[240px]">
+                  <td className="py-1.5 px-2 align-middle text-left font-extrabold text-slate-900 dark:text-white group-hover:text-[#4A6CF7] dark:group-hover:text-[#38BDF8] cursor-pointer transition max-w-[240px]">
                     <span onClick={() => onSolve(prob)} className="truncate block" title={prob.title}>
                       {prob.title}
                     </span>

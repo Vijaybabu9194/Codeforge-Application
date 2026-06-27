@@ -111,44 +111,43 @@ export const ProblemOfTheDayPage: React.FC = () => {
   const padZero = (n: number) => String(n).padStart(2, '0');
 
   return (
-  return (
-    <div className="min-h-[calc(100vh-64px)] select-none bg-dash-bg text-slate-900 dark:text-slate-100 font-sans relative overflow-x-hidden">
+    <div className="min-h-[calc(100vh-64px)] select-none bg-[#060912] text-slate-100 font-sans relative overflow-x-hidden">
       {/* Background ambient lighting orbs */}
-      <div className="absolute top-0 left-1/4 w-72 h-72 bg-[#0284C7]/5 rounded-full blur-[100px] pointer-events-none" />
-      <div className="absolute top-1/3 right-1/4 w-72 h-72 bg-purple-600/5 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute top-0 left-1/4 w-72 h-72 bg-indigo-600/10 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute top-1/3 right-1/4 w-72 h-72 bg-purple-600/10 rounded-full blur-[100px] pointer-events-none" />
 
       <div className="max-w-[1140px] mx-auto px-5 py-6 space-y-5 relative z-10">
 
         {/* ── COMPACT HERO BANNER ── */}
-        <div className="relative overflow-hidden dash-card border border-dash-border rounded-2xl p-5 lg:p-6 shadow-sm">
+        <div className="relative overflow-hidden bg-gradient-to-br from-[#0F172A] via-[#131B36] to-[#0D1326] border border-white/[0.08] rounded-2xl p-5 lg:p-6 shadow-xl">
           <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             {/* Left Column: Title & Live Clock */}
             <div className="space-y-1.5">
               <div className="flex items-center gap-3 flex-wrap">
-                <div className="inline-flex items-center gap-1.5 bg-[#0284C7]/10 border border-[#0284C7]/20 px-2.5 py-0.5 rounded-full text-[11px] font-bold text-[#0284C7]">
-                  <Calendar className="w-3 h-3 text-[#0284C7]" />
+                <div className="inline-flex items-center gap-1.5 bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-0.5 rounded-full text-[11px] font-bold text-indigo-300">
+                  <Calendar className="w-3 h-3 text-indigo-400" />
                   <span>{todayDateStr}</span>
                 </div>
-                <div className="flex items-center gap-1 text-[11px] font-semibold text-dash-textMuted">
-                  <Clock className="w-3 h-3 text-amber-500" />
-                  <span>Resets in: <span className="font-mono font-bold text-amber-500">{padZero(timeLeft.hours)}h {padZero(timeLeft.minutes)}m</span></span>
+                <div className="flex items-center gap-1 text-[11px] font-semibold text-slate-400">
+                  <Clock className="w-3 h-3 text-amber-400" />
+                  <span>Resets in: <span className="font-mono font-bold text-amber-400">{padZero(timeLeft.hours)}h {padZero(timeLeft.minutes)}m</span></span>
                 </div>
               </div>
 
-              <h1 className="text-2xl lg:text-3xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
+              <h1 className="text-2xl lg:text-3xl font-black tracking-tight text-white flex items-center gap-2.5">
                 Problem of The Day
-                <Sparkles className="w-5 h-5 text-amber-500 animate-pulse" />
+                <Sparkles className="w-5 h-5 text-amber-400 animate-pulse" />
               </h1>
             </div>
 
             {/* Right Column: Compact Streak Badge */}
-            <div className="dash-card border border-dash-border rounded-xl p-3 px-4 flex items-center gap-3 self-start sm:self-center shadow-sm">
+            <div className="bg-slate-900/70 border border-white/10 rounded-xl p-3 px-4 flex items-center gap-3 self-start sm:self-center shadow-md">
               <div className="w-9 h-9 rounded-lg bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center shadow-md shadow-orange-500/20">
                 <Flame className="w-5 h-5 text-slate-950 fill-slate-950" />
               </div>
               <div>
-                <div className="text-xl font-black text-slate-900 dark:text-white leading-none">{streak} <span className="text-xs font-bold text-orange-500">Days</span></div>
-                <div className="text-[9px] font-extrabold text-dash-textMuted uppercase tracking-wider mt-1">Streak</div>
+                <div className="text-xl font-black text-white leading-none">{streak} <span className="text-xs font-bold text-orange-400">Days</span></div>
+                <div className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mt-1">Streak</div>
               </div>
             </div>
           </div>
@@ -161,29 +160,29 @@ export const ProblemOfTheDayPage: React.FC = () => {
             const cardGlow = isLeetCode 
               ? 'hover:border-amber-500/30 hover:shadow-[0_10px_30px_-10px_rgba(245,158,11,0.15)]' 
               : 'hover:border-emerald-500/30 hover:shadow-[0_10px_30px_-10px_rgba(47,141,70,0.15)]';
-            const brandAccentBg = isLeetCode ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
+            const brandAccentBg = isLeetCode ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
 
             return (
               <div
                 key={p.id}
-                className={`dash-card border rounded-2xl p-5 flex flex-col justify-between gap-5 transition-all duration-300 shadow-sm relative group overflow-hidden ${cardGlow}`}
+                className={`bg-[#0C1222]/90 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 flex flex-col justify-between gap-5 transition-all duration-300 shadow-xl relative group overflow-hidden ${cardGlow}`}
               >
                 <div className="space-y-4 relative z-10">
                   {/* Card Top Header */}
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl dash-card border border-dash-border flex items-center justify-center p-2 shadow-sm">
+                      <div className="w-10 h-10 rounded-xl bg-slate-900/80 border border-white/10 flex items-center justify-center p-2 shadow-sm">
                         {isLeetCode ? <LeetCodeLogo className="w-5.5 h-5.5" /> : <GfgLogo className="w-7.5 h-3.5" />}
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <h3 className="text-sm font-bold text-slate-900 dark:text-white tracking-tight">{p.platformName}</h3>
+                          <h3 className="text-sm font-bold text-white tracking-tight">{p.platformName}</h3>
                           <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full border ${brandAccentBg}`}>
                             {p.subtitle}
                           </span>
                         </div>
-                        <span className="text-[10px] text-dash-textMuted font-medium flex items-center gap-1 mt-0.5">
-                          <ShieldCheck className="w-3 h-3 text-[#0284C7]" />
+                        <span className="text-[10px] text-slate-400 font-medium flex items-center gap-1 mt-0.5">
+                          <ShieldCheck className="w-3 h-3 text-indigo-400" />
                           Official Daily Problem
                         </span>
                       </div>
@@ -194,11 +193,11 @@ export const ProblemOfTheDayPage: React.FC = () => {
                       onClick={() => toggleSolve(p.id)}
                       className={`px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 transition-all active:scale-95 ${
                         p.solved
-                          ? 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/30'
-                          : 'dash-card text-dash-textSecondary border border-dash-border hover:text-slate-900 dark:hover:text-white'
+                          ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                          : 'bg-slate-900/80 text-slate-400 border border-white/10 hover:text-white hover:bg-white/10'
                       }`}
                     >
-                      <CheckCircle2 className={`w-3.5 h-3.5 ${p.solved ? 'fill-emerald-500 text-slate-950' : ''}`} />
+                      <CheckCircle2 className={`w-3.5 h-3.5 ${p.solved ? 'fill-emerald-400 text-slate-950' : ''}`} />
                       <span>{p.solved ? 'Solved' : 'Mark Solved'}</span>
                     </button>
                   </div>
@@ -209,38 +208,38 @@ export const ProblemOfTheDayPage: React.FC = () => {
                       <span className={`px-2.5 py-0.5 rounded-lg text-[10px] font-black border tracking-wide ${getDiffBadgeStyle(p.difficulty)}`}>
                         {p.difficulty}
                       </span>
-                      <span className="text-[10px] font-semibold text-dash-textSecondary bg-white/[0.04] px-2.5 py-0.5 rounded-lg border border-dash-border">
+                      <span className="text-[10px] font-semibold text-slate-300 bg-white/[0.04] px-2.5 py-0.5 rounded-lg border border-white/[0.06]">
                         {p.category}
                       </span>
                     </div>
 
-                    <h2 className="text-base lg:text-lg font-bold text-slate-900 dark:text-white leading-snug tracking-tight group-hover:text-[#0284C7] transition-colors">
+                    <h2 className="text-base lg:text-lg font-bold text-white leading-snug tracking-tight group-hover:text-indigo-300 transition-colors">
                       {p.title}
                     </h2>
                   </div>
 
                   {/* Compact Metrics Row */}
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="dash-card border border-dash-border rounded-xl p-2.5 px-3">
-                      <div className="text-[9px] font-extrabold text-dash-textMuted uppercase tracking-wider flex items-center gap-1">
-                        <TrendingUp className="w-3 h-3 text-[#0284C7]" />
+                    <div className="bg-slate-900/50 border border-white/[0.05] rounded-xl p-2.5 px-3">
+                      <div className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                        <TrendingUp className="w-3 h-3 text-indigo-400" />
                         Acceptance
                       </div>
-                      <div className="text-xs font-bold text-slate-900 dark:text-white mt-0.5">{p.accuracy}</div>
+                      <div className="text-xs font-bold text-white mt-0.5">{p.accuracy}</div>
                     </div>
-                    <div className="dash-card border border-dash-border rounded-xl p-2.5 px-3">
-                      <div className="text-[9px] font-extrabold text-dash-textMuted uppercase tracking-wider flex items-center gap-1">
-                        <Zap className="w-3 h-3 text-amber-500" />
+                    <div className="bg-slate-900/50 border border-white/[0.05] rounded-xl p-2.5 px-3">
+                      <div className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                        <Zap className="w-3 h-3 text-amber-400" />
                         Submissions
                       </div>
-                      <div className="text-xs font-bold text-slate-900 dark:text-white mt-0.5">{p.submissions}</div>
+                      <div className="text-xs font-bold text-white mt-0.5">{p.submissions}</div>
                     </div>
                   </div>
                 </div>
 
                 {/* Card Footer: Reward & Solve Action */}
-                <div className="pt-3.5 border-t border-dash-border flex items-center justify-between gap-3 relative z-10">
-                  <div className="flex items-center gap-1.5 text-[11px] font-semibold text-amber-500 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-lg">
+                <div className="pt-3.5 border-t border-white/[0.06] flex items-center justify-between gap-3 relative z-10">
+                  <div className="flex items-center gap-1.5 text-[11px] font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-lg">
                     <Award className="w-3.5 h-3.5 flex-shrink-0" />
                     <span className="truncate">{p.reward}</span>
                   </div>
@@ -265,10 +264,10 @@ export const ProblemOfTheDayPage: React.FC = () => {
         </div>
 
         {/* ── COMPACT FOOTER STRIP ── */}
-        <div className="dash-card border border-dash-border rounded-xl p-3.5 px-4 flex items-center gap-3">
-          <Zap className="w-4 h-4 text-[#0284C7] flex-shrink-0" />
-          <p className="text-xs text-dash-textSecondary font-medium">
-            <strong className="text-slate-900 dark:text-white font-semibold">Pro tip:</strong> Solving daily challenges keeps your streak alive and builds consistent problem-solving habits!
+        <div className="bg-slate-900/50 border border-white/[0.06] rounded-xl p-3.5 px-4 flex items-center gap-3">
+          <Zap className="w-4 h-4 text-indigo-400 flex-shrink-0" />
+          <p className="text-xs text-slate-400 font-medium">
+            <strong className="text-white font-semibold">Pro tip:</strong> Solving daily challenges keeps your streak alive and builds consistent problem-solving habits!
           </p>
         </div>
 

@@ -240,13 +240,13 @@
 }
 .dash-nav-item:hover {
   color: #FFFFFF;
-  background: rgba(14, 165, 233, 0.15);
+  background: rgba(74, 108, 247, 0.12);
 }
 .dash-nav-item.active {
   color: #FFFFFF !important;
-  background: #0284C7 !important; /* Rich, vibrant, punchy Electric Sky Blue */
-  font-weight: 700 !important;
-  box-shadow: 0 4px 16px rgba(2, 132, 199, 0.4) !important;
+  background: #4A6CF7 !important;
+  font-weight: 600;
+  box-shadow: 0 4px 14px rgba(74, 108, 247, 0.35);
 }
 
 /* Difficulty Badges */
@@ -345,9 +345,13 @@
 .light-theme [class*="bg-[#111827]"],
 .light-theme [class*="bg-[#131B36]"],
 .light-theme [class*="bg-[#1A2238]"],
-.light-theme .bg-slate-900,
-.light-theme .bg-slate-800 {
+.light-theme [class*="bg-slate-900"],
+.light-theme [class*="bg-slate-800"],
+.light-theme [class*="from-[#0F172A]"],
+.light-theme [class*="via-[#131B36]"],
+.light-theme [class*="to-[#0D1326]"] {
   background-color: #FFFFFF !important;
+  background-image: none !important;
   color: #0F172A !important;
   border-color: #E2E8F0 !important;
   box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04) !important;
@@ -358,8 +362,11 @@
 .light-theme [class*="bg-white/5"],
 .light-theme [class*="bg-white/10"],
 .light-theme [class*="bg-[#0D1224]"],
-.light-theme [class*="bg-[#0F1526]"] {
+.light-theme [class*="bg-[#0F1526]"],
+.light-theme [class*="bg-slate-900/"],
+.light-theme [class*="bg-black/"] {
   background-color: #F1F5F9 !important;
+  background-image: none !important;
   border-color: #E2E8F0 !important;
 }
 
@@ -371,7 +378,25 @@
   border-color: #E2E8F0 !important;
 }
 
-/* 100% Text Visibility Across All Components & Pages (Excluding company logos, badges & tooltips) */
+/* 100% Text Visibility & Pitch Black High Contrast Overrides */
+.light-theme th {
+  color: #0F172A !important;
+  font-weight: 900 !important;
+}
+
+.light-theme td span.block,
+.light-theme td span[title],
+.light-theme td span.truncate {
+  color: #0F172A !important;
+  font-weight: 500 !important;
+}
+
+/* Sharp Status Checkboxes ONLY in Light Theme (Status Column first cell) */
+.light-theme td:first-child button:not([class*="bg-emerald"]) {
+  border-color: #475569 !important;
+  border-width: 2px !important;
+}
+
 .light-theme .text-white:not([class*="company-logo"] *):not([data-company-logo] *):not(.tooltip-content *):not([class*="tooltip"] *),
 .light-theme .text-slate-100:not([class*="company-logo"] *):not([class*="tooltip"] *),
 .light-theme .text-slate-200:not([class*="company-logo"] *):not([class*="tooltip"] *),
@@ -397,7 +422,10 @@
 .light-theme button.bg-primary,
 .light-theme .btn-landing-primary,
 .light-theme .bg-dash-blue,
-.light-theme .bg-primary {
+.light-theme .bg-primary,
+.light-theme [class*="bg-[#4A6CF7]"],
+.light-theme [class*="from-[#4A6CF7]"],
+.light-theme [class*="from-indigo"] {
   background-color: #0284C7 !important; /* Vibrant punchy Electric Sky Blue */
   color: #FFFFFF !important;
 }
@@ -406,8 +434,23 @@
 .light-theme .btn-landing-primary *,
 .light-theme .dash-nav-item.active *,
 .light-theme .bg-dash-blue *,
-.light-theme .bg-primary * {
+.light-theme .bg-primary *,
+.light-theme [class*="bg-[#4A6CF7]"] * {
   color: #FFFFFF !important;
+}
+
+/* Roadmap & Accent Colors in Light Theme (Indigo/Violet -> Light Sky Blue) */
+.light-theme [class*="text-indigo"],
+.light-theme [class*="text-violet"],
+.light-theme [class*="text-[#818CF8]"],
+.light-theme [class*="text-[#A78BFA]"] {
+  color: #0284C7 !important;
+}
+.light-theme [class*="bg-indigo/"],
+.light-theme [class*="bg-violet/"],
+.light-theme [class*="border-indigo/"] {
+  background-color: rgba(2, 132, 199, 0.1) !important;
+  border-color: rgba(2, 132, 199, 0.25) !important;
 }
 
 /* Secondary & Muted Text Overrides for High Contrast readability */

@@ -162,27 +162,27 @@ export const CompanyDashboard: React.FC<CompanyDashboardProps> = ({ companyDetai
         {/* Most Asked Topics */}
         <div className="bg-[#0F1526] border border-white/[0.05] rounded-2xl p-5 flex flex-col">
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-6 h-6 rounded-lg bg-[#A78BFA]/10 flex items-center justify-center">
-              <Target className="w-3.5 h-3.5 text-[#A78BFA]" />
+            <div className="w-6 h-6 rounded-lg bg-[#0284C7]/10 flex items-center justify-center">
+              <Target className="w-3.5 h-3.5 text-[#0284C7]" />
             </div>
-            <h2 className="text-[12px] font-extrabold text-white uppercase tracking-wider">
+            <h2 className="text-[12px] font-black text-white uppercase tracking-wider">
               Top Topics
             </h2>
           </div>
-          <div className="flex-1 space-y-2 overflow-y-auto">
+          <div className="flex-1 space-y-2.5 overflow-y-auto">
             {companyDetail.topTopics?.length > 0 ? (
               companyDetail.topTopics.map((topic, i) => {
                 const maxCount = Math.max(...(companyDetail.topTopics?.map(t => t.count) ?? [1]));
                 const pct = Math.round((topic.count / maxCount) * 100);
                 return (
-                  <div key={i} className="space-y-1">
+                  <div key={i} className="space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-bold text-[#C8D1E8] truncate">{topic.topic}</span>
-                      <span className="text-[10px] font-black text-[#4A5580] ml-2 flex-shrink-0">{topic.count}</span>
+                      <span className="text-[12px] font-black text-slate-900 dark:text-[#C8D1E8] truncate">{topic.topic}</span>
+                      <span className="text-[11px] font-black text-slate-600 dark:text-[#4A5580] ml-2 flex-shrink-0">{topic.count}</span>
                     </div>
-                    <div className="h-1 bg-white/[0.05] rounded-full overflow-hidden">
+                    <div className="h-1.5 bg-slate-200 dark:bg-white/[0.05] rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-gradient-to-r from-[#4A6CF7] to-[#A78BFA] rounded-full transition-all duration-500"
+                        className="h-full bg-gradient-to-r from-[#0284C7] to-[#38BDF8] rounded-full transition-all duration-500"
                         style={{ width: `${pct}%` }}
                       />
                     </div>
