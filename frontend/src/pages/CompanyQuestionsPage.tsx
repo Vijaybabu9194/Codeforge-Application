@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import api from '../lib/api';
 import { useAuth } from '../context/AuthContext';
+import { Code2, ChevronDown, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { CompanyLogo } from '../components/CompanyLogos';
 
-import CompanySidebar from '../components/companies/CompanySidebar';
 import CompanyDashboard from '../components/companies/CompanyDashboard';
 import CompanyQuestionTable from '../components/companies/CompanyQuestionTable';
 
@@ -35,15 +36,19 @@ interface CompanyQuestion {
   solved: boolean;
 }
 
+const PINNED_COUNT = 7;
+const ITEMS_PER_PAGE = 10;
+
 export const CompanyQuestionsPage: React.FC = () => {
   const { updateUserStats } = useAuth();
   const [companies, setCompanies] = useState<CompanyListItem[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(null);
   const [companyDetail, setCompanyDetail] = useState<CompanyDetail | null>(null);
   const [questions, setQuestions] = useState<CompanyQuestion[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
   const [loadingList, setLoadingList] = useState(true);
   const [loadingDetail, setLoadingDetail] = useState(false);
+  const [showMoreCompanies, setShowMoreCompanies] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Fetch all companies list
   useEffect(() => {
@@ -67,13 +72,13 @@ export const CompanyQuestionsPage: React.FC = () => {
   // Fetch company details and questions when selected company changes
   useEffect(() => {
     if (!selectedCompanyId) return;
-
+    setCurrentPage(1);
     const fetchCompanyData = async () => {
       try {
         setLoadingDetail(true);
         const [detailRes, questionsRes] = await Promise.all([
           api.get<CompanyDetail>(`/companies/${selectedCompanyId}`),
-          api.get<CompanyQuestion[]>(`/companies/${selectedCompanyId}/problems`)
+          api.get<CompanyQuestion[]>(`/companies/${selectedCompanyId}/problems`),
         ]);
         setCompanyDetail(detailRes.data);
         setQuestions(questionsRes.data);
@@ -87,58 +92,255 @@ export const CompanyQuestionsPage: React.FC = () => {
   }, [selectedCompanyId]);
 
   const toggleSolved = async (id: number) => {
+    setQuestions(prev => prev.map(q => q.id === id ? { ...q, solved: !q.solved } : q));
     try {
-      // Optimistic update
-      setQuestions(prev => prev.map(q => q.id === id ? { ...q, solved: !q.solved } : q));
       await api.post(`/problems/${id}/solve`);
       updateUserStats();
     } catch (err) {
       console.error('Failed to solve problem:', err);
+      setQuestions(prev => prev.map(q => q.id === id ? { ...q, solved: !q.solved } : q));
     }
   };
 
-  // Filter companies list by query
-  const filteredCompanies = companies.filter(c => 
-    c.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const handleSelectCompany = (id: number) => {
+    setSelectedCompanyId(id);
+    setShowMoreCompanies(false);
+  };
+
+  // Pinned = first PINNED_COUNT companies; extras go in the "More" dropdown
+  const pinnedCompanies = useMemo(() => companies.slice(0, PINNED_COUNT), [companies]);
+  const extraCompanies = useMemo(() => companies.slice(PINNED_COUNT), [companies]);
+
+  // Pagination
+  const totalPages = Math.max(1, Math.ceil(questions.length / ITEMS_PER_PAGE));
+  const pagedQuestions = useMemo(
+    () => questions.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE),
+    [questions, currentPage]
   );
 
-  return (
-    <div className="flex min-h-[calc(100vh-64px)] select-none">
-      {/* LEFT SIDEBAR: COMPANIES */}
-      <CompanySidebar
-        companies={filteredCompanies}
-        selectedCompanyId={selectedCompanyId}
-        onCompanySelect={setSelectedCompanyId}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        loadingList={loadingList}
-      />
+  const getPaginationNums = (): (number | '...')[] => {
+    const pages: (number | '...')[] = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (currentPage > 3) pages.push('...');
+      const start = Math.max(2, currentPage - 1);
+      const end = Math.min(totalPages - 1, currentPage + 1);
+      for (let i = start; i <= end; i++) pages.push(i);
+      if (currentPage < totalPages - 2) pages.push('...');
+      pages.push(totalPages);
+    }
+    return pages;
+  };
 
-      {/* MAIN CONTENT AREA */}
-      <main className="flex-1 bg-[#FAFBFC] p-8 space-y-8 overflow-y-auto max-h-[calc(100vh-64px)]">
+  // Close "More" on outside click
+  useEffect(() => {
+    const handler = () => setShowMoreCompanies(false);
+    document.addEventListener('click', handler);
+    return () => document.removeEventListener('click', handler);
+  }, []);
+
+  return (
+    <div
+      className="min-h-[calc(100vh-64px)] select-none bg-[#060912]"
+      onClick={() => setShowMoreCompanies(false)}
+    >
+      <div className="max-w-[1200px] mx-auto px-6 py-6 space-y-5">
+
+        {/* ── PAGE HEADER ── */}
+        <div>
+          <h1 className="text-2xl font-bold text-white tracking-tight">Company Questions</h1>
+          <p className="text-[#4A5580] text-sm mt-0.5 font-medium">
+            Explore interview questions asked by top tech companies
+          </p>
+        </div>
+
+        {/* ── COMPANY TABS (like topic tabs in ProblemsPage) ── */}
+        <div className="space-y-3" onClick={e => e.stopPropagation()}>
+          <div className="flex flex-wrap items-center gap-2">
+
+            {loadingList ? (
+              // Loading skeletons for tabs
+              [...Array(6)].map((_, i) => (
+                <div key={i} className="h-9 w-24 bg-white/[0.04] rounded-xl animate-pulse" />
+              ))
+            ) : (
+              <>
+                {/* Pinned company tabs */}
+                {pinnedCompanies.map(c => {
+                  const isActive = selectedCompanyId === c.id;
+                  return (
+                    <button
+                      key={c.id}
+                      onClick={() => handleSelectCompany(c.id)}
+                      className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-200 flex-shrink-0 ${
+                        isActive
+                          ? 'bg-[#4A6CF7] text-white shadow-lg shadow-[#4A6CF7]/25'
+                          : 'bg-white/[0.03] border border-white/[0.06] text-[#7B8AB8] hover:text-white hover:bg-white/[0.06]'
+                      }`}
+                    >
+                      {/* Company logo */}
+                      <span className={`flex-shrink-0 ${isActive ? 'opacity-100' : 'opacity-80'}`}>
+                        <CompanyLogo name={c.name} logoUrl={c.logoUrl} className="w-5 h-5" />
+                      </span>
+                      <span>{c.name}</span>
+                      <span className={`text-[10px] font-black ml-0.5 ${isActive ? 'text-white/70' : 'text-[#4A5580]'}`}>
+                        {c.totalQuestions}
+                      </span>
+                    </button>
+                  );
+                })}
+
+                {/* More button */}
+                {extraCompanies.length > 0 && (
+                  <div className="relative">
+                    <button
+                      onClick={e => { e.stopPropagation(); setShowMoreCompanies(v => !v); }}
+                      className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-200 ${
+                        showMoreCompanies || extraCompanies.some(c => c.id === selectedCompanyId)
+                          ? 'bg-[#4A6CF7] text-white shadow-lg shadow-[#4A6CF7]/25'
+                          : 'bg-white/[0.03] border border-white/[0.06] text-[#7B8AB8] hover:text-white hover:bg-white/[0.06]'
+                      }`}
+                    >
+                      More ({extraCompanies.length})
+                      <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${showMoreCompanies ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {/* More dropdown */}
+                    {showMoreCompanies && (
+                      <div
+                        className="absolute top-full left-0 mt-2 bg-[#0D1224] border border-white/[0.08] rounded-2xl shadow-2xl shadow-black/60 z-30 p-3 min-w-[360px]"
+                        onClick={e => e.stopPropagation()}
+                      >
+                        <p className="text-[9px] font-bold text-[#4A5580] uppercase tracking-wider mb-2 px-1">
+                          All Companies
+                        </p>
+                        <div className="grid grid-cols-2 gap-1.5 max-h-72 overflow-y-auto pr-1">
+                          {extraCompanies.map(c => {
+                            const isActive = selectedCompanyId === c.id;
+                            return (
+                              <button
+                                key={c.id}
+                                onClick={() => handleSelectCompany(c.id)}
+                                className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-left transition-all ${
+                                  isActive
+                                    ? 'bg-[#4A6CF7] text-white'
+                                    : 'text-[#7B8AB8] hover:text-white hover:bg-white/[0.06] border border-white/[0.06] bg-[#0F1526]/50'
+                                }`}
+                              >
+                                <span className="flex-shrink-0">
+                                  <CompanyLogo name={c.name} logoUrl={c.logoUrl} className="w-5 h-5" />
+                                </span>
+                                <span className="truncate">{c.name}</span>
+                                <span className="ml-auto text-[9px] font-black text-[#4A5580] flex-shrink-0">
+                                  {c.totalQuestions}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* ── CONTENT ── */}
         {loadingDetail || !companyDetail ? (
-          <div className="space-y-8 animate-pulse">
-            <div className="h-20 bg-white border border-border rounded-premium" />
-            <div className="grid md:grid-cols-3 gap-6">
-              <div className="h-44 bg-white border border-border rounded-premium md:col-span-2" />
-              <div className="h-44 bg-white border border-border rounded-premium" />
+          <div className="space-y-5 animate-pulse">
+            <div className="h-24 bg-[#0F1526] border border-white/[0.05] rounded-2xl" />
+            <div className="grid md:grid-cols-3 gap-5">
+              <div className="h-44 bg-[#0F1526] border border-white/[0.05] rounded-2xl md:col-span-2" />
+              <div className="h-44 bg-[#0F1526] border border-white/[0.05] rounded-2xl" />
             </div>
-            <div className="h-64 bg-white border border-border rounded-premium" />
+            <div className="bg-[#0F1526] border border-white/[0.05] rounded-2xl overflow-hidden">
+              <div className="h-10 bg-white/[0.015] border-b border-white/[0.06]" />
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="h-12 border-b border-white/[0.04] bg-white/[0.01]" />
+              ))}
+            </div>
+            <div className="flex items-center justify-center gap-3 py-4">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#4A6CF7] to-[#A78BFA] flex items-center justify-center animate-pulse">
+                <Code2 className="w-4 h-4 text-white" />
+              </div>
+              <span className="text-[#7B8AB8] text-sm font-semibold">Loading company data...</span>
+            </div>
           </div>
         ) : (
           <>
-            {/* COMPANY STATS AND CHARTS */}
+            {/* Company Dashboard */}
             <CompanyDashboard companyDetail={companyDetail} />
 
-            {/* COMPANY QUESTIONS TABLE */}
+            {/* Questions Table (paginated slice) */}
             <CompanyQuestionTable
-              questions={questions}
+              questions={pagedQuestions}
               onSolveToggle={toggleSolved}
             />
+
+            {/* ── PAGINATION ── */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between gap-4 py-2">
+                {/* Info */}
+                <p className="text-[11px] font-semibold text-[#4A5580]">
+                  Showing{' '}
+                  <span className="text-[#7B8AB8]">{(currentPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(currentPage * ITEMS_PER_PAGE, questions.length)}</span>
+                  {' '}of{' '}
+                  <span className="text-[#7B8AB8]">{questions.length}</span>
+                  {' '}questions
+                </p>
+
+                {/* Page buttons */}
+                <div className="flex items-center gap-1">
+                  {/* Prev */}
+                  <button
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/[0.03] border border-white/[0.06] text-[#7B8AB8] hover:text-white hover:bg-white/[0.06] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+
+                  {getPaginationNums().map((p, i) =>
+                    p === '...' ? (
+                      <span key={`ellipsis-${i}`} className="w-8 h-8 flex items-center justify-center text-[#4A5580] text-xs font-bold">
+                        …
+                      </span>
+                    ) : (
+                      <button
+                        key={p}
+                        onClick={() => setCurrentPage(p as number)}
+                        className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all ${
+                          currentPage === p
+                            ? 'bg-[#4A6CF7] text-white shadow-lg shadow-[#4A6CF7]/30'
+                            : 'bg-white/[0.03] border border-white/[0.06] text-[#7B8AB8] hover:text-white hover:bg-white/[0.06]'
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    )
+                  )}
+
+                  {/* Next */}
+                  <button
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/[0.03] border border-white/[0.06] text-[#7B8AB8] hover:text-white hover:bg-white/[0.06] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
           </>
         )}
-      </main>
+
+      </div>
     </div>
   );
 };
+
 export default CompanyQuestionsPage;
