@@ -9,6 +9,7 @@ import ProblemEditorPage from './pages/ProblemEditorPage';
 import ContestsPage from './pages/ContestsPage';
 import DiscussPage from './pages/DiscussPage';
 import ProblemOfTheDayPage from './pages/ProblemOfTheDayPage';
+import RoadmapPage from './pages/RoadmapPage';
 import DashboardSidebar from './components/dashboard/DashboardSidebar';
 import DashboardTopbar from './components/dashboard/DashboardTopbar';
 
@@ -42,7 +43,7 @@ const DashboardContent: React.FC = () => {
       case 'discuss':
         return <DiscussPage />;
       case 'roadmap':
-        return <DiscussPage />;
+        return <RoadmapPage />;
       default:
         return <HomePage />;
     }
