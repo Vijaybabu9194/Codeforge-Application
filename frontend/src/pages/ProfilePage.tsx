@@ -62,14 +62,14 @@ export const ProfilePage: React.FC = () => {
   const hideTooltip = () => setTooltip(t => ({ ...t, visible: false }));
 
   const getColor = (level: number) => {
-    const isLight = document.documentElement.classList.contains('light-theme');
+    const isLight = document.documentElement.classList.contains('light-theme') || document.body.classList.contains('light-theme');
     switch (level) {
-      case 0: return isLight ? '#EBEDF0' : '#262626';
+      case 0: return isLight ? '#EBEDF0' : '#2D3748';
       case 1: return isLight ? '#9BE9A8' : '#0E4429';
       case 2: return isLight ? '#40C463' : '#006D32';
       case 3: return isLight ? '#30A14E' : '#26A641';
       case 4: return isLight ? '#216E39' : '#39D353';
-      default: return isLight ? '#EBEDF0' : '#262626';
+      default: return isLight ? '#EBEDF0' : '#2D3748';
     }
   };
   

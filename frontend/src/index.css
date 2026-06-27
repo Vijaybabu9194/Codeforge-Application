@@ -426,7 +426,10 @@
 .light-theme [class*="bg-[#4A6CF7]"],
 .light-theme [class*="from-[#4A6CF7]"],
 .light-theme [class*="from-indigo"] {
+  background: #0284C7 !important;
   background-color: #0284C7 !important; /* Vibrant punchy Electric Sky Blue */
+  background-image: none !important;
+  border-color: #0284C7 !important;
   color: #FFFFFF !important;
 }
 .light-theme button.bg-dash-blue *,
