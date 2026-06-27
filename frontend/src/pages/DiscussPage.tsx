@@ -21,9 +21,9 @@ export const DiscussPage: React.FC = () => {
           <h1 className="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
             Discuss
           </h1>
-          <div className="inline-flex items-center gap-2 bg-[#0284C7]/15 dark:bg-[#4A6CF7]/20 border border-[#0284C7]/40 dark:border-[#4A6CF7]/40 px-5 py-1.5 rounded-full shadow-sm">
-            <div className="w-2.5 h-2.5 rounded-full bg-[#0284C7] dark:bg-[#818CF8] animate-pulse" />
-            <span className="text-[#0284C7] dark:text-[#818CF8] text-sm font-extrabold tracking-wide">Coming Soon</span>
+          <div className="inline-flex items-center gap-2 bg-sky-100 dark:bg-indigo-950/80 border border-sky-300 dark:border-indigo-500/50 px-5 py-2 rounded-full shadow-sm">
+            <div className="w-2.5 h-2.5 rounded-full bg-sky-600 dark:bg-indigo-400 animate-pulse" />
+            <span className="text-sky-950 dark:text-indigo-100 text-sm font-black tracking-wider uppercase">Coming Soon</span>
           </div>
         </div>
 

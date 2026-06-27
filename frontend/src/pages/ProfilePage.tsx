@@ -630,8 +630,8 @@ export const ProfilePage: React.FC = () => {
 
   const renderPlatformStats = (extraClasses: string = "") => {
     return (
-      <div className={`bg-[#090D1A]/60 border border-white/[0.04] rounded-2xl p-5 flex flex-col space-y-4 ${extraClasses}`}>
-        <h2 className="text-[13px] font-bold text-white uppercase tracking-wider">
+      <div className={`dash-card border rounded-2xl p-5 flex flex-col space-y-4 shadow-sm ${extraClasses}`}>
+        <h2 className="text-[13px] font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">
           {selectedPlatformTab === 'CODEFORGE' ? 'Codeforge' : selectedPlatformTab.charAt(0) + selectedPlatformTab.slice(1).toLowerCase()} Stats
         </h2>
         
@@ -661,8 +661,8 @@ export const ProfilePage: React.FC = () => {
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                  <span className="text-[16px] font-extrabold text-white leading-none">{activeTotal}</span>
-                  <span className="text-[8px] text-[#7B8AB8] font-bold uppercase mt-1">Total</span>
+                  <span className="text-[16px] font-extrabold text-slate-900 dark:text-white leading-none">{activeTotal}</span>
+                  <span className="text-[8px] text-slate-500 dark:text-[#7B8AB8] font-extrabold uppercase mt-1">Total</span>
                 </div>
               </div>
 

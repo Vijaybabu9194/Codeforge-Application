@@ -183,7 +183,7 @@ export const LeetCodeDashboard: React.FC<LeetCodeDashboardProps> = ({
             <div className="h-36 w-36">
               <ResponsiveContainer width="100%" height="100%">
                 <RadialBarChart cx="50%" cy="50%" innerRadius="30%" outerRadius="100%" barSize={8} data={getRadialData()}>
-                  <RadialBar background dataKey="value" />
+                  <RadialBar background={{ fill: 'rgba(0,0,0,0.05)' }} dataKey="value" />
                 </RadialBarChart>
               </ResponsiveContainer>
             </div>
