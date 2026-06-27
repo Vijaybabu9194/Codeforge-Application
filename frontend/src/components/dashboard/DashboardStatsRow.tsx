@@ -10,7 +10,6 @@ interface StatCardProps {
   sparklineColor?: string;
   borderColorClass?: string;
   glowColorClass?: string;
-  icon?: React.ReactNode;
   isStreakCard?: boolean;
 }
 
@@ -23,7 +22,6 @@ const StatCard: React.FC<StatCardProps> = ({
   sparklineColor = '#4A6CF7',
   borderColorClass = 'border-white/[0.05]',
   glowColorClass = 'rgba(255,255,255,0)',
-  icon,
   isStreakCard = false,
 }) => {
   const sparklinePath = sparkline

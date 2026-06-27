@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Map, CheckCircle2, Circle, ExternalLink, ChevronDown, ChevronRight, Sparkles, Trophy, BookOpen, Layers, Zap } from 'lucide-react';
+import { Map, CheckCircle2, Circle, ExternalLink, ChevronDown, ChevronRight, Sparkles, Trophy, BookOpen, Layers } from 'lucide-react';
 
 interface RoadmapItem {
   id: string;

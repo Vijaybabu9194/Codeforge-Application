@@ -2,6 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../lib/api';
+import type {
+  ActivityItem,
+  HeatmapEntry,
+  ChartPoint,
+  PlatformDashboardResponse,
+  PlatformListItem,
+  ProgressResponse,
+  StatsResponse
+} from '../types';
 import { 
   MapPin, Calendar, Edit3, Share2, ShieldCheck, Info, ChevronDown, Check, X,
   TrendingUp, Star, Award, Flag, Loader2, RefreshCw
@@ -11,23 +20,20 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid
 } from 'recharts';
 
-interface PlatformItem {
+interface RecentContest {
+  id: string;
+  name: string;
   platform: string;
-  username: string | null;
-  problemsSolved: number;
-  contestRating: number;
-  connected: boolean;
+  isPositive: boolean;
+  change: string;
+  rating: number;
 }
 
-interface StatsResponse {
-  problemsSolved: number;
-  contestRating: number;
-  currentStreak: number;
-  companiesCovered: number;
-  studyHours: number;
-  bookmarks: number;
-  totalProblems: number;
+type PlatformItem = PlatformListItem;
+
+interface ProfileStatsResponse extends StatsResponse {
   attempted: number;
+  totalProblems: number;
   easySolved?: number;
   mediumSolved?: number;
   hardSolved?: number;
@@ -74,12 +80,12 @@ export const ProfilePage: React.FC = () => {
   };
   
   // Dynamic API states
-  const [platforms, setPlatforms] = useState<PlatformItem[]>([]);
-  const [stats, setStats] = useState<StatsResponse | null>(null);
-  const [heatmapList, setHeatmapList] = useState<{ date: string; count: number }[]>([]);
-  const [progress, setProgress] = useState<any>(null);
-  const [recentActivityList, setRecentActivityList] = useState<any[]>([]);
-  const [platformDashboards, setPlatformDashboards] = useState<any[]>([]);
+  const [platforms, setPlatforms] = useState<PlatformListItem[]>([]);
+  const [stats, setStats] = useState<ProfileStatsResponse | null>(null);
+  const [heatmapList, setHeatmapList] = useState<HeatmapEntry[]>([]);
+  const [progress, setProgress] = useState<ProgressResponse | null>(null);
+  const [recentActivityList, setRecentActivityList] = useState<ActivityItem[]>([]);
+  const [platformDashboards, setPlatformDashboards] = useState<PlatformDashboardResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPlatformTab, setSelectedPlatformTab] = useState<string>('CODEFORGE');
 
@@ -108,10 +114,10 @@ export const ProfilePage: React.FC = () => {
       }
       const [platRes, statsRes, heatRes, progRes, actRes] = await Promise.all([
         api.get<PlatformItem[]>('/profile/platforms'),
-        api.get<StatsResponse>('/dashboard/stats'),
+        api.get<ProfileStatsResponse>('/dashboard/stats'),
         api.get<{ date: string; count: number }[]>('/dashboard/heatmap'),
-        api.get<any>('/dashboard/progress'),
-        api.get<any[]>('/dashboard/recent-activity')
+      api.get<ProgressResponse>('/dashboard/progress'),
+      api.get<ActivityItem[]>('/dashboard/recent-activity')
       ]);
 
       setPlatforms(platRes.data);
@@ -141,7 +147,7 @@ export const ProfilePage: React.FC = () => {
             })
         );
         const dashDataList = await Promise.all(dashPromises);
-        const validDashboards = dashDataList.filter(d => d !== null);
+        const validDashboards = dashDataList.filter((d): d is PlatformDashboardResponse => d !== null);
         setPlatformDashboards(validDashboards);
         localStorage.setItem('cf_prof_dashboards', JSON.stringify(validDashboards));
       } else {
@@ -310,21 +316,21 @@ export const ProfilePage: React.FC = () => {
   };
 
   // Chart data matching
-  const ratingTrendData = progress?.contestTrend && progress.contestTrend.length > 0
+  const ratingTrendData: ChartPoint[] = progress?.contestTrend && progress.contestTrend.length > 0
     ? progress.contestTrend
     : [
-        { label: 'Jan', rating: 0 },
-        { label: 'Feb', rating: 0 },
-        { label: 'Mar', rating: 0 },
-        { label: 'Apr', rating: 0 },
-        { label: 'May', rating: 0 },
-        { label: 'Jun', rating: 0 },
-        { label: 'Jul', rating: 0 },
-        { label: 'Aug', rating: 0 },
-        { label: 'Sep', rating: 0 },
-        { label: 'Oct', rating: 0 },
-        { label: 'Nov', rating: 0 },
-        { label: 'Dec', rating: 0 }
+        { label: 'Jan', value: 0 },
+        { label: 'Feb', value: 0 },
+        { label: 'Mar', value: 0 },
+        { label: 'Apr', value: 0 },
+        { label: 'May', value: 0 },
+        { label: 'Jun', value: 0 },
+        { label: 'Jul', value: 0 },
+        { label: 'Aug', value: 0 },
+        { label: 'Sep', value: 0 },
+        { label: 'Oct', value: 0 },
+        { label: 'Nov', value: 0 },
+        { label: 'Dec', value: 0 }
       ];
 
   const codeforgeEasy = stats?.easySolved ?? 0;
@@ -371,11 +377,12 @@ export const ProfilePage: React.FC = () => {
   const activeMediumPct = activeTotal > 0 ? Math.round((activeMedium / activeTotal) * 100) : 0;
   const activeHardPct = activeTotal > 0 ? Math.max(100 - activeEasyPct - activeMediumPct, 0) : 0;
 
-  const getActiveHeatmap = () => {
+  const getActiveHeatmap = (): HeatmapEntry[] => {
     if (selectedPlatformTab === 'CODEFORGE') return heatmapList;
     if (activePlatDash?.heatmapData) {
       try {
-        return JSON.parse(activePlatDash.heatmapData);
+        const parsed = JSON.parse(activePlatDash.heatmapData) as HeatmapEntry[];
+        return Array.isArray(parsed) ? parsed : [];
       } catch (e) {
         console.error('Error parsing platform heatmap:', e);
       }
@@ -470,7 +477,7 @@ export const ProfilePage: React.FC = () => {
 
   // Dynamic recent contests - only from actual contest data
   // CodeForge has not conducted any contests yet, so this always returns empty
-  const getDynamicContests = () => {
+  const getDynamicContests = (): RecentContest[] => {
     return [];
   };
   const dynamicContests = getDynamicContests();
