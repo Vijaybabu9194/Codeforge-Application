@@ -20,16 +20,12 @@ public class DashboardService {
     private final DailyActivityRepository dailyActivityRepository;
     private final ActivityRepository activityRepository;
     private final TopicRepository topicRepository;
-    private final PlatformProfileRepository platformProfileRepository;
     private final SubmissionRepository submissionRepository;
     private final ProblemRepository problemRepository;
 
     public DashboardDto.StatsResponse getStats(User user) {
         long bookmarkCount = bookmarkRepository.findByUserId(user.getId()).size();
-        List<PlatformProfile> profiles = platformProfileRepository.findByUserId(user.getId());
-        
         int solvedCount = (int) submissionRepository.countSolvedByUserId(user.getId());
-        int platformSolved = profiles.stream().mapToInt(PlatformProfile::getProblemsSolved).sum();
         
         int attemptedCount = (int) submissionRepository.countByUserId(user.getId());
         int totalProblems = (int) problemRepository.count();
@@ -83,11 +79,8 @@ public class DashboardService {
     }
 
     public DashboardDto.ProgressResponse getProgress(User user) {
-        List<PlatformProfile> profiles = platformProfileRepository.findByUserId(user.getId());
-        
         // 1. Contest rating trend
         List<DashboardDto.ChartPoint> contestTrend = new ArrayList<>();
-        int solvedCount = (int) submissionRepository.countSolvedByUserId(user.getId());
         int rating = user.getContestRating(); // actual rating, 0 if no contests
 
         String[] months = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
@@ -98,8 +91,7 @@ public class DashboardService {
         // 2. Questions solved trend
         List<DashboardDto.ChartPoint> questionsTrend = new ArrayList<>();
         List<Submission> solvedSubmissions = submissionRepository.findByUserIdAndSolvedTrue(user.getId());
-        int platformSolved = profiles.stream().mapToInt(PlatformProfile::getProblemsSolved).sum();
-        
+
         int currentYear = LocalDate.now().getYear();
         int[] monthlyCounts = new int[12];
         for (Submission sub : solvedSubmissions) {

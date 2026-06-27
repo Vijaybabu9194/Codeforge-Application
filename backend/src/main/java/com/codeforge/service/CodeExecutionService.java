@@ -17,7 +17,6 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Base64;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -79,6 +78,7 @@ public class CodeExecutionService {
 
                 String message = (String) respMap.get("message");
 
+                @SuppressWarnings("unchecked")
                 Map<String, Object> statusMap = (Map<String, Object>) respMap.get("status");
                 Integer statusId = 3;
                 String statusDesc = "Accepted";

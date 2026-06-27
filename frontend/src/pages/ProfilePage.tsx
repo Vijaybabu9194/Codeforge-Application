@@ -34,7 +34,6 @@ interface StatsResponse {
 }
 
 const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const dayLabels = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
 
 export const ProfilePage: React.FC = () => {
   const { user } = useAuth();
@@ -87,6 +86,7 @@ export const ProfilePage: React.FC = () => {
 
   const [isCopied, setIsCopied] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [refreshError, setRefreshError] = useState<string | null>(null);
 
   // Fetch all profile and dashboard data dynamically from API
   const fetchProfileData = async () => {
@@ -137,6 +137,7 @@ export const ProfilePage: React.FC = () => {
   // Refresh stats for the currently selected (non-Codeforge) platform
   const handleRefreshPlatform = async () => {
     if (selectedPlatformTab === 'CODEFORGE' || isRefreshing) return;
+    setRefreshError(null);
     try {
       setIsRefreshing(true);
       const res = await api.post<any>(`/profile/${selectedPlatformTab.toUpperCase()}/refresh`);
@@ -146,7 +147,13 @@ export const ProfilePage: React.FC = () => {
         updated.push(res.data);
         return updated;
       });
-    } catch (err) {
+      // Also re-fetch the platforms list so problem count badges update
+      const platRes = await api.get<PlatformItem[]>('/profile/platforms');
+      setPlatforms(platRes.data);
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || err?.message || 'Refresh failed. Please try again.';
+      setRefreshError(msg);
+      setTimeout(() => setRefreshError(null), 5000);
       console.error('Error refreshing platform stats:', err);
     } finally {
       setIsRefreshing(false);
@@ -930,6 +937,14 @@ export const ProfilePage: React.FC = () => {
           </button>
         )}
       </div>
+
+      {/* Refresh error banner */}
+      {refreshError && (
+        <div className="flex items-center gap-2 px-4 py-2.5 bg-rose-500/10 border border-rose-500/20 rounded-xl text-[11px] text-rose-400 font-semibold animate-fadeIn">
+          <span className="text-base">⚠️</span>
+          <span>{refreshError}</span>
+        </div>
+      )}
 
       {/* 3. HEATMAP & RATING PROGRESS CHART ROW */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
