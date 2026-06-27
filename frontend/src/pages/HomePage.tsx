@@ -45,16 +45,54 @@ interface ActivityItem {
 
 export const HomePage: React.FC = () => {
   const { user } = useAuth();
-  const [stats, setStats] = useState<Stats | null>(null);
-  const [heatmap, setHeatmap] = useState<HeatmapItem[]>([]);
-  const [progress, setProgress] = useState<ProgressResponse | null>(null);
-  const [activity, setActivity] = useState<ActivityItem[]>([]);
-  const [loading, setLoading] = useState(true);
+
+  // Instant local cache initialization for 0ms instant render (like LeetCode static feel)
+  const [stats, setStats] = useState<Stats | null>(() => {
+    try {
+      const cached = localStorage.getItem('cf_dash_stats');
+      if (cached) return JSON.parse(cached);
+    } catch (e) {}
+    return {
+      problemsSolved: user?.problemsSolved ?? 0,
+      contestRating: user?.contestRating ?? 0,
+      currentStreak: user?.currentStreak ?? 0,
+      companiesCovered: (user as any)?.companiesCovered ?? 0,
+      studyHours: (user as any)?.studyHours ?? 0,
+      bookmarks: 0,
+    };
+  });
+
+  const [heatmap, setHeatmap] = useState<HeatmapItem[]>(() => {
+    try {
+      const cached = localStorage.getItem('cf_dash_heatmap');
+      if (cached) return JSON.parse(cached);
+    } catch (e) {}
+    return [];
+  });
+
+  const [progress, setProgress] = useState<ProgressResponse | null>(() => {
+    try {
+      const cached = localStorage.getItem('cf_dash_progress');
+      if (cached) return JSON.parse(cached);
+    } catch (e) {}
+    return null;
+  });
+
+  const [activity, setActivity] = useState<ActivityItem[]>(() => {
+    try {
+      const cached = localStorage.getItem('cf_dash_activity');
+      if (cached) return JSON.parse(cached);
+    } catch (e) {}
+    return [];
+  });
+
+  const [loading, setLoading] = useState<boolean>(() => {
+    return !localStorage.getItem('cf_dash_stats');
+  });
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        setLoading(true);
         const [statsRes, heatmapRes, progressRes, activityRes] = await Promise.all([
           api.get<Stats>('/dashboard/stats'),
           api.get<HeatmapItem[]>('/dashboard/heatmap'),
@@ -65,6 +103,12 @@ export const HomePage: React.FC = () => {
         setHeatmap(heatmapRes.data);
         setProgress(progressRes.data);
         setActivity(activityRes.data);
+
+        // Cache results for instant sub-millisecond future page renders
+        localStorage.setItem('cf_dash_stats', JSON.stringify(statsRes.data));
+        localStorage.setItem('cf_dash_heatmap', JSON.stringify(heatmapRes.data));
+        localStorage.setItem('cf_dash_progress', JSON.stringify(progressRes.data));
+        localStorage.setItem('cf_dash_activity', JSON.stringify(activityRes.data));
       } catch (err) {
         console.error('Error fetching dashboard data:', err);
       } finally {

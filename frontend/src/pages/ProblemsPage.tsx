@@ -107,23 +107,46 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
     setActiveNoteProblem(null);
   };
 
-  // Load all topics and problems eagerly with stale-while-revalidate
+  // Load all topics and problems eagerly with stale-while-revalidate and persistent local cache
   useEffect(() => {
     const init = async () => {
-      if (globalTopics && globalAllProblems && globalTopicDetailsMap) {
-        setTopics(globalTopics);
-        setAllProblems(globalAllProblems);
-        setTopicDetailsMap(globalTopicDetailsMap);
-        // Auto-select Arrays topic if nothing is selected yet
-        setSelectedTopicId(prev => {
-          if (prev !== null) return prev;
-          const arrTopic = globalTopics!.find(t => t.name.toLowerCase().includes('array'));
-          return arrTopic ? arrTopic.id : (globalTopics![0]?.id ?? null);
-        });
-        setLoading(false);
-      } else {
-        setLoading(true);
-      }
+      try {
+        const cachedTopics = localStorage.getItem('cf_problems_topics');
+        const cachedFlat = localStorage.getItem('cf_problems_flat');
+        const cachedMap = localStorage.getItem('cf_problems_map');
+
+        if (cachedTopics && cachedFlat && cachedMap) {
+          const pTopics = JSON.parse(cachedTopics);
+          const pFlat = JSON.parse(cachedFlat);
+          const pMap = JSON.parse(cachedMap);
+
+          globalTopics = pTopics;
+          globalAllProblems = pFlat;
+          globalTopicDetailsMap = pMap;
+
+          setTopics(pTopics);
+          setAllProblems(pFlat);
+          setTopicDetailsMap(pMap);
+          setSelectedTopicId(prev => {
+            if (prev !== null) return prev;
+            const arrTopic = pTopics.find((t: any) => t.name.toLowerCase().includes('array'));
+            return arrTopic ? arrTopic.id : (pTopics[0]?.id ?? null);
+          });
+          setLoading(false);
+        } else if (globalTopics && globalAllProblems && globalTopicDetailsMap) {
+          setTopics(globalTopics);
+          setAllProblems(globalAllProblems);
+          setTopicDetailsMap(globalTopicDetailsMap);
+          setSelectedTopicId(prev => {
+            if (prev !== null) return prev;
+            const arrTopic = globalTopics!.find(t => t.name.toLowerCase().includes('array'));
+            return arrTopic ? arrTopic.id : (globalTopics![0]?.id ?? null);
+          });
+          setLoading(false);
+        } else {
+          setLoading(true);
+        }
+      } catch (e) {}
 
       setLoadingProgress(0);
       try {
@@ -159,7 +182,11 @@ export const ProblemsPage: React.FC<ProblemsPageProps> = ({ onSolve }) => {
         setTopics(newTopics);
         setAllProblems(flat);
         setTopicDetailsMap(detailsMap);
-        // Auto-select Arrays topic on first load
+
+        localStorage.setItem('cf_problems_topics', JSON.stringify(newTopics));
+        localStorage.setItem('cf_problems_flat', JSON.stringify(flat));
+        localStorage.setItem('cf_problems_map', JSON.stringify(detailsMap));
+
         setSelectedTopicId(prev => {
           if (prev !== null) return prev;
           const arrTopic = newTopics.find(t => t.name.toLowerCase().includes('array'));

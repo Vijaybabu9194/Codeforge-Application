@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import api from '../lib/api';
 import { useAuth } from '../context/AuthContext';
-import { Code2, ChevronDown, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { Code2, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { CompanyLogo } from '../components/CompanyLogos';
 
 import CompanyDashboard from '../components/companies/CompanyDashboard';
@@ -52,14 +52,26 @@ export const CompanyQuestionsPage: React.FC = () => {
   const [showMoreCompanies, setShowMoreCompanies] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Fetch all companies list
+  // Fetch all companies list with instant local cache
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
-        setLoadingList(true);
+        const cachedList = localStorage.getItem('cf_companies_list');
+        if (cachedList) {
+          const parsed = JSON.parse(cachedList);
+          setCompanies(parsed);
+          if (parsed.length > 0 && !selectedCompanyId) {
+            setSelectedCompanyId(parsed[0].id);
+          }
+          setLoadingList(false);
+        } else {
+          setLoadingList(true);
+        }
+
         const response = await api.get<CompanyListItem[]>('/companies');
         setCompanies(response.data);
-        if (response.data.length > 0) {
+        localStorage.setItem('cf_companies_list', JSON.stringify(response.data));
+        if (response.data.length > 0 && !selectedCompanyId) {
           setSelectedCompanyId(response.data[0].id);
         }
       } catch (err) {
@@ -71,19 +83,34 @@ export const CompanyQuestionsPage: React.FC = () => {
     fetchCompanies();
   }, []);
 
-  // Fetch company details and questions when selected company changes
+  // Fetch company details and questions when selected company changes with instant cache
   useEffect(() => {
     if (!selectedCompanyId) return;
     setCurrentPage(1);
     const fetchCompanyData = async () => {
       try {
-        setLoadingDetail(true);
+        const cacheKeyDetail = `cf_comp_detail_${selectedCompanyId}`;
+        const cacheKeyQuestions = `cf_comp_questions_${selectedCompanyId}`;
+        const cachedDetail = localStorage.getItem(cacheKeyDetail);
+        const cachedQuestions = localStorage.getItem(cacheKeyQuestions);
+
+        if (cachedDetail && cachedQuestions) {
+          setCompanyDetail(JSON.parse(cachedDetail));
+          setQuestions(JSON.parse(cachedQuestions));
+          setLoadingDetail(false);
+        } else {
+          setLoadingDetail(true);
+        }
+
         const [detailRes, questionsRes] = await Promise.all([
           api.get<CompanyDetail>(`/companies/${selectedCompanyId}`),
           api.get<CompanyQuestion[]>(`/companies/${selectedCompanyId}/problems`),
         ]);
         setCompanyDetail(detailRes.data);
         setQuestions(questionsRes.data);
+
+        localStorage.setItem(cacheKeyDetail, JSON.stringify(detailRes.data));
+        localStorage.setItem(cacheKeyQuestions, JSON.stringify(questionsRes.data));
       } catch (err) {
         console.error('Error fetching company details:', err);
       } finally {
