@@ -257,51 +257,51 @@ export const RoadmapPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-[calc(100vh-64px)] select-none bg-[#060912] text-slate-100 font-sans relative overflow-x-hidden">
+    <div className="min-h-[calc(100vh-64px)] select-none bg-dash-bg text-slate-900 dark:text-slate-100 font-sans relative overflow-x-hidden">
       {/* Ambient background lighting */}
-      <div className="absolute top-0 left-1/3 w-96 h-96 bg-indigo-600/10 rounded-full blur-[128px] pointer-events-none" />
+      <div className="absolute top-0 left-1/3 w-96 h-96 bg-[#0284C7]/5 rounded-full blur-[128px] pointer-events-none" />
 
       <div className="max-w-[1140px] mx-auto px-5 py-6 space-y-6 relative z-10">
 
         {/* ── HEADER BANNER ── */}
-        <div className="relative overflow-hidden bg-gradient-to-br from-[#0F172A] via-[#131B36] to-[#0D1326] border border-white/[0.08] rounded-2xl p-5 lg:p-6 shadow-xl">
+        <div className="relative overflow-hidden dash-card border border-dash-border rounded-2xl p-5 lg:p-6 shadow-sm">
           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/20 px-3 py-1 rounded-full text-xs font-bold text-indigo-300">
-                <Map className="w-3.5 h-3.5 text-indigo-400" />
+              <div className="inline-flex items-center gap-2 bg-[#0284C7]/10 border border-[#0284C7]/20 px-3 py-1 rounded-full text-xs font-bold text-[#0284C7]">
+                <Map className="w-3.5 h-3.5 text-[#0284C7]" />
                 <span>Structured Career Paths</span>
               </div>
-              <h1 className="text-2xl lg:text-3xl font-black tracking-tight text-white flex items-center gap-2.5">
+              <h1 className="text-2xl lg:text-3xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
                 Developer Roadmaps
-                <Sparkles className="w-5 h-5 text-amber-400 animate-pulse" />
+                <Sparkles className="w-5 h-5 text-amber-500 animate-pulse" />
               </h1>
-              <p className="text-slate-400 text-xs lg:text-sm font-medium max-w-2xl leading-relaxed">
-                Step-by-step learning guides extracted from leading industry resources like <strong className="text-white">takeUforward</strong> and <strong className="text-white">roadmap.sh</strong>.
+              <p className="text-dash-textSecondary text-xs lg:text-sm font-medium max-w-2xl leading-relaxed">
+                Step-by-step learning guides extracted from leading industry resources like <strong className="text-slate-900 dark:text-white">takeUforward</strong> and <strong className="text-slate-900 dark:text-white">roadmap.sh</strong>.
               </p>
             </div>
 
             {/* Dynamic Progress Indicator */}
-            <div className="bg-slate-900/80 border border-white/10 rounded-xl p-4 min-w-[220px] shadow-md flex flex-col justify-between space-y-2">
+            <div className="dash-card border border-dash-border rounded-xl p-4 min-w-[220px] shadow-sm flex flex-col justify-between space-y-2">
               <div className="flex items-center justify-between text-xs font-extrabold">
-                <span className="text-slate-400 uppercase tracking-wider">Track Progress</span>
-                <span className="text-indigo-400">{progressPercent}%</span>
+                <span className="text-dash-textMuted uppercase tracking-wider">Track Progress</span>
+                <span className="text-[#0284C7]">{progressPercent}%</span>
               </div>
-              <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden border border-white/5">
+              <div className="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-2 overflow-hidden border border-dash-border">
                 <div
-                  className="bg-gradient-to-r from-indigo-500 to-amber-400 h-full rounded-full transition-all duration-500"
+                  className="bg-gradient-to-r from-[#0284C7] to-amber-500 h-full rounded-full transition-all duration-500"
                   style={{ width: `${progressPercent}%` }}
                 />
               </div>
-              <div className="text-[10px] text-slate-400 font-semibold flex items-center justify-between pt-0.5">
+              <div className="text-[10px] text-dash-textMuted font-semibold flex items-center justify-between pt-0.5">
                 <span>{completedCount} of {allItemsInCurrent.length} completed</span>
-                {progressPercent === 100 && <Trophy className="w-3.5 h-3.5 text-amber-400" />}
+                {progressPercent === 100 && <Trophy className="w-3.5 h-3.5 text-amber-500" />}
               </div>
             </div>
           </div>
         </div>
 
         {/* ── ROADMAP TAB SELECTOR ── */}
-        <div className="flex flex-wrap gap-3 p-1.5 bg-slate-900/60 border border-white/[0.06] rounded-2xl backdrop-blur-xl">
+        <div className="flex flex-wrap gap-3 p-1.5 dash-card border border-dash-border rounded-2xl">
           {[
             { id: 'dsa', name: 'DSA Roadmap', tag: 'takeUforward' },
             { id: 'javaFullStack', name: 'Java Full Stack', tag: 'Spring Boot' },
@@ -314,13 +314,13 @@ export const RoadmapPage: React.FC = () => {
                 onClick={() => setSelectedRoadmapId(tab.id)}
                 className={`flex-1 min-w-[180px] py-3 px-4 rounded-xl text-xs font-black tracking-wide transition-all duration-300 flex items-center justify-center gap-2.5 ${
                   isActive
-                    ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-lg shadow-indigo-600/25 scale-[1.02]'
-                    : 'text-slate-400 hover:text-white hover:bg-white/[0.04]'
+                    ? 'bg-[#0284C7] text-white shadow-lg shadow-[#0284C7]/25 scale-[1.02]'
+                    : 'text-dash-textSecondary hover:text-slate-900 dark:hover:text-white hover:bg-white/[0.04]'
                 }`}
               >
-                <Layers className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-500'}`} />
+                <Layers className={`w-4 h-4 ${isActive ? 'text-white' : 'text-dash-textMuted'}`} />
                 <span>{tab.name}</span>
-                <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full ${isActive ? 'bg-white/20 text-white' : 'bg-white/[0.06] text-slate-400'}`}>
+                <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full ${isActive ? 'bg-white/20 text-white' : 'bg-white/[0.06] text-dash-textMuted'}`}>
                   {tab.tag}
                 </span>
               </button>
@@ -331,15 +331,15 @@ export const RoadmapPage: React.FC = () => {
         {/* ── ROADMAP CONTENT DETAILS ── */}
         <div className="space-y-4">
           {/* Active Roadmap Title & Source Badge */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-900/40 border border-white/[0.06] rounded-2xl p-4 px-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 dash-card border border-dash-border rounded-2xl p-4 px-5">
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-lg font-black text-white">{currentRoadmap.title}</h2>
+                <h2 className="text-lg font-black text-slate-900 dark:text-white">{currentRoadmap.title}</h2>
                 <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border ${currentRoadmap.badgeColor}`}>
                   {currentRoadmap.source}
                 </span>
               </div>
-              <p className="text-xs text-slate-400 font-medium mt-0.5">{currentRoadmap.subtitle}</p>
+              <p className="text-xs text-dash-textSecondary font-medium mt-0.5">{currentRoadmap.subtitle}</p>
             </div>
 
             <button
@@ -364,54 +364,54 @@ export const RoadmapPage: React.FC = () => {
               return (
                 <div
                   key={step.stepNumber}
-                  className="bg-[#0C1222]/90 border border-white/[0.08] rounded-2xl overflow-hidden transition-all duration-300 shadow-lg"
+                  className="dash-card border rounded-2xl overflow-hidden transition-all duration-300 shadow-sm"
                 >
                   {/* Step Header Accordion Toggle */}
                   <div
                     onClick={() => toggleStepExpand(step.stepNumber)}
-                    className="p-4 px-5 bg-slate-900/60 hover:bg-slate-900/90 cursor-pointer flex items-center justify-between gap-4 transition-colors border-b border-white/[0.06]"
+                    className="p-4 px-5 bg-white/[0.02] hover:bg-white/[0.05] cursor-pointer flex items-center justify-between gap-4 transition-colors border-b border-dash-border"
                   >
                     <div className="flex items-center gap-3">
                       <div className={`w-7 h-7 rounded-lg font-extrabold text-xs flex items-center justify-center ${
-                        isStepDone ? 'bg-emerald-500 text-slate-950' : 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30'
+                        isStepDone ? 'bg-emerald-500 text-slate-950' : 'bg-[#0284C7]/10 text-[#0284C7] border border-[#0284C7]/20'
                       }`}>
                         {step.stepNumber}
                       </div>
-                      <h3 className="text-sm font-bold text-white tracking-tight">{step.stepTitle}</h3>
+                      <h3 className="text-sm font-bold text-slate-900 dark:text-white tracking-tight">{step.stepTitle}</h3>
                     </div>
 
                     <div className="flex items-center gap-3">
-                      <span className="text-[11px] font-semibold text-slate-400 bg-white/[0.04] px-2.5 py-0.5 rounded-lg border border-white/[0.06]">
+                      <span className="text-[11px] font-semibold text-dash-textMuted bg-white/[0.04] px-2.5 py-0.5 rounded-lg border border-dash-border">
                         {stepCompletedCount} / {step.items.length} done
                       </span>
                       {isExpanded ? (
-                        <ChevronDown className="w-4 h-4 text-slate-400" />
+                        <ChevronDown className="w-4 h-4 text-dash-textMuted" />
                       ) : (
-                        <ChevronRight className="w-4 h-4 text-slate-400" />
+                        <ChevronRight className="w-4 h-4 text-dash-textMuted" />
                       )}
                     </div>
                   </div>
 
                   {/* Step Items Table / List */}
                   {isExpanded && (
-                    <div className="p-3 lg:p-4 divide-y divide-white/[0.04]">
+                    <div className="p-3 lg:p-4 divide-y divide-dash-border">
                       {step.items.map(item => {
                         const isDone = completedItems[item.id] ?? false;
                         return (
                           <div
                             key={item.id}
                             className={`py-3 px-3 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors ${
-                              isDone ? 'bg-emerald-500/[0.03]' : 'hover:bg-white/[0.02]'
+                              isDone ? 'bg-emerald-500/[0.05]' : 'hover:bg-white/[0.02]'
                             }`}
                           >
                             {/* Left: Checkbox + Title + Desc */}
                             <div className="flex items-start gap-3 flex-1">
                               <button
                                 onClick={() => toggleItemCompletion(item.id)}
-                                className="mt-0.5 text-slate-500 hover:text-emerald-400 transition-colors flex-shrink-0"
+                                className="mt-0.5 text-dash-textMuted hover:text-emerald-500 transition-colors flex-shrink-0"
                               >
                                 {isDone ? (
-                                  <CheckCircle2 className="w-5 h-5 text-emerald-400 fill-emerald-400/20" />
+                                  <CheckCircle2 className="w-5 h-5 text-emerald-500 fill-emerald-500/20" />
                                 ) : (
                                   <Circle className="w-5 h-5" />
                                 )}
@@ -419,14 +419,14 @@ export const RoadmapPage: React.FC = () => {
 
                               <div className="space-y-0.5">
                                 <div className="flex items-center gap-2 flex-wrap">
-                                  <span className={`text-xs font-bold ${isDone ? 'line-through text-slate-500' : 'text-white'}`}>
+                                  <span className={`text-xs font-bold ${isDone ? 'line-through text-slate-400' : 'text-slate-900 dark:text-white'}`}>
                                     {item.title}
                                   </span>
                                   <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-md border ${getDiffBadgeStyle(item.difficulty)}`}>
                                     {item.difficulty}
                                   </span>
                                 </div>
-                                <p className="text-[11px] text-slate-400 font-medium leading-relaxed">{item.desc}</p>
+                                <p className="text-[11px] text-dash-textSecondary font-medium leading-relaxed">{item.desc}</p>
                               </div>
                             </div>
 
@@ -435,7 +435,7 @@ export const RoadmapPage: React.FC = () => {
                               href={item.resourceUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="self-start sm:self-center flex items-center gap-1.5 text-[11px] font-bold text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 px-3 py-1.5 rounded-xl transition-all flex-shrink-0"
+                              className="self-start sm:self-center flex items-center gap-1.5 text-[11px] font-bold text-[#0284C7] hover:text-[#0284C7] bg-[#0284C7]/10 hover:bg-[#0284C7]/20 border border-[#0284C7]/20 px-3 py-1.5 rounded-xl transition-all flex-shrink-0"
                             >
                               <BookOpen className="w-3.5 h-3.5" />
                               <span>{item.resourceName}</span>

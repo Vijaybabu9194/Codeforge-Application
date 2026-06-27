@@ -60,6 +60,18 @@ export const ProfilePage: React.FC = () => {
   };
 
   const hideTooltip = () => setTooltip(t => ({ ...t, visible: false }));
+
+  const getColor = (level: number) => {
+    const isLight = document.documentElement.classList.contains('light-theme');
+    switch (level) {
+      case 0: return isLight ? '#EBEDF0' : '#262626';
+      case 1: return isLight ? '#9BE9A8' : '#0E4429';
+      case 2: return isLight ? '#40C463' : '#006D32';
+      case 3: return isLight ? '#30A14E' : '#26A641';
+      case 4: return isLight ? '#216E39' : '#39D353';
+      default: return isLight ? '#EBEDF0' : '#262626';
+    }
+  };
   
   // Dynamic API states
   const [platforms, setPlatforms] = useState<PlatformItem[]>([]);
@@ -465,16 +477,6 @@ export const ProfilePage: React.FC = () => {
       monthsList.push({ year: d.getFullYear(), month: d.getMonth() });
     }
 
-    const getColor = (level: number) => {
-      switch (level) {
-        case 0: return '#262626';
-        case 1: return '#0E4429';
-        case 2: return '#006D32';
-        case 3: return '#26A641';
-        case 4: return '#39D353';
-        default: return '#262626';
-      }
-    };
 
     const formatDate = (dateStr: string) => {
       try {
@@ -991,11 +993,9 @@ export const ProfilePage: React.FC = () => {
               
               <div className="flex items-center gap-1">
                 <span>Less</span>
-                <span className="w-2.5 h-2.5 rounded-[1.5px] bg-[#262626]" />
-                <span className="w-2.5 h-2.5 rounded-[1.5px] bg-[#0E4429]" />
-                <span className="w-2.5 h-2.5 rounded-[1.5px] bg-[#006D32]" />
-                <span className="w-2.5 h-2.5 rounded-[1.5px] bg-[#26A641]" />
-                <span className="w-2.5 h-2.5 rounded-[1.5px] bg-[#39D353]" />
+                {[0, 1, 2, 3, 4].map((lvl) => (
+                  <span key={lvl} className="w-2.5 h-2.5 rounded-[1.5px]" style={{ backgroundColor: getColor(lvl) }} />
+                ))}
                 <span>More</span>
               </div>
             </div>

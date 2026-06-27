@@ -19,12 +19,12 @@ export const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({ heatmapData 
   
   const getColor = (level: number) => {
     switch (level) {
-      case 0: return isLight ? '#E2E8F0' : '#1A2238'; // Light gray in light mode, dark backdrop in dark mode
-      case 1: return isLight ? '#A7F3D0' : '#064E3B'; // Soft green / Darkest green
-      case 2: return isLight ? '#34D399' : '#047857'; // Medium green / Dark green
-      case 3: return '#10B981'; // Green
-      case 4: return isLight ? '#059669' : '#4ADE80'; // Deep green / Neon green
-      default: return isLight ? '#E2E8F0' : '#1A2238';
+      case 0: return isLight ? '#EBEDF0' : '#262626'; // Empty cell (light gray vs dark gray)
+      case 1: return isLight ? '#9BE9A8' : '#0E4429'; // Low submissions (light green in light mode, dark green in dark mode)
+      case 2: return isLight ? '#40C463' : '#006D32'; // Medium submissions
+      case 3: return isLight ? '#30A14E' : '#26A641'; // High submissions
+      case 4: return isLight ? '#216E39' : '#39D353'; // Max submissions (darkest green in light mode, brightest neon green in dark mode)
+      default: return isLight ? '#EBEDF0' : '#262626';
     }
   };
 

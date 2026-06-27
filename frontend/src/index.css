@@ -304,11 +304,15 @@
   color-scheme: light;
 }
 
-/* App Shell & Main Backgrounds */
+/* App Shell & Main Backgrounds Across All Pages */
 .light-theme body,
 .light-theme #root,
 .light-theme main,
-.light-theme .bg-dash-bg {
+.light-theme .bg-dash-bg,
+.light-theme [class*="bg-[#060912]"],
+.light-theme [class*="bg-[#020205]"],
+.light-theme [class*="bg-[#030712]"],
+.light-theme [class*="bg-[#0B1120]"] {
   background-color: #F8FAFC !important;
   color: #0F172A !important;
 }
@@ -316,23 +320,54 @@
 /* Topbar, Sidebar & Headers */
 .light-theme header,
 .light-theme aside,
-.light-theme .bg-dash-sidebar {
+.light-theme .bg-dash-sidebar,
+.light-theme [class*="bg-[#050814]"],
+.light-theme [class*="bg-[#0D1425]"] {
   background-color: #FFFFFF !important;
   border-color: #E2E8F0 !important;
 }
 
-/* Dashboard Cards & Surfaces */
+/* Dashboard Cards, Modals, & Surfaces Across All Pages */
 .light-theme .dash-card,
 .light-theme .feature-card,
-.light-theme .bg-dash-card {
+.light-theme .bg-dash-card,
+.light-theme [class*="bg-[#080C1E]"],
+.light-theme [class*="bg-[#090D1A]"],
+.light-theme [class*="bg-[#0B1026]"],
+.light-theme [class*="bg-[#0C1222]"],
+.light-theme [class*="bg-[#0D1222]"],
+.light-theme [class*="bg-[#0D1224]"],
+.light-theme [class*="bg-[#0D1326]"],
+.light-theme [class*="bg-[#0E1326]"],
+.light-theme [class*="bg-[#0F1526]"],
+.light-theme [class*="bg-[#0F172A]"],
+.light-theme [class*="bg-[#101629]"],
+.light-theme [class*="bg-[#111827]"],
+.light-theme [class*="bg-[#131B36]"],
+.light-theme [class*="bg-[#1A2238]"],
+.light-theme .bg-slate-900,
+.light-theme .bg-slate-800 {
   background-color: #FFFFFF !important;
   color: #0F172A !important;
   border-color: #E2E8F0 !important;
   box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04) !important;
 }
 
-/* General Borders */
-.light-theme .border-dash-border {
+/* Translucent Overlays & Sub-panels Inside Cards */
+.light-theme [class*="bg-white/["],
+.light-theme [class*="bg-white/5"],
+.light-theme [class*="bg-white/10"],
+.light-theme [class*="bg-[#0D1224]"],
+.light-theme [class*="bg-[#0F1526]"] {
+  background-color: #F1F5F9 !important;
+  border-color: #E2E8F0 !important;
+}
+
+/* General Borders Across All Pages */
+.light-theme .border-dash-border,
+.light-theme [class*="border-white/["],
+.light-theme [class*="border-white/10"],
+.light-theme [class*="border-white/20"] {
   border-color: #E2E8F0 !important;
 }
 
@@ -376,17 +411,17 @@
 }
 
 /* Secondary & Muted Text Overrides for High Contrast readability */
-.light-theme .text-\[\#7B8AB8\],
+.light-theme [class*="text-[#7B8AB8]"],
 .light-theme .text-dash-textSecondary,
 .light-theme .text-slate-300,
 .light-theme .text-slate-400,
 .light-theme .text-gray-300,
 .light-theme .text-gray-400,
-.light-theme .text-\[\#94A3B8\] {
+.light-theme [class*="text-[#94A3B8]"] {
   color: #334155 !important;
 }
 
-.light-theme .text-\[\#4A5580\],
+.light-theme [class*="text-[#4A5580]"],
 .light-theme .text-dash-textMuted,
 .light-theme .text-slate-500,
 .light-theme .text-gray-500 {

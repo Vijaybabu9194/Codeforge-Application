@@ -53,19 +53,19 @@ export const CompanyQuestionTable: React.FC<CompanyQuestionTableProps> = ({
   };
 
   return (
-    <div className="bg-[#0F1526] border border-white/[0.05] rounded-2xl overflow-hidden">
+    <div className="dash-card border rounded-2xl overflow-hidden shadow-sm">
       {/* Table header section */}
-      <div className="px-5 py-3.5 flex items-center justify-between bg-white/[0.015] border-b border-white/[0.06]">
+      <div className="px-5 py-3.5 flex items-center justify-between bg-white/[0.02] border-b border-dash-border">
         <div className="flex items-center gap-2.5">
-          <div className="w-1.5 h-5 rounded-full bg-[#4A6CF7] flex-shrink-0" />
-          <h2 className="text-[13px] font-bold text-white">Questions List</h2>
-          <span className="text-[10px] font-black text-[#4A5580] bg-white/[0.04] border border-white/[0.06] px-2 py-0.5 rounded-full">
+          <div className="w-1.5 h-5 rounded-full bg-[#0284C7] flex-shrink-0" />
+          <h2 className="text-[13px] font-bold text-slate-900 dark:text-white">Questions List</h2>
+          <span className="text-[10px] font-black text-slate-500 dark:text-[#4A5580] bg-white/[0.04] border border-dash-border px-2 py-0.5 rounded-full">
             {questions.length}
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <Zap className="w-3.5 h-3.5 text-[#4A5580]" />
-          <span className="text-[10px] text-[#4A5580] font-semibold">Sorted by frequency</span>
+          <Zap className="w-3.5 h-3.5 text-slate-400 dark:text-[#4A5580]" />
+          <span className="text-[10px] text-slate-500 dark:text-[#4A5580] font-semibold">Sorted by frequency</span>
         </div>
       </div>
 
@@ -73,26 +73,26 @@ export const CompanyQuestionTable: React.FC<CompanyQuestionTableProps> = ({
       <div className="overflow-x-auto">
         <table className="w-full border-collapse">
           <thead>
-            <tr className="border-b border-white/[0.08] bg-white/[0.01]">
-              <th className="py-2.5 px-3 text-center text-[10px] font-extrabold text-[#7B8AB8] uppercase tracking-wider w-12 border-r border-white/[0.05]">
+            <tr className="border-b border-dash-border bg-white/[0.02]">
+              <th className="py-2.5 px-3 text-center text-[10px] font-extrabold text-dash-textMuted uppercase tracking-wider w-12 border-r border-dash-border">
                 Status
               </th>
-              <th className="py-2.5 px-4 text-left text-[10px] font-extrabold text-[#7B8AB8] uppercase tracking-wider border-r border-white/[0.05]">
+              <th className="py-2.5 px-4 text-left text-[10px] font-extrabold text-dash-textMuted uppercase tracking-wider border-r border-dash-border">
                 Question
               </th>
-              <th className="py-2.5 px-4 text-center text-[10px] font-extrabold text-[#7B8AB8] uppercase tracking-wider w-24 border-r border-white/[0.05]">
+              <th className="py-2.5 px-4 text-center text-[10px] font-extrabold text-dash-textMuted uppercase tracking-wider w-24 border-r border-dash-border">
                 Practice
               </th>
-              <th className="py-2.5 px-4 text-center text-[10px] font-extrabold text-[#7B8AB8] uppercase tracking-wider w-28 border-r border-white/[0.05]">
+              <th className="py-2.5 px-4 text-center text-[10px] font-extrabold text-dash-textMuted uppercase tracking-wider w-28 border-r border-dash-border">
                 Times Asked
               </th>
-              <th className="py-2.5 px-4 text-center text-[10px] font-extrabold text-[#7B8AB8] uppercase tracking-wider w-32 border-r border-white/[0.05]">
+              <th className="py-2.5 px-4 text-center text-[10px] font-extrabold text-dash-textMuted uppercase tracking-wider w-32 border-r border-dash-border">
                 Frequency
               </th>
-              <th className="py-2.5 px-4 text-center text-[10px] font-extrabold text-[#7B8AB8] uppercase tracking-wider w-28 border-r border-white/[0.05]">
+              <th className="py-2.5 px-4 text-center text-[10px] font-extrabold text-dash-textMuted uppercase tracking-wider w-28 border-r border-dash-border">
                 Difficulty
               </th>
-              <th className="py-2.5 px-4 text-center text-[10px] font-extrabold text-[#7B8AB8] uppercase tracking-wider w-24">
+              <th className="py-2.5 px-4 text-center text-[10px] font-extrabold text-dash-textMuted uppercase tracking-wider w-24">
                 Acceptance
               </th>
             </tr>
@@ -114,35 +114,35 @@ export const CompanyQuestionTable: React.FC<CompanyQuestionTableProps> = ({
               questions.map((q, idx) => (
                 <tr
                   key={q.id}
-                  className={`border-b border-white/[0.04] hover:bg-white/[0.025] transition-colors duration-150 group ${
+                  className={`border-b border-dash-border hover:bg-white/[0.025] transition-colors duration-150 group ${
                     idx === questions.length - 1 ? 'border-b-0' : ''
                   }`}
                 >
                   {/* Status */}
-                  <td className="py-3 px-3 text-center align-middle w-12 border-r border-white/[0.05]">
+                  <td className="py-3 px-3 text-center align-middle w-14 border-r border-dash-border">
                     <button
                       onClick={() => onSolveToggle(q.id)}
-                      className={`w-5 h-5 mx-auto rounded-full flex items-center justify-center border transition-all duration-200 hover:scale-105 active:scale-95 ${
+                      className={`w-5 h-5 mx-auto rounded-full flex items-center justify-center border-2 transition-all duration-200 hover:scale-110 active:scale-95 ${
                         q.solved
-                          ? 'bg-[#4ADE80]/10 border-[#4ADE80]/40 text-[#4ADE80]'
-                          : 'border-white/[0.10] text-transparent hover:border-[#4ADE80]/40 hover:text-[#4ADE80]/50'
+                          ? 'bg-emerald-500 border-emerald-500 text-white shadow-sm'
+                          : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-transparent hover:border-emerald-500 hover:text-emerald-500'
                       }`}
                       title={q.solved ? 'Mark as unsolved' : 'Mark as solved'}
                     >
-                      <Check className="w-2.5 h-2.5 stroke-[3.5]" />
+                      <Check className="w-3 h-3 stroke-[3.5]" />
                     </button>
                   </td>
 
                   {/* Title */}
-                  <td className="py-3 px-4 align-middle border-r border-white/[0.05]">
-                    <span className="text-[13px] font-semibold text-[#C8D1E8] group-hover:text-white transition-colors duration-150 truncate block max-w-xs">
+                  <td className="py-3 px-4 align-middle border-r border-dash-border">
+                    <span className="text-[13px] font-extrabold text-slate-900 dark:text-[#C8D1E8] group-hover:text-[#0284C7] transition-colors duration-150 block leading-snug">
                       {q.title}
                     </span>
                   </td>
 
                   {/* Practice — LeetCode + GFG icons */}
-                  <td className="py-3 px-4 text-center align-middle w-24 border-r border-white/[0.05]">
-                    <div className="flex items-center justify-center gap-5 scale-75 origin-center">
+                  <td className="py-3 px-4 text-center align-middle w-24 border-r border-dash-border">
+                    <div className="flex items-center justify-center gap-4 scale-90 origin-center">
                       {q.leetcodeUrl ? (
                         <a
                           href={q.leetcodeUrl}
@@ -177,15 +177,15 @@ export const CompanyQuestionTable: React.FC<CompanyQuestionTableProps> = ({
                   </td>
 
                   {/* Times Asked */}
-                  <td className="py-3 px-4 text-center align-middle w-28 border-r border-white/[0.05]">
+                  <td className="py-3 px-4 text-center align-middle w-28 border-r border-dash-border">
                     <div className="flex items-center justify-center gap-1">
-                      <Zap className="w-3 h-3 text-[#4A5580]" />
-                      <span className="text-sm font-black text-white">{q.timesAsked}</span>
+                      <Zap className="w-3 h-3 text-amber-500" />
+                      <span className="text-sm font-black text-slate-900 dark:text-white">{q.timesAsked}</span>
                     </div>
                   </td>
 
                   {/* Frequency */}
-                  <td className="py-3 px-4 text-center align-middle w-32 border-r border-white/[0.05]">
+                  <td className="py-3 px-4 text-center align-middle w-32 border-r border-dash-border">
                     <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-bold tracking-wide ${getFreqBadge(q.frequency)}`}>
                       {getFreqIcon(q.frequency) && <span>{getFreqIcon(q.frequency)}</span>}
                       {getFreqLabel(q.frequency)}
@@ -193,7 +193,7 @@ export const CompanyQuestionTable: React.FC<CompanyQuestionTableProps> = ({
                   </td>
 
                   {/* Difficulty */}
-                  <td className="py-3 px-4 text-center align-middle w-28 border-r border-white/[0.05]">
+                  <td className="py-3 px-4 text-center align-middle w-28 border-r border-dash-border">
                     <span className={`inline-flex px-2.5 py-0.5 rounded-md text-[11px] font-bold tracking-wide ${getDiffBadge(q.difficulty)}`}>
                       {q.difficulty.charAt(0).toUpperCase() + q.difficulty.slice(1).toLowerCase()}
                     </span>
@@ -201,8 +201,8 @@ export const CompanyQuestionTable: React.FC<CompanyQuestionTableProps> = ({
 
                   {/* Acceptance */}
                   <td className="py-3 px-4 text-center align-middle w-24">
-                    <span className="text-[12px] font-bold text-[#7B8AB8] group-hover:text-[#C8D1E8] transition-colors">
-                      {q.acceptanceRate != null ? `${q.acceptanceRate.toFixed(1)}%` : '—'}
+                    <span className="text-xs font-extrabold text-slate-900 dark:text-white">
+                      {q.acceptanceRate}%
                     </span>
                   </td>
                 </tr>
