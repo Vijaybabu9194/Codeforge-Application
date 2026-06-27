@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  Home, Code2, Building2, Trophy, MessageSquare, Map, User
+  Home, Code2, Building2, Trophy, MessageSquare, Map, User, Flame
 } from 'lucide-react';
 
 interface DashboardSidebarProps {
@@ -12,6 +12,7 @@ const navItems = [
   { id: 'home', label: 'Home', icon: Home },
   { id: 'problems', label: 'Problems', icon: Code2 },
   { id: 'companies', label: 'Companies', icon: Building2 },
+  { id: 'potd', label: 'Problem of The Day', icon: Flame },
   { id: 'profile', label: 'Profile', icon: User },
   { id: 'contests', label: 'Contests', icon: Trophy },
   { id: 'discuss', label: 'Discuss', icon: MessageSquare },

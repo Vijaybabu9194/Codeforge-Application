@@ -8,6 +8,7 @@ import ProfilePage from './pages/ProfilePage';
 import ProblemEditorPage from './pages/ProblemEditorPage';
 import ContestsPage from './pages/ContestsPage';
 import DiscussPage from './pages/DiscussPage';
+import ProblemOfTheDayPage from './pages/ProblemOfTheDayPage';
 import DashboardSidebar from './components/dashboard/DashboardSidebar';
 import DashboardTopbar from './components/dashboard/DashboardTopbar';
 
@@ -32,6 +33,8 @@ const DashboardContent: React.FC = () => {
         return <ProblemsPage onSolve={setSelectedProblem} />;
       case 'companies':
         return <CompanyQuestionsPage />;
+      case 'potd':
+        return <ProblemOfTheDayPage />;
       case 'profile':
         return <ProfilePage />;
       case 'contests':
