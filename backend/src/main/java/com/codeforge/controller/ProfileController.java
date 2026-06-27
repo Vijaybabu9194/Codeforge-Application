@@ -36,4 +36,11 @@ public class ProfileController {
         User user = (User) auth.getPrincipal();
         return ResponseEntity.ok(profileService.linkPlatform(user, request));
     }
+
+    @PostMapping("/{platform}/refresh")
+    public ResponseEntity<ProfileDto.PlatformDashboardResponse> refreshPlatform(
+            Authentication auth, @PathVariable String platform) {
+        User user = (User) auth.getPrincipal();
+        return ResponseEntity.ok(profileService.refreshPlatformStats(user, platform));
+    }
 }

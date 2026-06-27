@@ -352,14 +352,14 @@ public class ProfileService {
                     profile.setCountryRank(rank);
                 }
 
-                // Generate deterministic pseudo-heatmap distributed over the last year matching their solved count
+                // Generate a full 365-day heatmap with deterministic pseudo-distribution
+                // Always emit all 365 entries (including zero days) so the calendar renders correctly
                 int solvedCount = profile.getProblemsSolved();
-                if (solvedCount > 0) {
+                {
                     StringBuilder heatmapBuilder = new StringBuilder("[");
                     java.time.LocalDate today = java.time.LocalDate.now();
                     java.util.Random r = new java.util.Random(username.hashCode());
-                    int remaining = solvedCount;
-                    boolean first = true;
+                    int remaining = Math.max(solvedCount, 0);
                     for (int i = 364; i >= 0; i--) {
                         java.time.LocalDate date = today.minusDays(i);
                         int count = 0;
@@ -367,11 +367,8 @@ public class ProfileService {
                             count = r.nextInt(Math.min(remaining, 3)) + 1;
                             remaining -= count;
                         }
-                        if (count > 0 || r.nextDouble() > 0.95) {
-                            if (!first) heatmapBuilder.append(",");
-                            heatmapBuilder.append(String.format("{\"date\":\"%s\",\"count\":%d}", date.toString(), count));
-                            first = false;
-                        }
+                        if (i < 364) heatmapBuilder.append(",");
+                        heatmapBuilder.append(String.format("{\"date\":\"%s\",\"count\":%d}", date.toString(), count));
                     }
                     heatmapBuilder.append("]");
                     profile.setHeatmapData(heatmapBuilder.toString());
@@ -508,5 +505,42 @@ public class ProfileService {
             e.printStackTrace();
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error fetching Codeforces stats: " + e.getMessage());
         }
+    }
+
+    /**
+     * Re-fetches live stats for an already-linked platform and persists the result.
+     */
+    public ProfileDto.PlatformDashboardResponse refreshPlatformStats(User user, String platformName) {
+        PlatformProfile.Platform platform = PlatformProfile.Platform.valueOf(platformName.toUpperCase());
+        PlatformProfile profile = platformProfileRepository.findByUserIdAndPlatform(user.getId(), platform)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Platform profile not linked"));
+
+        // Re-run the appropriate fetcher
+        if (platform == PlatformProfile.Platform.LEETCODE) {
+            fetchLeetCodeStats(profile, profile.getUsername());
+        } else if (platform == PlatformProfile.Platform.CODEFORCES) {
+            fetchCodeforcesStats(profile, profile.getUsername());
+        } else if (platform == PlatformProfile.Platform.GEEKSFORGEEKS) {
+            fetchGFGStats(profile, profile.getUsername());
+        }
+
+        platformProfileRepository.save(profile);
+
+        return ProfileDto.PlatformDashboardResponse.builder()
+                .platform(profile.getPlatform().name())
+                .username(profile.getUsername())
+                .globalRank(profile.getGlobalRank())
+                .countryRank(profile.getCountryRank())
+                .contestRating(profile.getContestRating())
+                .problemsSolved(profile.getProblemsSolved())
+                .easySolved(profile.getEasySolved())
+                .mediumSolved(profile.getMediumSolved())
+                .hardSolved(profile.getHardSolved())
+                .badgesCount(profile.getBadgesCount())
+                .contestHistory(profile.getContestHistory())
+                .heatmapData(profile.getHeatmapData())
+                .badges(profile.getBadges())
+                .recentActivity(profile.getRecentActivity())
+                .build();
     }
 }

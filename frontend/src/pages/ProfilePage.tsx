@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../lib/api';
 import { 
   MapPin, Calendar, Edit3, Share2, ShieldCheck, Info, ChevronDown, Check, X,
-  TrendingUp, Star, Award, Flag, Loader2
+  TrendingUp, Star, Award, Flag, Loader2, RefreshCw
 } from 'lucide-react';
 import { 
   PieChart, Pie, Cell, ResponsiveContainer,
@@ -38,6 +39,28 @@ const dayLabels = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
 export const ProfilePage: React.FC = () => {
   const { user } = useAuth();
   const heatmapScrollRef = React.useRef<HTMLDivElement>(null);
+
+  // Fixed-position tooltip state for heatmap cells
+  const [tooltip, setTooltip] = React.useState<{
+    visible: boolean;
+    x: number;
+    y: number;
+    text: string;
+    sub: string;
+  }>({ visible: false, x: 0, y: 0, text: '', sub: '' });
+
+  const showTooltip = (e: React.MouseEvent, text: string, sub: string) => {
+    const rect = (e.target as HTMLElement).getBoundingClientRect();
+    setTooltip({
+      visible: true,
+      x: rect.left + rect.width / 2,
+      y: rect.top - 10,
+      text,
+      sub,
+    });
+  };
+
+  const hideTooltip = () => setTooltip(t => ({ ...t, visible: false }));
   
   // Dynamic API states
   const [platforms, setPlatforms] = useState<PlatformItem[]>([]);
@@ -63,6 +86,7 @@ export const ProfilePage: React.FC = () => {
   const [isLinking, setIsLinking] = useState(false);
 
   const [isCopied, setIsCopied] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Fetch all profile and dashboard data dynamically from API
   const fetchProfileData = async () => {
@@ -109,6 +133,25 @@ export const ProfilePage: React.FC = () => {
   useEffect(() => {
     fetchProfileData();
   }, []);
+
+  // Refresh stats for the currently selected (non-Codeforge) platform
+  const handleRefreshPlatform = async () => {
+    if (selectedPlatformTab === 'CODEFORGE' || isRefreshing) return;
+    try {
+      setIsRefreshing(true);
+      const res = await api.post<any>(`/profile/${selectedPlatformTab.toUpperCase()}/refresh`);
+      // Update the dashboards list with the refreshed data
+      setPlatformDashboards(prev => {
+        const updated = prev.filter(d => d.platform.toUpperCase() !== selectedPlatformTab.toUpperCase());
+        updated.push(res.data);
+        return updated;
+      });
+    } catch (err) {
+      console.error('Error refreshing platform stats:', err);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   useEffect(() => {
     if (heatmapScrollRef.current) {
@@ -437,29 +480,26 @@ export const ProfilePage: React.FC = () => {
     };
 
     return (
-      <div ref={heatmapScrollRef} className="flex select-none overflow-x-auto pt-10 pb-2 w-full dash-scroll">
-        <div className="flex gap-[14px] md:gap-[18px] min-w-max pb-1">
+      <div ref={heatmapScrollRef} className="select-none overflow-x-auto w-full dash-scroll pb-2">
+        <div className="flex gap-[14px] md:gap-[18px] min-w-max">
           {monthsList.map(({ year, month }, mIdx) => {
-            const firstDay = new Date(year, month, 1);
             const lastDay = new Date(year, month + 1, 0);
             const totalDays = lastDay.getDate();
-            
+
             // Build columns (weeks) for this month
             const weeks: ({ date: string; count: number; level: number } | null)[][] = [];
             let currentWeek: ({ date: string; count: number; level: number } | null)[] = Array(7).fill(null);
 
             for (let d = 1; d <= totalDays; d++) {
               const currentDate = new Date(year, month, d);
-              const dayOfWeek = currentDate.getDay(); // 0 = Sun, ..., 6 = Sat
-
+              const dayOfWeek = currentDate.getDay();
               const yyyy = currentDate.getFullYear();
               const mm = String(currentDate.getMonth() + 1).padStart(2, '0');
               const dd = String(currentDate.getDate()).padStart(2, '0');
               const dateStr = `${yyyy}-${mm}-${dd}`;
-
               const count = dataMap.get(dateStr) || 0;
               let level = 0;
-              if (count === 0) level = 0;
+              if (count <= 0) level = 0;
               else if (count <= 2) level = 1;
               else if (count <= 5) level = 2;
               else if (count <= 8) level = 3;
@@ -467,12 +507,9 @@ export const ProfilePage: React.FC = () => {
 
               const currentDateOnly = new Date(yyyy, currentDate.getMonth(), currentDate.getDate());
               const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-
-              if (currentDateOnly > todayOnly) {
-                currentWeek[dayOfWeek] = null;
-              } else {
-                currentWeek[dayOfWeek] = { date: dateStr, count, level };
-              }
+              currentWeek[dayOfWeek] = currentDateOnly > todayOnly
+                ? null
+                : { date: dateStr, count, level };
 
               if (dayOfWeek === 6 || d === totalDays) {
                 weeks.push(currentWeek);
@@ -481,43 +518,32 @@ export const ProfilePage: React.FC = () => {
             }
 
             return (
-              <div key={mIdx} className="flex flex-col items-center gap-2 flex-shrink-0 relative hover:z-20">
-                {/* 7xN Grid of days for this month */}
+              <div key={mIdx} className="flex flex-col items-center gap-2 flex-shrink-0">
                 <div className="flex gap-[3px]">
                   {weeks.map((week, wIdx) => (
-                    <div key={wIdx} className="flex flex-col gap-[3px] flex-shrink-0 relative hover:z-30">
-                      {week.map((day, dIdx) => {
-                        if (!day) {
-                          // Transparent placeholder for padding boundary days
-                          return (
-                            <div 
-                              key={dIdx} 
-                              className="w-[10px] h-[10px] flex-shrink-0 opacity-0"
-                            />
-                          );
-                        }
-                        return (
+                    <div key={wIdx} className="flex flex-col gap-[3px] flex-shrink-0">
+                      {week.map((day, dIdx) =>
+                        !day ? (
+                          <div key={dIdx} className="w-[10px] h-[10px] flex-shrink-0 opacity-0" />
+                        ) : (
                           <div
                             key={dIdx}
-                            className="w-[10px] h-[10px] rounded-[2px] hover:scale-125 transition-transform duration-100 cursor-pointer relative group flex-shrink-0 hover:z-50"
+                            className="w-[10px] h-[10px] rounded-[2px] hover:scale-125 transition-transform duration-100 cursor-pointer flex-shrink-0"
                             style={{ backgroundColor: getColor(day.level) }}
-                          >
-                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1.5 bg-[#0F172A] border border-white/[0.08] rounded-lg text-[9px] text-[#C8D1E8] font-bold whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-150 z-50 shadow-[0_4px_12px_rgba(0,0,0,0.5)]">
-                              <span className="text-white font-extrabold">
-                                {day.count === 0 ? 'No submissions' : `${day.count} submission${day.count !== 1 ? 's' : ''}`}
-                              </span>
-                              {" on "}{formatDate(day.date)}
-                              {/* Small arrow */}
-                              <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-0.5 border-4 border-transparent border-t-[#0F172A]" />
-                            </div>
-                          </div>
-                        );
-                      })}
+                            onMouseEnter={(e) => showTooltip(
+                              e,
+                              day.count === 0
+                                ? 'No submissions'
+                                : `${day.count} submission${day.count !== 1 ? 's' : ''}`,
+                              `on ${formatDate(day.date)}`
+                            )}
+                            onMouseLeave={hideTooltip}
+                          />
+                        )
+                      )}
                     </div>
                   ))}
                 </div>
-
-                {/* Month Name centered under the block */}
                 <span className="text-[9px] font-bold text-[#4A5580] uppercase tracking-wider select-none">
                   {monthNames[month]}
                 </span>
@@ -878,6 +904,31 @@ export const ProfilePage: React.FC = () => {
             );
           })}
         </div>
+
+        {/* Per-platform Refresh button */}
+        {selectedPlatformTab !== 'CODEFORGE' && isTabPlatformConnected && (
+          <button
+            onClick={handleRefreshPlatform}
+            disabled={isRefreshing}
+            className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/[0.15] text-[11px] font-bold text-[#7B8AB8] hover:text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            title={`Refresh ${selectedPlatformTab} stats`}
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-[#4A6CF7]' : ''}`} />
+            <span>{isRefreshing ? 'Refreshing…' : 'Refresh Stats'}</span>
+          </button>
+        )}
+
+        {selectedPlatformTab === 'CODEFORGE' && (
+          <button
+            onClick={fetchProfileData}
+            disabled={loading}
+            className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/[0.15] text-[11px] font-bold text-[#7B8AB8] hover:text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Refresh Codeforge stats"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#4A6CF7]' : ''}`} />
+            <span>{loading ? 'Refreshing…' : 'Refresh Stats'}</span>
+          </button>
+        )}
       </div>
 
       {/* 3. HEATMAP & RATING PROGRESS CHART ROW */}
@@ -1360,6 +1411,28 @@ export const ProfilePage: React.FC = () => {
             </form>
           </div>
         </div>
+      )}
+      {/* ── HEATMAP TOOLTIP (portal – renders at document.body, above everything) ── */}
+      {typeof document !== 'undefined' && createPortal(
+        <div
+          style={{
+            position: 'fixed',
+            left: tooltip.x,
+            top: tooltip.y,
+            transform: 'translate(-50%, -100%)',
+            pointerEvents: 'none',
+            opacity: tooltip.visible ? 1 : 0,
+            transition: 'opacity 0.12s',
+            zIndex: 99999,
+          }}
+        >
+          <div className="px-2.5 py-1.5 bg-[#0F172A] border border-white/[0.10] rounded-lg text-[9px] text-[#C8D1E8] font-bold whitespace-nowrap shadow-[0_4px_16px_rgba(0,0,0,0.6)]">
+            <span className="text-white font-extrabold">{tooltip.text}</span>
+            {' '}{tooltip.sub}
+            <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-0.5 border-4 border-transparent border-t-[#0F172A]" />
+          </div>
+        </div>,
+        document.body
       )}
 
     </div>
