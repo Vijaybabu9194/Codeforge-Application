@@ -5,6 +5,8 @@ import HeroSection from '../components/landing/HeroSection';
 import TrustedBySection from '../components/landing/TrustedBySection';
 import ScrollIndicator from '../components/landing/ScrollIndicator';
 import FeaturesSection from '../components/landing/FeaturesSection';
+import TestimonialsSection from '../components/landing/TestimonialsSection';
+import FAQSection from '../components/landing/FAQSection';
 import CTABanner from '../components/landing/CTABanner';
 import LandingFooter from '../components/landing/LandingFooter';
 import LoginPage from './LoginPage';
@@ -70,6 +72,12 @@ export const LandingPage: React.FC = () => {
 
       {/* FEATURES */}
       <FeaturesSection />
+
+      {/* TESTIMONIALS */}
+      <TestimonialsSection />
+
+      {/* FAQS */}
+      <FAQSection />
 
       {/* CTA BANNER */}
       <CTABanner onSignupClick={() => setAuthView('signup')} />
