@@ -61,4 +61,30 @@ public class ProblemController {
         problemService.markSolved(user, id);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ProblemDto.ProblemResponse> getProblemById(
+            Authentication auth, @PathVariable Long id) {
+        User user = (User) auth.getPrincipal();
+        return ResponseEntity.ok(problemService.getProblemById(user, id));
+    }
+
+    @PostMapping("/{id}/submit")
+    public ResponseEntity<ProblemDto.SubmitResult> submitProblem(
+            Authentication auth,
+            @PathVariable Long id,
+            @RequestBody ProblemDto.ProblemSubmitRequest request) {
+        User user = (User) auth.getPrincipal();
+        return ResponseEntity.ok(problemService.submitProblem(user, id, request.getSourceCode(), request.getLanguageId()));
+    }
+
+    @PostMapping("/{id}/run")
+    public ResponseEntity<ProblemDto.SubmitResult> runSampleTestCases(
+            Authentication auth,
+            @PathVariable Long id,
+            @RequestBody ProblemDto.ProblemSubmitRequest request) {
+        User user = (User) auth.getPrincipal();
+        // For run, we still use submitProblem logic but only sample test cases are in DB when no hidden ones exist
+        return ResponseEntity.ok(problemService.submitProblem(user, id, request.getSourceCode(), request.getLanguageId()));
+    }
 }

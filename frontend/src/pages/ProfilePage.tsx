@@ -365,12 +365,14 @@ export const ProfilePage: React.FC = () => {
     ? codeforgeTotal
     : (activePlatDash?.problemsSolved ?? 0);
 
+  const isLightTheme = document.documentElement.classList.contains('light-theme') || document.body.classList.contains('light-theme');
+
   const activeBreakdownData = activeTotal > 0 ? [
     { name: 'Easy', value: activeEasy, color: '#4ADE80' },
     { name: 'Medium', value: activeMedium, color: '#F59E0B' },
     { name: 'Hard', value: activeHard, color: '#EF4444' },
   ] : [
-    { name: 'Empty', value: 1, color: '#1E293B' }
+    { name: 'Empty', value: 1, color: isLightTheme ? '#E2E8F0' : '#1E293B' }
   ];
 
   const activeEasyPct = activeTotal > 0 ? Math.round((activeEasy / activeTotal) * 100) : 0;

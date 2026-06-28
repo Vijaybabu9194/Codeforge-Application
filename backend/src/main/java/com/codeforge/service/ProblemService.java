@@ -1,17 +1,18 @@
 package com.codeforge.service;
 
 import com.codeforge.dto.ProblemDto;
+import com.codeforge.dto.SubmissionRequestDto;
 import com.codeforge.entity.*;
 import com.codeforge.repository.*;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityManager;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.Base64;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,7 +27,9 @@ public class ProblemService {
     private final NotificationService notificationService;
     private final ActivityRepository activityRepository;
     private final DailyActivityRepository dailyActivityRepository;
+    private final CodeExecutionService codeExecutionService;
     private final EntityManager entityManager;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public ProblemDto.ProblemListResponse getProblems(User user, Long topicId, String difficulty,
                                                        String search, Long companyId, String status, int page, int size) {
@@ -398,6 +401,122 @@ public class ProblemService {
                 .articleUrl(p.getArticleUrl())
                 .subtopicId(p.getSubtopic() != null ? p.getSubtopic().getId() : null)
                 .subtopicName(p.getSubtopic() != null ? p.getSubtopic().getName() : null)
+                .problemStatement(p.getProblemStatement())
+                .sampleTestCases(p.getSampleTestCases())
+                .constraints(p.getConstraints())
+                .hints(p.getHints())
+                .starterCode(p.getStarterCode())
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    public ProblemDto.ProblemResponse getProblemById(User user, Long problemId) {
+        Problem p = problemRepository.findById(problemId)
+                .orElseThrow(() -> new RuntimeException("Problem not found: " + problemId));
+        Set<Long> solvedIds = submissionRepository.findSolvedProblemIdsByUserId(user.getId())
+                .stream().collect(Collectors.toSet());
+        Set<Long> bookmarkedIds = bookmarkRepository.findBookmarkedProblemIdsByUserId(user.getId())
+                .stream().collect(Collectors.toSet());
+        return mapToResponse(p, solvedIds, bookmarkedIds);
+    }
+
+    @Transactional
+    public ProblemDto.SubmitResult submitProblem(User user, Long problemId,
+                                                  String sourceCode, Integer languageId) {
+        Problem problem = problemRepository.findById(problemId)
+                .orElseThrow(() -> new RuntimeException("Problem not found: " + problemId));
+
+        // Parse hidden test cases
+        String hiddenJson = problem.getHiddenTestCases();
+        List<Map<String, String>> testCases = new ArrayList<>();
+        if (hiddenJson != null && !hiddenJson.isBlank()) {
+            try {
+                testCases = objectMapper.readValue(hiddenJson, new TypeReference<List<Map<String, String>>>() {});
+            } catch (Exception e) {
+                testCases = new ArrayList<>();
+            }
+        }
+
+        // Fall back to sample test cases if no hidden ones
+        if (testCases.isEmpty()) {
+            String sampleJson = problem.getSampleTestCases();
+            if (sampleJson != null && !sampleJson.isBlank()) {
+                try {
+                    testCases = objectMapper.readValue(sampleJson, new TypeReference<List<Map<String, String>>>() {});
+                } catch (Exception e) {
+                    testCases = new ArrayList<>();
+                }
+            }
+        }
+
+        List<ProblemDto.TestCaseResult> results = new ArrayList<>();
+        int passedCount = 0;
+        String overallStatus = "Accepted";
+
+        for (Map<String, String> tc : testCases) {
+            String input = tc.getOrDefault("input", "");
+            String expected = tc.getOrDefault("output", "").trim();
+
+            // Encode input for Judge0
+            String encodedInput = Base64.getEncoder().encodeToString(
+                    input.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+
+            SubmissionRequestDto.CodeRunResponse runResult = codeExecutionService.runCode(
+                    SubmissionRequestDto.CodeRunRequest.builder()
+                            .sourceCode(sourceCode)
+                            .languageId(languageId)
+                            .stdin(encodedInput)
+                            .build());
+
+            String actual = "";
+            if (runResult.getStdout() != null) {
+                try {
+                    actual = new String(Base64.getDecoder().decode(runResult.getStdout()),
+                            java.nio.charset.StandardCharsets.UTF_8).trim();
+                } catch (Exception e) {
+                    actual = runResult.getStdout().trim();
+                }
+            }
+
+            boolean passed = actual.equals(expected) && runResult.getStatus().getId() == 3;
+            if (!passed && overallStatus.equals("Accepted")) {
+                overallStatus = runResult.getStatus().getId() == 6
+                        ? "Compilation Error"
+                        : runResult.getStatus().getId() == 3
+                            ? "Wrong Answer"
+                            : runResult.getStatus().getDescription();
+                if (actual.isEmpty() && runResult.getStdout() == null) {
+                    overallStatus = runResult.getStatus().getDescription();
+                } else if (!actual.isEmpty()) {
+                    overallStatus = "Wrong Answer";
+                }
+            }
+            if (passed) passedCount++;
+
+            results.add(ProblemDto.TestCaseResult.builder()
+                    .input(input)
+                    .expectedOutput(expected)
+                    .actualOutput(actual)
+                    .passed(passed)
+                    .status(runResult.getStatus().getDescription())
+                    .time(runResult.getTime())
+                    .memory(runResult.getMemory())
+                    .build());
+        }
+
+        boolean allPassed = passedCount == testCases.size() && !testCases.isEmpty();
+        if (allPassed) {
+            overallStatus = "Accepted";
+            // Mark as solved
+            markSolved(user, problemId);
+        }
+
+        return ProblemDto.SubmitResult.builder()
+                .allPassed(allPassed)
+                .passedCount(passedCount)
+                .totalCount(testCases.size())
+                .results(results)
+                .overallStatus(overallStatus)
                 .build();
     }
 }

@@ -29,6 +29,12 @@ public class ProblemDto {
         private String articleUrl;
         private Long subtopicId;
         private String subtopicName;
+        // Rich problem content fields
+        private String problemStatement;
+        private String sampleTestCases;  // JSON string: [{input,output,explanation}]
+        private String constraints;       // newline-separated
+        private String hints;             // JSON string: ["hint1","hint2"]
+        private String starterCode;       // JSON string: {python,java,cpp}
     }
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
@@ -61,5 +67,31 @@ public class ProblemDto {
         private String name;
         private String icon;
         private List<SubtopicResponse> subtopics;
+    }
+
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    public static class ProblemSubmitRequest {
+        private String sourceCode; // base64 encoded
+        private Integer languageId;
+    }
+
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    public static class TestCaseResult {
+        private String input;
+        private String expectedOutput;
+        private String actualOutput;
+        private boolean passed;
+        private String status;
+        private Double time;
+        private Integer memory;
+    }
+
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    public static class SubmitResult {
+        private boolean allPassed;
+        private int passedCount;
+        private int totalCount;
+        private List<TestCaseResult> results;
+        private String overallStatus; // "Accepted", "Wrong Answer", "Runtime Error", etc.
     }
 }

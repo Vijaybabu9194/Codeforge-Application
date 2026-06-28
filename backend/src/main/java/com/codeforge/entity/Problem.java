@@ -29,6 +29,30 @@ public class Problem {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    /** Rich problem statement (Markdown) */
+    @Column(name = "problem_statement", columnDefinition = "TEXT")
+    private String problemStatement;
+
+    /** JSON array: [{input, output, explanation}] — sent to frontend */
+    @Column(name = "sample_test_cases", columnDefinition = "TEXT")
+    private String sampleTestCases;
+
+    /** JSON array: [{input, output}] — NEVER sent to frontend */
+    @Column(name = "hidden_test_cases", columnDefinition = "TEXT")
+    private String hiddenTestCases;
+
+    /** Newline-separated constraints */
+    @Column(name = "constraints", columnDefinition = "TEXT")
+    private String constraints;
+
+    /** JSON array of hint strings */
+    @Column(name = "hints", columnDefinition = "TEXT")
+    private String hints;
+
+    /** JSON map: {python, java, cpp} starter code templates */
+    @Column(name = "starter_code", columnDefinition = "TEXT")
+    private String starterCode;
+
     @Builder.Default
     private Integer timesAsked = 0;
 

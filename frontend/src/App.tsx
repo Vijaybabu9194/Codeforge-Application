@@ -18,16 +18,17 @@ const DashboardContent: React.FC = () => {
   const [activeTab, setActiveTab] = useState('home');
   const [selectedProblem, setSelectedProblem] = useState<any | null>(null);
 
-  const renderActiveView = () => {
-    if (selectedProblem) {
-      return (
-        <ProblemEditorPage
-          problem={selectedProblem}
-          onBack={() => setSelectedProblem(null)}
-        />
-      );
-    }
+  // Full-screen problem editor — renders outside sidebar/topbar layout like LeetCode
+  if (selectedProblem) {
+    return (
+      <ProblemEditorPage
+        problem={selectedProblem}
+        onBack={() => setSelectedProblem(null)}
+      />
+    );
+  }
 
+  const renderActiveView = () => {
     switch (activeTab) {
       case 'home':
         return <HomePage />;
