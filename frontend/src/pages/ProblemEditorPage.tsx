@@ -252,9 +252,9 @@ export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, o
     } catch {}
   };
 
-  const [allProblemsList, setAllProblemsList] = useState<{ id: number; title: string }[]>([]);
+  const [allProblemsList, setAllProblemsList] = useState<Problem[]>([]);
 
-  // Fetch list of all problem IDs for exact, continuous navigation
+  // Pre-cache list of all problems for instant 0ms switching
   useEffect(() => {
     api.get<any>('/problems?size=1000')
       .then(res => {
@@ -265,46 +265,38 @@ export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, o
       .catch(() => {});
   }, []);
 
-  // Problem Navigation Handler ('prev' | 'next' | 'random')
-  const navigateToProblem = async (direction: 'next' | 'prev' | 'random') => {
+  // Problem Navigation Handler ('prev' | 'next' | 'random') — Instant switching
+  const navigateToProblem = (direction: 'next' | 'prev' | 'random') => {
     let list = allProblemsList;
-    if (list.length === 0) {
-      try {
-        const pRes = await api.get<any>('/problems?size=1000');
-        if (pRes.data && pRes.data.problems) {
-          list = pRes.data.problems;
-          setAllProblemsList(list);
-        }
-      } catch {}
-    }
+    let targetProblem: Problem | null = null;
 
-    let targetId = enrichedProblem.id;
     if (list.length > 0) {
       const idx = list.findIndex(p => p.id === enrichedProblem.id);
       if (direction === 'next') {
         const nextIdx = idx >= 0 ? (idx + 1) % list.length : 0;
-        targetId = list[nextIdx].id;
+        targetProblem = list[nextIdx];
       } else if (direction === 'prev') {
         const prevIdx = idx >= 0 ? (idx - 1 + list.length) % list.length : list.length - 1;
-        targetId = list[prevIdx].id;
+        targetProblem = list[prevIdx];
       } else {
         const randIdx = Math.floor(Math.random() * list.length);
-        targetId = list[randIdx].id;
+        targetProblem = list[randIdx];
       }
-    } else {
-      const cur = Number(enrichedProblem.id) || 1;
-      targetId = direction === 'next' ? cur + 1 : direction === 'prev' ? Math.max(1, cur - 1) : Math.floor(Math.random() * 380) + 1;
     }
 
-    try {
-      const res = await api.get<Problem>(`/problems/${targetId}`);
-      if (res.data && res.data.id) {
-        setEnrichedProblem(res.data);
-        setRunResult(null);
-        setSubmitResult(null);
-        setSelectedSubmissionRecord(null);
-      }
-    } catch {}
+    if (targetProblem) {
+      setEnrichedProblem(targetProblem);
+      setRunResult(null);
+      setSubmitResult(null);
+      setSelectedSubmissionRecord(null);
+      
+      // Asynchronously fetch extra details in background if needed
+      api.get<Problem>(`/problems/${targetProblem.id}`)
+        .then(res => {
+          if (res.data && res.data.id) setEnrichedProblem(res.data);
+        })
+        .catch(() => {});
+    }
   };
 
   const handleCodeChange = (value: string | undefined) => {
