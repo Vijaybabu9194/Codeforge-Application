@@ -159,6 +159,8 @@ export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, o
   const [submissionHistory, setSubmissionHistory] = useState<SubmissionRecord[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [selectedSubmissionRecord, setSelectedSubmissionRecord] = useState<SubmissionRecord | null>(null);
+  const [showTopicsDropdown, setShowTopicsDropdown] = useState(false);
+  const [showCompaniesDropdown, setShowCompaniesDropdown] = useState(false);
 
   // Panel resizing & Layout modes
   const [leftWidth, setLeftWidth] = useState(45);
@@ -547,22 +549,6 @@ export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, o
                         </span>
                       )}
                     </div>
-
-                    {/* Topic & Company Tags */}
-                    {((enrichedProblem.topics && enrichedProblem.topics.length > 0) || (enrichedProblem.companies && enrichedProblem.companies.length > 0)) && (
-                      <div className="flex flex-wrap items-center gap-2 pt-1">
-                        {enrichedProblem.topics?.map((topic, idx) => (
-                          <span key={idx} className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border border-sky-200/60 dark:border-sky-800/60">
-                            {topic}
-                          </span>
-                        ))}
-                        {enrichedProblem.companies?.map((comp, idx) => (
-                          <span key={idx} className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 flex items-center gap-1">
-                            <span className="text-sky-500 font-bold">🏢</span> {comp}
-                          </span>
-                        ))}
-                      </div>
-                    )}
                   </div>
 
                   {enrichedProblem.problemStatement ? (
@@ -596,7 +582,9 @@ export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, o
                             {tc.explanation && (
                               <div>
                                 <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Explanation</span>
-                                <p className={`text-xs ${textSecondary} leading-relaxed bg-white/60 dark:bg-slate-800/60 p-3 rounded-lg border ${borderSky}`}>{tc.explanation}</p>
+                                <div className={`text-xs ${textSecondary} leading-relaxed bg-white/60 dark:bg-slate-800/60 p-3 rounded-lg border ${borderSky} whitespace-pre-wrap`}>
+                                  {tc.explanation}
+                                </div>
                               </div>
                             )}
                           </div>
@@ -618,6 +606,57 @@ export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, o
                       </ul>
                     </div>
                   )}
+
+                  {/* ── DROPDOWN SECTIONS FOR TOPICS & COMPANIES (AFTER CONSTRAINTS) ── */}
+                  <div className="space-y-3 pt-2">
+                    {/* Topics Dropdown */}
+                    {enrichedProblem.topics && enrichedProblem.topics.length > 0 && (
+                      <div className={`rounded-xl border ${border} ${bgPanel} overflow-hidden shadow-sm`}>
+                        <button
+                          onClick={() => setShowTopicsDropdown(s => !s)}
+                          className="w-full flex items-center justify-between px-4 py-3 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition"
+                        >
+                          <span className="flex items-center gap-2">
+                            <span className="text-sky-500 font-bold">🏷️</span> Topics ({enrichedProblem.topics.length})
+                          </span>
+                          <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${showTopicsDropdown ? 'rotate-180' : ''}`} />
+                        </button>
+                        {showTopicsDropdown && (
+                          <div className="p-4 border-t border-slate-100 dark:border-slate-800 flex flex-wrap gap-2 animate-fadeIn">
+                            {enrichedProblem.topics.map((topic, idx) => (
+                              <span key={idx} className="px-2.5 py-1 rounded-lg text-xs font-medium bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border border-sky-200/60 dark:border-sky-800/60">
+                                {topic}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Companies Dropdown */}
+                    {enrichedProblem.companies && enrichedProblem.companies.length > 0 && (
+                      <div className={`rounded-xl border ${border} ${bgPanel} overflow-hidden shadow-sm`}>
+                        <button
+                          onClick={() => setShowCompaniesDropdown(s => !s)}
+                          className="w-full flex items-center justify-between px-4 py-3 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition"
+                        >
+                          <span className="flex items-center gap-2">
+                            <span className="text-sky-500 font-bold">🏢</span> Companies ({enrichedProblem.companies.length})
+                          </span>
+                          <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${showCompaniesDropdown ? 'rotate-180' : ''}`} />
+                        </button>
+                        {showCompaniesDropdown && (
+                          <div className="p-4 border-t border-slate-100 dark:border-slate-800 flex flex-wrap gap-2 animate-fadeIn">
+                            {enrichedProblem.companies.map((comp, idx) => (
+                              <span key={idx} className="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                                {comp}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </>
               )}
 
