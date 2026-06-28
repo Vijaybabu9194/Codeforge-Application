@@ -182,10 +182,20 @@ export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, o
 
   const diff = DIFFICULTY_CONFIG[enrichedProblem.difficulty] || DIFFICULTY_CONFIG.EASY;
 
-  // Fetch submission history and persistent DB note on problem change
+  // Fetch submission history, persistent DB note, and full problem details if missing
   useEffect(() => {
     fetchSubmissionHistory(enrichedProblem.id);
     fetchNoteFromDB(enrichedProblem.id);
+
+    if (!enrichedProblem.problemStatement || !enrichedProblem.topics || enrichedProblem.topics.length === 0) {
+      api.get<Problem>(`/problems/${enrichedProblem.id}`)
+        .then(res => {
+          if (res.data && res.data.id) {
+            setEnrichedProblem(res.data);
+          }
+        })
+        .catch(() => {});
+    }
   }, [enrichedProblem.id]);
 
   useEffect(() => {
@@ -523,11 +533,11 @@ export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, o
               {/* ── DESCRIPTION TAB ── */}
               {leftTab === 'desc' && (
                 <>
-                  <div className="space-y-3 pb-2 border-b border-slate-100 dark:border-slate-800">
+                  <div className="space-y-3 pb-3 border-b border-slate-100 dark:border-slate-800">
                     <h1 className={`text-xl font-bold ${textPrimary} tracking-tight`}>
                       {enrichedProblem.id}. {enrichedProblem.title}
                     </h1>
-                    <div className="flex items-center gap-2.5">
+                    <div className="flex flex-wrap items-center gap-2">
                       <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${diff.bg} ${diff.text} ${diff.border}`}>
                         {diff.label}
                       </span>
@@ -537,6 +547,22 @@ export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, o
                         </span>
                       )}
                     </div>
+
+                    {/* Topic & Company Tags */}
+                    {((enrichedProblem.topics && enrichedProblem.topics.length > 0) || (enrichedProblem.companies && enrichedProblem.companies.length > 0)) && (
+                      <div className="flex flex-wrap items-center gap-2 pt-1">
+                        {enrichedProblem.topics?.map((topic, idx) => (
+                          <span key={idx} className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border border-sky-200/60 dark:border-sky-800/60">
+                            {topic}
+                          </span>
+                        ))}
+                        {enrichedProblem.companies?.map((comp, idx) => (
+                          <span key={idx} className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 flex items-center gap-1">
+                            <span className="text-sky-500 font-bold">🏢</span> {comp}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   {enrichedProblem.problemStatement ? (
@@ -567,6 +593,12 @@ export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, o
                               <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Output</span>
                               <pre className={`text-xs font-mono ${codeGreen} ${bgInput} border ${borderSky} rounded-lg p-3 overflow-x-auto whitespace-pre-wrap leading-relaxed`}>{tc.output}</pre>
                             </div>
+                            {tc.explanation && (
+                              <div>
+                                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Explanation</span>
+                                <p className={`text-xs ${textSecondary} leading-relaxed bg-white/60 dark:bg-slate-800/60 p-3 rounded-lg border ${borderSky}`}>{tc.explanation}</p>
+                              </div>
+                            )}
                           </div>
                         </div>
                       ))}
