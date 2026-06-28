@@ -11,18 +11,18 @@ export const CTABanner: React.FC<CTABannerProps> = ({ onSignupClick }) => {
   const dark = theme === 'dark';
 
   return (
-    <section className="py-14 relative z-10">
-      <div className="max-w-[1440px] mx-auto px-8 lg:px-12">
-        <div className={`px-8 md:px-12 py-10 rounded-3xl border flex flex-col md:flex-row items-center justify-between gap-8 shadow-xl transition-colors duration-300 ${
+    <section className="py-8 relative z-10 select-none">
+      <div className="max-w-[1100px] mx-auto px-6 lg:px-8">
+        <div className={`px-6 md:px-8 py-5 rounded-2xl border flex flex-col md:flex-row items-center justify-between gap-5 shadow-lg transition-colors duration-300 ${
           dark 
             ? 'bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 border-slate-800' 
             : 'bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 border-sky-400 text-white'
         }`}>
           {/* Left: Rocket & Heading */}
-          <div className="flex items-center gap-7 flex-1">
-            <div className="relative w-24 h-24 md:w-28 md:h-28 flex-shrink-0 select-none pointer-events-none animate-float-slow">
-              <div className="absolute inset-0 bg-sky-400/30 rounded-full blur-xl scale-75" />
-              <svg className="w-full h-full object-contain relative z-10 transform rotate-12 drop-shadow-[0_0_15px_rgba(34,211,238,0.4)]" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <div className="flex items-center gap-4 flex-1">
+            <div className="relative w-12 h-12 md:w-14 md:h-14 flex-shrink-0 select-none pointer-events-none animate-float-slow">
+              <div className="absolute inset-0 bg-sky-400/30 rounded-full blur-lg scale-75" />
+              <svg className="w-full h-full object-contain relative z-10 transform rotate-12 drop-shadow-[0_0_10px_rgba(34,211,238,0.4)]" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <defs>
                   <linearGradient id="rocketBodyGrad" x1="0" y1="0" x2="1" y2="1">
                     <stop offset="0%" stopColor="#22D3EE" />
@@ -53,10 +53,10 @@ export const CTABanner: React.FC<CTABannerProps> = ({ onSignupClick }) => {
               </svg>
             </div>
             <div>
-              <h3 className={`font-extrabold text-[17px] md:text-[20px] leading-tight select-none ${dark ? 'text-white' : 'text-white'}`}>
+              <h3 className={`font-black text-[15px] md:text-[17px] leading-tight select-none ${dark ? 'text-white' : 'text-white'}`}>
                 Ready to forge your coding journey?
               </h3>
-              <p className={`text-[13px] mt-1 select-none font-medium ${dark ? 'text-slate-400' : 'text-sky-100'}`}>
+              <p className={`text-[12px] mt-0.5 select-none font-medium ${dark ? 'text-slate-400' : 'text-sky-100'}`}>
                 Join thousands of developers and start your transformation today.
               </p>
             </div>
@@ -65,14 +65,14 @@ export const CTABanner: React.FC<CTABannerProps> = ({ onSignupClick }) => {
           {/* Right: CTA Button */}
           <button
             onClick={onSignupClick}
-            className={`px-8 py-4 font-extrabold text-[16px] whitespace-nowrap flex-shrink-0 select-none rounded-2xl flex items-center gap-3 transition shadow-lg ${
+            className={`px-5 py-2.5 font-bold text-[13px] whitespace-nowrap flex-shrink-0 select-none rounded-xl flex items-center gap-2 transition shadow-md ${
               dark 
-                ? 'bg-sky-500 hover:bg-sky-600 text-white shadow-sky-500/30' 
+                ? 'bg-sky-500 hover:bg-sky-600 text-white shadow-sky-500/20' 
                 : 'bg-white text-sky-700 hover:bg-sky-50 shadow-black/10'
             }`}
           >
             Create Free Account
-            <ArrowRight className="w-5 h-5" />
+            <ArrowRight className="w-4 h-4" />
           </button>
         </div>
       </div>
