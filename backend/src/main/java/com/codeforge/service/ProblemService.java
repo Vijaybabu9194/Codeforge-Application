@@ -420,6 +420,108 @@ public class ProblemService {
         return mapToResponse(p, solvedIds, bookmarkedIds);
     }
 
+    @Transactional(readOnly = true)
+    public ProblemDto.SubmitResult runSampleTestCases(User user, Long problemId,
+                                                      String sourceCode, Integer languageId) {
+        Problem problem = problemRepository.findById(problemId)
+                .orElseThrow(() -> new RuntimeException("Problem not found: " + problemId));
+
+        String sampleJson = problem.getSampleTestCases();
+        List<Map<String, String>> testCases = new ArrayList<>();
+        if (sampleJson != null && !sampleJson.isBlank()) {
+            try {
+                testCases = objectMapper.readValue(sampleJson, new TypeReference<List<Map<String, String>>>() {});
+            } catch (Exception e) {
+                testCases = new ArrayList<>();
+            }
+        }
+
+        List<ProblemDto.TestCaseResult> results = new ArrayList<>();
+        int passedCount = 0;
+        String overallStatus = "Accepted";
+        String errorDetails = null;
+
+        for (Map<String, String> tc : testCases) {
+            String input = tc.getOrDefault("input", "");
+            String expected = tc.getOrDefault("output", "").trim();
+
+            String encodedInput = Base64.getEncoder().encodeToString(
+                    input.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+
+            SubmissionRequestDto.CodeRunResponse runResult = codeExecutionService.runCode(
+                    SubmissionRequestDto.CodeRunRequest.builder()
+                            .sourceCode(sourceCode)
+                            .languageId(languageId)
+                            .stdin(encodedInput)
+                            .build());
+
+            String actual = "";
+            if (runResult.getStdout() != null) {
+                try {
+                    actual = new String(Base64.getDecoder().decode(runResult.getStdout()),
+                            java.nio.charset.StandardCharsets.UTF_8).trim();
+                } catch (Exception e) {
+                    actual = runResult.getStdout().trim();
+                }
+            }
+
+            if (errorDetails == null) {
+                if (runResult.getCompileOutput() != null && !runResult.getCompileOutput().isBlank()) {
+                    try {
+                        errorDetails = new String(Base64.getDecoder().decode(runResult.getCompileOutput()), java.nio.charset.StandardCharsets.UTF_8);
+                    } catch (Exception e) {
+                        errorDetails = runResult.getCompileOutput();
+                    }
+                } else if (runResult.getStderr() != null && !runResult.getStderr().isBlank() && runResult.getStatus().getId() != 3) {
+                    try {
+                        errorDetails = new String(Base64.getDecoder().decode(runResult.getStderr()), java.nio.charset.StandardCharsets.UTF_8);
+                    } catch (Exception e) {
+                        errorDetails = runResult.getStderr();
+                    }
+                }
+            }
+
+            boolean passed = actual.equals(expected) && runResult.getStatus().getId() == 3;
+            if (!passed && overallStatus.equals("Accepted")) {
+                overallStatus = runResult.getStatus().getId() == 6
+                        ? "Compilation Error"
+                        : runResult.getStatus().getId() == 3
+                            ? "Wrong Answer"
+                            : runResult.getStatus().getDescription();
+                if (actual.isEmpty() && runResult.getStdout() == null) {
+                    overallStatus = runResult.getStatus().getDescription();
+                } else if (!actual.isEmpty()) {
+                    overallStatus = "Wrong Answer";
+                }
+            }
+            if (passed) passedCount++;
+
+            results.add(ProblemDto.TestCaseResult.builder()
+                    .input(input)
+                    .expectedOutput(expected)
+                    .actualOutput(actual)
+                    .passed(passed)
+                    .status(runResult.getStatus().getDescription())
+                    .time(runResult.getTime())
+                    .memory(runResult.getMemory())
+                    .build());
+        }
+
+        boolean allPassed = passedCount == testCases.size() && !testCases.isEmpty();
+        if (allPassed) {
+            overallStatus = "Accepted";
+        }
+
+        return ProblemDto.SubmitResult.builder()
+                .allPassed(allPassed)
+                .passedCount(passedCount)
+                .totalCount(testCases.size())
+                .results(results)
+                .overallStatus(overallStatus)
+                .errorDetails(errorDetails)
+                .build();
+    }
+
     @Transactional
     public ProblemDto.SubmitResult submitProblem(User user, Long problemId,
                                                   String sourceCode, Integer languageId) {
@@ -452,6 +554,7 @@ public class ProblemService {
         List<ProblemDto.TestCaseResult> results = new ArrayList<>();
         int passedCount = 0;
         String overallStatus = "Accepted";
+        String errorDetails = null;
 
         for (Map<String, String> tc : testCases) {
             String input = tc.getOrDefault("input", "");
@@ -475,6 +578,22 @@ public class ProblemService {
                             java.nio.charset.StandardCharsets.UTF_8).trim();
                 } catch (Exception e) {
                     actual = runResult.getStdout().trim();
+                }
+            }
+
+            if (errorDetails == null) {
+                if (runResult.getCompileOutput() != null && !runResult.getCompileOutput().isBlank()) {
+                    try {
+                        errorDetails = new String(Base64.getDecoder().decode(runResult.getCompileOutput()), java.nio.charset.StandardCharsets.UTF_8);
+                    } catch (Exception e) {
+                        errorDetails = runResult.getCompileOutput();
+                    }
+                } else if (runResult.getStderr() != null && !runResult.getStderr().isBlank() && runResult.getStatus().getId() != 3) {
+                    try {
+                        errorDetails = new String(Base64.getDecoder().decode(runResult.getStderr()), java.nio.charset.StandardCharsets.UTF_8);
+                    } catch (Exception e) {
+                        errorDetails = runResult.getStderr();
+                    }
                 }
             }
 
@@ -517,6 +636,7 @@ public class ProblemService {
                 .totalCount(testCases.size())
                 .results(results)
                 .overallStatus(overallStatus)
+                .errorDetails(errorDetails)
                 .build();
     }
 }

@@ -36,6 +36,7 @@ interface SubmitResult {
   totalCount: number;
   results: TestCaseResult[];
   overallStatus: string;
+  errorDetails?: string;
 }
 
 interface Problem {
@@ -52,6 +53,7 @@ interface Problem {
   gfgUrl?: string;
   youtubeUrl?: string;
   articleUrl?: string;
+  description?: string;
   problemStatement?: string;
   sampleTestCases?: string;
   constraints?: string;
@@ -310,12 +312,8 @@ export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, o
             {leftTab === 'desc' && (
               <>
                 {enrichedProblem.problemStatement ? (
-                  <div className={`leading-relaxed ${textPrimary} text-sm`}
-                    dangerouslySetInnerHTML={{ __html: enrichedProblem.problemStatement
-                      .replace(/\n/g, '<br/>')
-                      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                      .replace(/`(.*?)`/g, `<code class="${dark ? 'bg-white/10 text-[#A5B4FC]' : 'bg-[#EEF2FF] text-[#4338CA]'} px-1 py-0.5 rounded text-xs">$1</code>`)
-                    }}
+                  <div className={`space-y-3 leading-relaxed ${textPrimary} text-sm [&>p]:mb-3 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-xs ${dark ? '[&_code]:bg-white/10 [&_code]:text-[#A5B4FC]' : '[&_code]:bg-[#EEF2FF] [&_code]:text-[#4338CA]'}`}
+                    dangerouslySetInnerHTML={{ __html: enrichedProblem.problemStatement }}
                   />
                 ) : (
                   <p className={`${textSecondary} text-sm leading-relaxed`}>
@@ -405,20 +403,12 @@ export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, o
                 )}
 
                 {/* Resources */}
-                {(enrichedProblem.youtubeUrl || enrichedProblem.articleUrl) && (
+                {enrichedProblem.articleUrl && (
                   <div className="flex gap-2">
-                    {enrichedProblem.youtubeUrl && (
-                      <a href={enrichedProblem.youtubeUrl} target="_blank" rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/15 border border-red-500/30 text-red-500 text-[10px] font-bold hover:bg-red-500/25 transition">
-                        ▶ Video Solution
-                      </a>
-                    )}
-                    {enrichedProblem.articleUrl && (
-                      <a href={enrichedProblem.articleUrl} target="_blank" rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#4A6CF7]/15 border border-[#4A6CF7]/30 text-[#4A6CF7] text-[10px] font-bold hover:bg-[#4A6CF7]/25 transition">
-                        📖 Article
-                      </a>
-                    )}
+                    <a href={enrichedProblem.articleUrl} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#4A6CF7]/15 border border-[#4A6CF7]/30 text-[#4A6CF7] text-[10px] font-bold hover:bg-[#4A6CF7]/25 transition">
+                      📖 Article
+                    </a>
                   </div>
                 )}
               </>
@@ -535,16 +525,10 @@ export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, o
 
             {/* Console header */}
             <div className={`flex items-center justify-between px-4 py-0 h-[42px] border-b ${border}`}>
-              <div className="flex items-center gap-1">
-                {(['testcases', 'results'] as const).map(tab => (
-                  <button key={tab}
-                    onClick={() => { setConsoleTab(tab); setConsoleOpen(true); }}
-                    className={`px-3 py-2 text-xs font-semibold border-b-2 transition-colors h-[42px] ${
-                      consoleTab === tab && consoleOpen ? tabActive : tabInactive
-                    }`}>
-                    {tab === 'testcases' ? 'Test Cases' : 'Results'}
-                  </button>
-                ))}
+              <div className="flex items-center gap-2">
+                <span className={`px-3 py-2 text-xs font-semibold border-b-2 ${tabActive} h-[42px] flex items-center`}>
+                  Test Results
+                </span>
               </div>
               <button onClick={() => setConsoleOpen(o => !o)} className={`${textSecondary} hover:${textPrimary} p-1 transition`}>
                 <ChevronDown className={`w-4 h-4 transition-transform ${consoleOpen ? '' : 'rotate-180'}`} />
@@ -553,57 +537,21 @@ export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, o
 
             {consoleOpen && (
               <div className="flex flex-col h-[calc(100%-42px)] overflow-hidden">
-
-                {/* TEST CASES TAB */}
-                {consoleTab === 'testcases' && (
-                  <div className={`flex-1 overflow-y-auto p-4 scrollbar-thin ${dark ? 'scrollbar-thumb-white/10' : 'scrollbar-thumb-slate-300'} scrollbar-track-transparent`}>
-                    {sampleCases.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center py-8 text-center">
-                        <p className={`text-xs ${textSecondary}`}>No sample test cases available.</p>
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
-                        {/* Case selector */}
-                        <div className="flex gap-2 flex-wrap">
-                          {sampleCases.map((_, i) => (
-                            <button key={i} onClick={() => setActiveTestIdx(i)}
-                              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                                activeTestIdx === i
-                                  ? 'bg-[#4A6CF7]/20 border border-[#4A6CF7]/50 text-[#4A6CF7]'
-                                  : `${dark ? 'bg-white/[0.04] border-white/[0.08] text-[#7B8AB8] hover:text-white' : 'bg-[#F1F5F9] border-[#E2E8F0] text-[#64748B] hover:text-[#1E293B]'} border`
-                              }`}>
-                              Case {i + 1}
-                            </button>
-                          ))}
-                        </div>
-                        {sampleCases[activeTestIdx] && (
-                          <div className="space-y-2">
-                            <div>
-                              <span className={`text-[10px] font-bold ${textSecondary} uppercase tracking-wider block mb-1`}>Input</span>
-                              <pre className={`text-xs font-mono ${codeText} ${bgInput} border ${border} rounded-lg p-2.5 whitespace-pre-wrap overflow-x-auto`}>{sampleCases[activeTestIdx].input}</pre>
-                            </div>
-                            <div>
-                              <span className={`text-[10px] font-bold ${textSecondary} uppercase tracking-wider block mb-1`}>Expected Output</span>
-                              <pre className={`text-xs font-mono ${codeGreen} ${bgInput} border ${border} rounded-lg p-2.5 whitespace-pre-wrap overflow-x-auto`}>{sampleCases[activeTestIdx].output}</pre>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* RESULTS TAB */}
-                {consoleTab === 'results' && (
-                  <div className={`flex-1 overflow-y-auto p-4 scrollbar-thin ${dark ? 'scrollbar-thumb-white/10' : 'scrollbar-thumb-slate-300'} scrollbar-track-transparent`}>
-                    {(running || submitting) ? (
-                      <div className="flex flex-col items-center justify-center py-8 gap-3">
-                        <div className="w-8 h-8 border-2 border-[#4A6CF7] border-t-transparent rounded-full animate-spin" />
-                        <span className={`text-xs ${textSecondary} font-semibold animate-pulse`}>
-                          {submitting ? 'Running all test cases...' : 'Running sample cases...'}
-                        </span>
-                      </div>
-                    ) : activeResult ? (
+                <div className={`flex-1 overflow-y-auto p-4 scrollbar-thin ${dark ? 'scrollbar-thumb-white/10' : 'scrollbar-thumb-slate-300'} scrollbar-track-transparent`}>
+                  {(running || submitting) ? (
+                    <div className="flex flex-col items-center justify-center py-8 gap-3">
+                      <div className="w-8 h-8 border-2 border-[#4A6CF7] border-t-transparent rounded-full animate-spin" />
+                      <span className={`text-xs ${textSecondary} font-semibold animate-pulse`}>
+                        {submitting ? 'Running hidden test cases...' : 'Running sample test cases...'}
+                      </span>
+                    </div>
+                  ) : !activeResult ? (
+                    <div className="flex flex-col items-center justify-center py-10 gap-2 text-center">
+                      <Code2 className={`w-8 h-8 ${textMuted}`} />
+                      <p className={`text-xs ${textSecondary} font-semibold`}>Execution results will appear here</p>
+                      <p className={`text-[10px] ${textMuted}`}>Click "Run" to test sample cases or "Submit" to run hidden test cases</p>
+                    </div>
+                  ) : (
                       <div className="space-y-3">
                         {/* Overall status */}
                         <div className={`flex items-center justify-between px-4 py-2.5 rounded-xl border ${
@@ -625,7 +573,16 @@ export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, o
                           </span>
                         </div>
 
-                        {/* Per-case results */}
+                        {activeResult.errorDetails && (
+                          <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl space-y-1.5">
+                            <span className="text-[10px] font-extrabold text-red-400 uppercase tracking-wider block">Error Details / Compiler Output</span>
+                            <pre className="text-xs font-mono text-red-400 whitespace-pre-wrap overflow-x-auto leading-relaxed p-2 bg-black/30 rounded-lg">
+                              {activeResult.errorDetails}
+                            </pre>
+                          </div>
+                        )}
+
+                        {/* Per-case results in exact order: Input -> Output -> Expected */}
                         {activeResult.results.map((r, i) => (
                           <div key={i} className={`rounded-xl border overflow-hidden ${r.passed ? 'border-emerald-500/20' : 'border-red-500/20'}`}>
                             <div className={`flex items-center justify-between px-3 py-2 ${r.passed ? 'bg-emerald-500/10' : 'bg-red-500/10'}`}>
@@ -652,33 +609,31 @@ export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, o
                               </div>
                             </div>
                             <div className={`p-3 ${bgInput} space-y-2`}>
+                              {/* 1. Input */}
                               <div>
                                 <span className={`text-[9px] font-bold ${textSecondary} uppercase tracking-wider block mb-0.5`}>Input</span>
-                                <pre className={`text-[10px] font-mono ${codeText} whitespace-pre-wrap overflow-x-auto leading-relaxed`}>{r.input || '(none)'}</pre>
+                                <pre className={`text-[10px] font-mono ${codeText} whitespace-pre-wrap overflow-x-auto leading-relaxed`}>
+                                  {r.input ? r.input.split(/,\s*(?=[a-zA-Z_][a-zA-Z0-9_]*\s*=)/).map(s => s.trim()).join('\n') : '(none)'}
+                                </pre>
                               </div>
+                              {/* 2. Output */}
                               <div>
-                                <span className={`text-[9px] font-bold ${textSecondary} uppercase tracking-wider block mb-0.5`}>Expected</span>
-                                <pre className={`text-[10px] font-mono ${codeGreen} whitespace-pre-wrap overflow-x-auto leading-relaxed`}>{r.expectedOutput}</pre>
-                              </div>
-                              <div>
-                                <span className={`text-[9px] font-bold ${textSecondary} uppercase tracking-wider block mb-0.5`}>Your Output</span>
+                                <span className={`text-[9px] font-bold ${textSecondary} uppercase tracking-wider block mb-0.5`}>Output</span>
                                 <pre className={`text-[10px] font-mono whitespace-pre-wrap overflow-x-auto leading-relaxed ${r.passed ? codeGreen : 'text-red-500'}`}>
                                   {r.actualOutput || '(no output)'}
                                 </pre>
+                              </div>
+                              {/* 3. Expected */}
+                              <div>
+                                <span className={`text-[9px] font-bold ${textSecondary} uppercase tracking-wider block mb-0.5`}>Expected</span>
+                                <pre className={`text-[10px] font-mono ${codeGreen} whitespace-pre-wrap overflow-x-auto leading-relaxed`}>{r.expectedOutput}</pre>
                               </div>
                             </div>
                           </div>
                         ))}
                       </div>
-                    ) : (
-                      <div className="flex flex-col items-center justify-center py-8 gap-2 text-center">
-                        <Code2 className={`w-8 h-8 ${textMuted}`} />
-                        <p className={`text-xs ${textSecondary} font-semibold`}>Run your code to see results</p>
-                        <p className={`text-[10px] ${textMuted}`}>Click "Run" for sample cases or "Submit" for all tests</p>
-                      </div>
                     )}
-                  </div>
-                )}
+                </div>
               </div>
             )}
           </div>

@@ -1,109 +1,23 @@
 package com.codeforge.service;
 
 import com.codeforge.dto.SubmissionRequestDto.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
 public class CodeExecutionService {
 
-    @Value("${app.judge0.url:https://ce.judge0.com}")
-    private String judge0Url;
-
-    @Value("${app.judge0.token:}")
-    private String judge0Token;
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
-    private final HttpClient httpClient = HttpClient.newBuilder()
-            .connectTimeout(Duration.ofSeconds(10))
-            .build();
-
     public CodeRunResponse runCode(CodeRunRequest request) {
-        log.info("Attempting to run code via Judge0: languageId={}", request.getLanguageId());
-        try {
-            Map<String, Object> bodyMap = new HashMap<>();
-            bodyMap.put("source_code", request.getSourceCode());
-            bodyMap.put("language_id", request.getLanguageId());
-            bodyMap.put("stdin", request.getStdin());
-
-            String jsonBody = objectMapper.writeValueAsString(bodyMap);
-
-            HttpRequest.Builder reqBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create(judge0Url + "/submissions?base64_encoded=true&wait=true"))
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody));
-
-            if (judge0Token != null && !judge0Token.isBlank()) {
-                reqBuilder.header("X-Auth-Token", judge0Token);
-            }
-
-            HttpResponse<String> response = httpClient.send(reqBuilder.build(), HttpResponse.BodyHandlers.ofString());
-
-            if (response.statusCode() == 200 || response.statusCode() == 201) {
-                Map<String, Object> respMap = objectMapper.readValue(response.body(), new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {});
-                
-                String stdout = (String) respMap.get("stdout");
-                String stderr = (String) respMap.get("stderr");
-                String compileOutput = (String) respMap.get("compile_output");
-                Object timeObj = respMap.get("time");
-                Double time = 0.0;
-                if (timeObj instanceof Number) {
-                    time = ((Number) timeObj).doubleValue();
-                } else if (timeObj instanceof String) {
-                    time = Double.parseDouble((String) timeObj);
-                }
-                
-                Object memObj = respMap.get("memory");
-                Integer memory = 0;
-                if (memObj instanceof Number) {
-                    memory = ((Number) memObj).intValue();
-                }
-
-                String message = (String) respMap.get("message");
-
-                @SuppressWarnings("unchecked")
-                Map<String, Object> statusMap = (Map<String, Object>) respMap.get("status");
-                Integer statusId = 3;
-                String statusDesc = "Accepted";
-                if (statusMap != null) {
-                    statusId = (Integer) statusMap.get("id");
-                    statusDesc = (String) statusMap.get("description");
-                }
-
-                return CodeRunResponse.builder()
-                        .stdout(stdout)
-                        .stderr(stderr)
-                        .compileOutput(compileOutput)
-                        .time(time)
-                        .memory(memory)
-                        .message(message)
-                        .status(RunStatus.builder().id(statusId).description(statusDesc).build())
-                        .build();
-            } else {
-                log.warn("Judge0 returned error code: {}. Falling back to local execution.", response.statusCode());
-                return runLocally(request);
-            }
-        } catch (Exception e) {
-            log.error("Failed to execute code via Judge0. Falling back to local execution.", e);
-            return runLocally(request);
-        }
+        log.info("Executing code via local engine: languageId={}", request.getLanguageId());
+        return runLocally(request);
     }
 
     private CodeRunResponse runLocally(CodeRunRequest request) {
@@ -131,6 +45,12 @@ public class CodeExecutionService {
             Path tempDir = Files.createTempDirectory("codeforge-local-exec-");
             String fileName = "Main." + ext;
 
+            if (lang.equals("python")) {
+                sourceCode = wrapPythonCode(sourceCode, stdin);
+            } else if (lang.equals("java")) {
+                sourceCode = wrapJavaCode(sourceCode, stdin);
+            }
+
             Path codePath = tempDir.resolve(fileName);
             Files.writeString(codePath, sourceCode);
 
@@ -140,6 +60,7 @@ public class CodeExecutionService {
             long startTime = System.currentTimeMillis();
             long endTime = startTime;
 
+            int exitCode = 0;
             if (lang.equals("java")) {
                 ProcessBuilder compileBuilder = new ProcessBuilder("javac", "Main.java");
                 compileBuilder.directory(tempDir.toFile());
@@ -171,6 +92,7 @@ public class CodeExecutionService {
                 stdout = readStream(runProcess.getInputStream());
                 stderr = readStream(runProcess.getErrorStream());
                 runProcess.waitFor(5, TimeUnit.SECONDS);
+                exitCode = runProcess.exitValue();
                 endTime = System.currentTimeMillis();
 
             } else if (lang.equals("cpp")) {
@@ -204,6 +126,7 @@ public class CodeExecutionService {
                 stdout = readStream(runProcess.getInputStream());
                 stderr = readStream(runProcess.getErrorStream());
                 runProcess.waitFor(5, TimeUnit.SECONDS);
+                exitCode = runProcess.exitValue();
                 endTime = System.currentTimeMillis();
 
             } else {
@@ -222,6 +145,7 @@ public class CodeExecutionService {
                 stdout = readStream(runProcess.getInputStream());
                 stderr = readStream(runProcess.getErrorStream());
                 runProcess.waitFor(5, TimeUnit.SECONDS);
+                exitCode = runProcess.exitValue();
                 endTime = System.currentTimeMillis();
             }
 
@@ -232,7 +156,7 @@ public class CodeExecutionService {
             String encodedStderr = Base64.getEncoder().encodeToString(stderr.getBytes(StandardCharsets.UTF_8));
 
             RunStatus status = RunStatus.builder().id(3).description("Accepted").build();
-            if (!stderr.isEmpty()) {
+            if (exitCode != 0) {
                 status = RunStatus.builder().id(11).description("Runtime Error (NZEC)").build();
             }
 
@@ -274,4 +198,117 @@ public class CodeExecutionService {
         }
         file.delete();
     }
+
+    private String wrapPythonCode(String sourceCode, String stdin) {
+        if (!sourceCode.contains("class Solution")) {
+            return sourceCode;
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append(sourceCode).append("\n\n");
+        sb.append("import json, sys, inspect, re\n");
+        sb.append("from typing import *\n\n");
+        sb.append("def _run_sol():\n");
+        String escapedStdin = stdin.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n");
+        sb.append("    raw = \"").append(escapedStdin).append("\"\n");
+        sb.append("    for line in raw.splitlines():\n");
+        sb.append("        for part in re.split(r',\\s*(?=[a-zA-Z_][a-zA-Z0-9_]*\\s*=)', line.strip()):\n");
+        sb.append("            if '=' in part:\n");
+        sb.append("                try:\n");
+        sb.append("                    exec(part.strip(), globals())\n");
+        sb.append("                except:\n");
+        sb.append("                    pass\n");
+        sb.append("    sol = Solution()\n");
+        sb.append("    methods = [m for m in dir(sol) if not m.startswith('_')]\n");
+        sb.append("    if methods:\n");
+        sb.append("        method = getattr(sol, methods[0])\n");
+        sb.append("        sig = inspect.signature(method)\n");
+        sb.append("        args = [globals()[p] for p in sig.parameters.keys() if p in globals()]\n");
+        sb.append("        res = method(*args)\n");
+        sb.append("        if res is None and sig.parameters:\n");
+        sb.append("            res = globals()[list(sig.parameters.keys())[0]]\n");
+        sb.append("        if isinstance(res, bool):\n");
+        sb.append("            print('true' if res else 'false')\n");
+        sb.append("        elif isinstance(res, (list, dict, int, str)):\n");
+        sb.append("            print(json.dumps(res, separators=(',', ':')))\n");
+        sb.append("        elif res is not None:\n");
+        sb.append("            print(res)\n\n");
+        sb.append("_run_sol()\n");
+        return sb.toString();
+    }
+
+    private String wrapJavaCode(String sourceCode, String stdin) {
+        if (sourceCode.contains("public class Main") || sourceCode.contains("class Main")) {
+            return sourceCode;
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("import java.util.*;\n");
+        sb.append("import java.lang.reflect.*;\n\n");
+        sb.append(sourceCode).append("\n\n");
+        sb.append("public class Main {\n");
+        sb.append("    public static void main(String[] args) {\n");
+        sb.append("        try {\n");
+        String escapedStdin = stdin.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n");
+        sb.append("            String stdinRaw = \"").append(escapedStdin).append("\";\n");
+        sb.append("            Map<String, String> vars = new LinkedHashMap<>();\n");
+        sb.append("            for (String line : stdinRaw.split(\"\\\\n\")) {\n");
+        sb.append("                for (String part : line.split(\",\\\\s*(?=[a-zA-Z_][a-zA-Z0-9_]*\\\\s*=)\")) {\n");
+        sb.append("                    if (part.contains(\"=\")) {\n");
+        sb.append("                        String[] kv = part.split(\"=\", 2);\n");
+        sb.append("                        vars.put(kv[0].trim(), kv[1].trim());\n");
+        sb.append("                    }\n");
+        sb.append("                }\n");
+        sb.append("            }\n");
+        sb.append("            Solution sol = new Solution();\n");
+        sb.append("            Method targetMethod = null;\n");
+        sb.append("            for (Method m : Solution.class.getDeclaredMethods()) {\n");
+        sb.append("                if (Modifier.isPublic(m.getModifiers()) && !Modifier.isStatic(m.getModifiers())) {\n");
+        sb.append("                    targetMethod = m;\n");
+        sb.append("                    break;\n");
+        sb.append("                }\n");
+        sb.append("            }\n");
+        sb.append("            if (targetMethod == null) return;\n");
+        sb.append("            Class<?>[] paramTypes = targetMethod.getParameterTypes();\n");
+        sb.append("            Object[] paramValues = new Object[paramTypes.length];\n");
+        sb.append("            String[] valStrs = vars.values().toArray(new String[0]);\n");
+        sb.append("            for (int i = 0; i < paramTypes.length; i++) {\n");
+        sb.append("                String valStr = i < valStrs.length ? valStrs[i] : \"\";\n");
+        sb.append("                paramValues[i] = parseVal(valStr, paramTypes[i]);\n");
+        sb.append("            }\n");
+        sb.append("            Object res = targetMethod.invoke(sol, paramValues);\n");
+        sb.append("            if (res == null && paramValues.length > 0) {\n");
+        sb.append("                res = paramValues[0];\n");
+        sb.append("            }\n");
+        sb.append("            printRes(res);\n");
+        sb.append("        } catch (Exception e) {\n");
+        sb.append("            e.printStackTrace();\n");
+        sb.append("        }\n");
+        sb.append("    }\n");
+        sb.append("    private static Object parseVal(String s, Class<?> type) {\n");
+        sb.append("        s = s.trim();\n");
+        sb.append("        if (type == int.class || type == Integer.class) return Integer.parseInt(s);\n");
+        sb.append("        if (type == long.class || type == Long.class) return Long.parseLong(s);\n");
+        sb.append("        if (type == double.class || type == Double.class) return Double.parseDouble(s);\n");
+        sb.append("        if (type == boolean.class || type == Boolean.class) return Boolean.parseBoolean(s);\n");
+        sb.append("        if (type == String.class) return s.replace(String.valueOf('\"'), \"\");\n");
+        sb.append("        if (type == int[].class) {\n");
+        sb.append("            s = s.replace(\"[\", \"\").replace(\"]\", \"\").trim();\n");
+        sb.append("            if (s.isEmpty()) return new int[0];\n");
+        sb.append("            String[] parts = s.split(\",\");\n");
+        sb.append("            int[] arr = new int[parts.length];\n");
+        sb.append("            for(int i=0;i<parts.length;i++) arr[i] = Integer.parseInt(parts[i].trim());\n");
+        sb.append("            return arr;\n");
+        sb.append("        }\n");
+        sb.append("        return s;\n");
+        sb.append("    }\n");
+        sb.append("    private static void printRes(Object res) {\n");
+        sb.append("        if (res instanceof int[]) {\n");
+        sb.append("            System.out.println(Arrays.toString((int[])res).replace(\" \", \"\"));\n");
+        sb.append("        } else {\n");
+        sb.append("            System.out.println(res);\n");
+        sb.append("        }\n");
+        sb.append("    }\n");
+        sb.append("}\n");
+        return sb.toString();
+    }
 }
+

@@ -93,5 +93,6 @@ public class ProblemDto {
         private int totalCount;
         private List<TestCaseResult> results;
         private String overallStatus; // "Accepted", "Wrong Answer", "Runtime Error", etc.
+        private String errorDetails;
     }
 }

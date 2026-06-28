@@ -84,7 +84,6 @@ public class ProblemController {
             @PathVariable Long id,
             @RequestBody ProblemDto.ProblemSubmitRequest request) {
         User user = (User) auth.getPrincipal();
-        // For run, we still use submitProblem logic but only sample test cases are in DB when no hidden ones exist
-        return ResponseEntity.ok(problemService.submitProblem(user, id, request.getSourceCode(), request.getLanguageId()));
+        return ResponseEntity.ok(problemService.runSampleTestCases(user, id, request.getSourceCode(), request.getLanguageId()));
     }
 }
