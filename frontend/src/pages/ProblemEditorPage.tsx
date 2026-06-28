@@ -252,20 +252,35 @@ export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, o
     } catch {}
   };
 
-  const MAX_PROBLEMS = 382;
-
-  // Problem Navigation Handler (< , > , Shuffle)
-  const navigateToProblem = async (targetId: number) => {
-    if (targetId < 1 || targetId > MAX_PROBLEMS || targetId === enrichedProblem.id) return;
-    try {
-      const res = await api.get<Problem>(`/problems/${targetId}`);
-      if (res.data && res.data.id) {
-        setEnrichedProblem(res.data);
-        setRunResult(null);
-        setSubmitResult(null);
-        setSelectedSubmissionRecord(null);
+  // Problem Navigation Handler ('prev' | 'next' | 'random')
+  const navigateToProblem = async (direction: 'next' | 'prev' | 'random') => {
+    let currentId = Number(enrichedProblem.id) || 1;
+    let attempts = 0;
+    
+    while (attempts < 10) {
+      attempts++;
+      let targetId = currentId;
+      if (direction === 'next') {
+        targetId = currentId >= 382 ? 1 : currentId + 1;
+      } else if (direction === 'prev') {
+        targetId = currentId <= 1 ? 382 : currentId - 1;
+      } else {
+        targetId = Math.floor(Math.random() * 380) + 1;
       }
-    } catch {}
+      
+      try {
+        const res = await api.get<Problem>(`/problems/${targetId}`);
+        if (res.data && res.data.id) {
+          setEnrichedProblem(res.data);
+          setRunResult(null);
+          setSubmitResult(null);
+          setSelectedSubmissionRecord(null);
+          return;
+        }
+      } catch {
+        currentId = targetId;
+      }
+    }
   };
 
   const handleCodeChange = (value: string | undefined) => {
@@ -410,21 +425,19 @@ export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, o
           {/* Working Problem Navigation: Previous (<), Next (>), Shuffle */}
           <div className="flex items-center gap-1">
             <button
-              onClick={() => navigateToProblem(enrichedProblem.id - 1)}
-              disabled={enrichedProblem.id <= 1}
-              className={`p-1.5 rounded-md ${textSecondary} ${btnHover} transition disabled:opacity-30 disabled:cursor-not-allowed`}
-              title={enrichedProblem.id <= 1 ? "First problem reached" : "Previous Problem"}>
+              onClick={() => navigateToProblem('prev')}
+              className={`p-1.5 rounded-md ${textSecondary} ${btnHover} transition`}
+              title="Previous Problem">
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
-              onClick={() => navigateToProblem(enrichedProblem.id + 1)}
-              disabled={enrichedProblem.id >= MAX_PROBLEMS}
-              className={`p-1.5 rounded-md ${textSecondary} ${btnHover} transition disabled:opacity-30 disabled:cursor-not-allowed`}
-              title={enrichedProblem.id >= MAX_PROBLEMS ? "Last problem reached" : "Next Problem"}>
+              onClick={() => navigateToProblem('next')}
+              className={`p-1.5 rounded-md ${textSecondary} ${btnHover} transition`}
+              title="Next Problem">
               <ChevronRight className="w-4 h-4" />
             </button>
             <button
-              onClick={() => navigateToProblem(Math.floor(Math.random() * (MAX_PROBLEMS - 1)) + 1)}
+              onClick={() => navigateToProblem('random')}
               className={`p-1.5 rounded-md ${textSecondary} ${btnHover} transition ml-1`}
               title="Pick Random Problem">
               <Shuffle className="w-3.5 h-3.5 text-sky-500" />
