@@ -8,6 +8,7 @@ import com.codeforge.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -17,6 +18,7 @@ public class AuthService {
     private final SubmissionRepository submissionRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final OtpService otpService;
 
     public AuthDto.AuthResponse register(AuthDto.RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -55,8 +57,43 @@ public class AuthService {
                 .build();
     }
 
+    public AuthDto.UserInfo updateProfile(User user, AuthDto.UpdateProfileRequest request) {
+        if (request.getName() != null && !request.getName().trim().isEmpty()) {
+            user.setName(request.getName().trim());
+        }
+        if (request.getEmail() != null && !request.getEmail().trim().isEmpty() && !request.getEmail().equalsIgnoreCase(user.getEmail())) {
+            if (userRepository.existsByEmail(request.getEmail().trim())) {
+                throw new RuntimeException("Email address already in use");
+            }
+            user.setEmail(request.getEmail().trim());
+        }
+        user = userRepository.save(user);
+        return mapToUserInfo(user);
+    }
+
+    public AuthDto.OtpResponse changePassword(User user, AuthDto.ChangePasswordRequest request) {
+        // Verify OTP code first
+        otpService.verifyOtp(user.getEmail(), request.getOtp());
+
+        if (request.getNewPassword() == null || request.getNewPassword().trim().length() < 6) {
+            throw new RuntimeException("New password must be at least 6 characters long");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword().trim()));
+        userRepository.save(user);
+
+        return AuthDto.OtpResponse.builder()
+                .message("Password updated successfully")
+                .success(true)
+                .build();
+    }
+
+    @Transactional
+    public void deleteAccount(User user) {
+        userRepository.delete(user);
+    }
+
     public AuthDto.UserInfo getCurrentUser(User user) {
-        // Compute solved count from actual submissions so it's always accurate
         int solvedCount = (int) submissionRepository.countSolvedByUserId(user.getId());
         return mapToUserInfo(user, solvedCount);
     }

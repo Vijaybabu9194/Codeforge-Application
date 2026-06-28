@@ -13,10 +13,20 @@ import ProblemOfTheDayPage from './pages/ProblemOfTheDayPage';
 import RoadmapPage from './pages/RoadmapPage';
 import DashboardSidebar from './components/dashboard/DashboardSidebar';
 import DashboardTopbar from './components/dashboard/DashboardTopbar';
+import AccountSettingsModal from './components/dashboard/AccountSettingsModal';
 
 const DashboardContent: React.FC = () => {
   const [activeTab, setActiveTab] = useState('home');
   const [selectedProblem, setSelectedProblem] = useState<any | null>(null);
+  
+  // Account settings modal state
+  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
+  const [accountModalTab, setAccountModalTab] = useState<'edit' | 'settings'>('edit');
+
+  const handleOpenAccountModal = (tab: 'edit' | 'settings') => {
+    setAccountModalTab(tab);
+    setIsAccountModalOpen(true);
+  };
 
   // Full-screen problem editor — renders outside sidebar/topbar layout like LeetCode
   if (selectedProblem) {
@@ -59,13 +69,23 @@ const DashboardContent: React.FC = () => {
       {/* Right Content Area */}
       <div className="flex-1 min-w-0 ml-[240px] flex flex-col min-h-screen overflow-x-hidden">
         {/* Top Navbar — Sticky */}
-        <DashboardTopbar />
+        <DashboardTopbar
+          onNavigateTab={(tab) => setActiveTab(tab)}
+          onOpenAccountModal={handleOpenAccountModal}
+        />
 
         {/* Scrollable Main Content */}
         <main className="flex-1 p-6 lg:p-8 overflow-y-auto overflow-x-hidden dash-scroll">
           {renderActiveView()}
         </main>
       </div>
+
+      {/* Interactive Account Settings Modal */}
+      <AccountSettingsModal
+        isOpen={isAccountModalOpen}
+        onClose={() => setIsAccountModalOpen(false)}
+        initialTab={accountModalTab}
+      />
     </div>
   );
 };

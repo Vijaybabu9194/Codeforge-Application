@@ -28,6 +28,19 @@ public class AuthDto {
         private String otp;
     }
 
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor
+    public static class UpdateProfileRequest {
+        private String name;
+        private String email;
+    }
+
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor
+    public static class ChangePasswordRequest {
+        private String email;
+        private String otp;
+        private String newPassword;
+    }
+
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
     public static class OtpResponse {
         private String message;

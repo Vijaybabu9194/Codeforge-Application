@@ -66,6 +66,7 @@ com/codeforge/dto/SubmissionRequestDto$CodeRunRequest.class
 com/codeforge/entity/User$UserBuilder.class
 com/codeforge/controller/CodeExecutionController.class
 com/codeforge/config/DataSeeder$SeedSubtopic.class
+com/codeforge/dto/AuthDto$UpdateProfileRequest.class
 com/codeforge/dto/SubmissionRequestDto$CodeRunResponse$CodeRunResponseBuilder.class
 com/codeforge/dto/AuthDto.class
 com/codeforge/entity/Bookmark.class
@@ -122,6 +123,7 @@ com/codeforge/service/DashboardService.class
 com/codeforge/service/CompanyService.class
 com/codeforge/dto/ProblemDto$ProblemResponse.class
 com/codeforge/dto/ProblemDto$NoteDto.class
+com/codeforge/dto/AuthDto$ChangePasswordRequest.class
 com/codeforge/dto/CompanyDto$CompanyQuestionResponse.class
 com/codeforge/entity/Problem$Difficulty.class
 com/codeforge/repository/UserRepository.class

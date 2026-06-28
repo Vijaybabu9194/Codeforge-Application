@@ -1,8 +1,7 @@
 import React from 'react';
 import {
-  Home, Code2, Building2, Trophy, MessageSquare, Map, User, Flame, LogOut
+  Home, Code2, Building2, Trophy, MessageSquare, Map, User, Flame
 } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
 
 interface DashboardSidebarProps {
   activeTab: string;
@@ -21,8 +20,6 @@ const navItems = [
 ];
 
 export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ activeTab, onTabChange }) => {
-  const { logout } = useAuth();
-
   return (
     <aside className="w-[240px] h-screen bg-dash-sidebar flex flex-col border-r border-dash-border fixed left-0 top-0 z-30 select-none">
       {/* Logo */}
@@ -40,7 +37,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ activeTab, o
       </div>
 
       {/* Scrollable Area */}
-      <div className="flex-1 overflow-y-auto dash-scroll flex flex-col justify-between pb-4">
+      <div className="flex-1 overflow-y-auto dash-scroll flex flex-col pb-4">
         {/* Navigation */}
         <nav className="px-3 py-4 space-y-0.5">
           {navItems.map((item) => {
@@ -58,17 +55,6 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ activeTab, o
             );
           })}
         </nav>
-
-        {/* Sidebar Bottom Logout Button */}
-        <div className="px-3 pt-2 border-t border-dash-border/60">
-          <button
-            onClick={logout}
-            className="w-full py-2.5 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 border border-red-500/20 flex items-center gap-2.5 text-[13px] font-bold transition-all cursor-pointer"
-          >
-            <LogOut className="w-[17px] h-[17px] flex-shrink-0" />
-            <span>Logout</span>
-          </button>
-        </div>
       </div>
     </aside>
   );

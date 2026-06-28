@@ -37,6 +37,25 @@ public class AuthController {
         return ResponseEntity.ok(authService.login(request));
     }
 
+    @PutMapping("/update-profile")
+    public ResponseEntity<AuthDto.UserInfo> updateProfile(@RequestBody AuthDto.UpdateProfileRequest request, Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        return ResponseEntity.ok(authService.updateProfile(user, request));
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<AuthDto.OtpResponse> changePassword(@RequestBody AuthDto.ChangePasswordRequest request, Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        return ResponseEntity.ok(authService.changePassword(user, request));
+    }
+
+    @DeleteMapping("/delete-account")
+    public ResponseEntity<AuthDto.OtpResponse> deleteAccount(Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        authService.deleteAccount(user);
+        return ResponseEntity.ok(AuthDto.OtpResponse.builder().message("Account deleted successfully").success(true).build());
+    }
+
     @GetMapping("/me")
     public ResponseEntity<AuthDto.UserInfo> getCurrentUser(Authentication authentication) {
         User user = (User) authentication.getPrincipal();
