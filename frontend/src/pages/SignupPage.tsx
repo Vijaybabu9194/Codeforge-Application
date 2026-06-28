@@ -24,7 +24,6 @@ export const SignupPage: React.FC<SignupPageProps> = ({ onSwitchToLogin, onBackT
 
   // OTP
   const [otp, setOtp] = useState('');
-  const [serverOtpHint, setServerOtpHint] = useState<string | null>(null);
 
   // External profiles (Optional)
   const [leetcodeUser, setLeetcodeUser] = useState('');
@@ -35,7 +34,7 @@ export const SignupPage: React.FC<SignupPageProps> = ({ onSwitchToLogin, onBackT
   const [infoMessage, setInfoMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  // Step 1: Send Real Backend OTP
+  // Step 1: Send Real Backend OTP to Mail
   const handleStep1Submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !email || !password) {
@@ -46,9 +45,8 @@ export const SignupPage: React.FC<SignupPageProps> = ({ onSwitchToLogin, onBackT
     setInfoMessage('');
     setSubmitting(true);
     try {
-      const response = await api.post<{ message: string; success: boolean; otp: string }>('/auth/send-otp', { email });
-      setServerOtpHint(response.data.otp);
-      setInfoMessage(`Real OTP sent! Code: ${response.data.otp}`);
+      await api.post<{ message: string; success: boolean }>('/auth/send-otp', { email });
+      setInfoMessage('Verification code dispatched! Please check your email inbox.');
       setStep(2);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to send OTP code. Please try again.');
@@ -72,7 +70,7 @@ export const SignupPage: React.FC<SignupPageProps> = ({ onSwitchToLogin, onBackT
       setInfoMessage('Email verified successfully! Optionally add coding profiles.');
       setStep(3);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Invalid OTP code. Please try again.');
+      setError(err.response?.data?.message || 'Invalid OTP code. Please check your email and try again.');
     } finally {
       setSubmitting(false);
     }
@@ -190,7 +188,7 @@ export const SignupPage: React.FC<SignupPageProps> = ({ onSwitchToLogin, onBackT
                   disabled={submitting}
                   className="w-full py-3.5 px-6 bg-sky-500 hover:bg-sky-600 text-white font-black text-sm rounded-xl shadow-lg shadow-sky-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 mt-2"
                 >
-                  <span>{submitting ? 'Sending Real OTP...' : 'Continue to Verification'}</span>
+                  <span>{submitting ? 'Sending OTP...' : 'Continue to Verification'}</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </form>
@@ -204,14 +202,14 @@ export const SignupPage: React.FC<SignupPageProps> = ({ onSwitchToLogin, onBackT
                 <div className="w-12 h-12 rounded-2xl bg-sky-500/10 border border-sky-500/20 text-sky-500 flex items-center justify-center mx-auto mb-3">
                   <KeyRound className="w-6 h-6" />
                 </div>
-                <h1 className="text-2xl font-black tracking-tight mb-2">Verify Your Email ✉️</h1>
+                <h1 className="text-2xl font-black tracking-tight mb-2">Check Your Inbox ✉️</h1>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Step 2 of 3 — Enter 6-digit real OTP sent to <span className="font-bold text-sky-500">{email}</span>.
+                  Step 2 of 3 — Enter 6-digit verification code sent to <span className="font-bold text-sky-500">{email}</span>.
                 </p>
               </div>
 
               {infoMessage && (
-                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-xs font-bold text-center">
+                <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-xs font-bold text-center">
                   {infoMessage}
                 </div>
               )}
@@ -233,15 +231,6 @@ export const SignupPage: React.FC<SignupPageProps> = ({ onSwitchToLogin, onBackT
                     onChange={e => setOtp(e.target.value)}
                     className={`w-full text-center tracking-[0.5em] text-xl font-black py-3 rounded-xl border focus:outline-none focus:border-sky-500 transition ${dark ? 'bg-slate-800/80 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'}`}
                   />
-                  {serverOtpHint && (
-                    <button
-                      type="button"
-                      onClick={() => setOtp(serverOtpHint)}
-                      className="mt-2 text-[11px] font-extrabold text-sky-500 hover:underline cursor-pointer"
-                    >
-                      Autofill Real Dispatched OTP ({serverOtpHint})
-                    </button>
-                  )}
                 </div>
 
                 <button

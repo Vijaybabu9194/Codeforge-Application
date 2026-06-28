@@ -32,7 +32,6 @@ public class AuthDto {
     public static class OtpResponse {
         private String message;
         private boolean success;
-        private String otp; // Returned so client can display or verify real OTP!
     }
 
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder

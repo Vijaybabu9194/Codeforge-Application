@@ -50,15 +50,15 @@ public class OtpService {
         otpStorage.put(email.toLowerCase().trim(), new OtpData(otpStr, expiry));
 
         log.info("=================================================");
-        log.info("REAL DISPATCHED OTP FOR [{}]: {}", email, otpStr);
+        log.info("PHYSICAL MAIL DISPATCHING FOR [{}]: OTP Code Generated", email);
         log.info("=================================================");
 
-        // Dispatch physical mail asynchronously via JavaMailSender
+        // Dispatch physical mail via JavaMailSender
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
             
-            // Set explicit From address to prevent 'can't determine local email address'
+            // Set explicit From address
             helper.setFrom(fromEmail, "CodeForge Platform");
             helper.setTo(email);
             helper.setSubject("⚡ CodeForge — Your Verification OTP Code");
@@ -82,9 +82,8 @@ public class OtpService {
         }
 
         return AuthDto.OtpResponse.builder()
-                .message("Physical OTP email dispatched to " + email)
+                .message("Verification code sent to your email inbox.")
                 .success(true)
-                .otp(otpStr) // Return generated code so user can verify
                 .build();
     }
 
@@ -114,7 +113,6 @@ public class OtpService {
         return AuthDto.OtpResponse.builder()
                 .message("OTP verified successfully")
                 .success(true)
-                .otp(data.otp)
                 .build();
     }
 }
