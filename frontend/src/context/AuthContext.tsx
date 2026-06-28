@@ -24,9 +24,21 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<UserInfo | null>(null);
-  const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
-  const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem('token'));
+  const [user, setUser] = useState<UserInfo | null>(() => {
+    try {
+      const cached = localStorage.getItem('user');
+      if (cached) return JSON.parse(cached);
+    } catch (e) {}
+    return null;
+  });
+  
+  // Instant loading initialization — false if token and cached user exist!
+  const [loading, setLoading] = useState<boolean>(() => {
+    const cachedToken = localStorage.getItem('token');
+    const cachedUser = localStorage.getItem('user');
+    return Boolean(cachedToken && !cachedUser);
+  });
 
   const fetchCurrentUser = async () => {
     try {
@@ -42,7 +54,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
-    if (token) {
+    if (token && !user) {
       fetchCurrentUser();
     } else {
       setLoading(false);
@@ -50,14 +62,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [token]);
 
   const login = async (email: string, password: string) => {
-    setLoading(true);
     try {
       const response = await api.post<{ token: string; user: UserInfo }>('/auth/login', { email, password });
       const { token: receivedToken, user: receivedUser } = response.data;
+      
       localStorage.setItem('token', receivedToken);
       localStorage.setItem('user', JSON.stringify(receivedUser));
-      setToken(receivedToken);
+      
       setUser(receivedUser);
+      setToken(receivedToken);
+      setLoading(false); // Instant transition without waiting for re-fetch
     } catch (error) {
       setLoading(false);
       throw error;
@@ -65,14 +79,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const register = async (name: string, email: string, password: string) => {
-    setLoading(true);
     try {
       const response = await api.post<{ token: string; user: UserInfo }>('/auth/register', { name, email, password });
       const { token: receivedToken, user: receivedUser } = response.data;
+      
       localStorage.setItem('token', receivedToken);
       localStorage.setItem('user', JSON.stringify(receivedUser));
-      setToken(receivedToken);
+      
       setUser(receivedUser);
+      setToken(receivedToken);
+      setLoading(false); // Instant transition
     } catch (error) {
       setLoading(false);
       throw error;
@@ -93,9 +109,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const response = await api.get<UserInfo>('/auth/me');
       setUser(response.data);
       localStorage.setItem('user', JSON.stringify(response.data));
-      window.dispatchEvent(new Event('stats-updated'));
     } catch (error) {
-      console.error('Error updating stats:', error);
+      console.error('Failed to update user stats:', error);
     }
   };
 
@@ -108,7 +123,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
