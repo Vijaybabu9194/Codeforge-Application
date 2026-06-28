@@ -31,6 +31,19 @@ spring:
       write-dates-as-timestamps: false
     default-property-inclusion: non_null
 
+  # Physical Mail Dispatched via SMTP
+  mail:
+    host: ${SPRING_MAIL_HOST:smtp.gmail.com}
+    port: ${SPRING_MAIL_PORT:587}
+    username: ${SPRING_MAIL_USERNAME:codeforge.verify@gmail.com}
+    password: ${SPRING_MAIL_PASSWORD:demo-app-password}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 app:
   jwt:
     secret: codeforge-super-secret-key-that-is-at-least-256-bits-long-for-hs256-algorithm
