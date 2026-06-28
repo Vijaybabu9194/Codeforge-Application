@@ -59,10 +59,17 @@ def parse_html_content(html):
 
     soup = BeautifulSoup(html, 'html.parser')
 
-    # 1. Parse examples from <pre> tags with full multiline regex
+    # 1. Universal example parsing (handles <pre>, <div class="example-block">, and paragraphs)
     examples = []
-    for pre in soup.find_all('pre'):
-        text = pre.get_text()
+    blocks = soup.find_all(['div', 'pre'], class_=lambda c: c and 'example-block' in c) or soup.find_all('pre')
+    if not blocks:
+        ex_headers = soup.find_all(lambda t: t.name in ['p', 'strong', 'div', 'h3', 'h4'] and re.search(r'Example\s*\d+', t.get_text(), re.I))
+        for h in ex_headers:
+            parent = h.find_parent(['div', 'section']) or h.parent
+            if parent and parent not in blocks: blocks.append(parent)
+
+    for block in blocks:
+        text = block.get_text('\n')
         ex = {}
         m_in = re.search(r'Input:\s*(.*?)(?=\n?\s*(?:Output:|Explanation:|$))', text, re.DOTALL | re.I)
         m_out = re.search(r'Output:\s*(.*?)(?=\n?\s*(?:Explanation:|$))', text, re.DOTALL | re.I)

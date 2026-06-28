@@ -273,13 +273,22 @@ export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, o
       .catch(() => {});
   }, []);
 
-  // Problem Navigation Handler ('prev' | 'next' | 'random') — Instant switching
-  const navigateToProblem = (direction: 'next' | 'prev' | 'random') => {
+  // Problem Navigation Handler ('prev' | 'next' | 'random') — Fail-proof switching
+  const navigateToProblem = async (direction: 'next' | 'prev' | 'random') => {
     let list = allProblemsList;
-    let targetProblem: Problem | null = null;
+    if (list.length === 0) {
+      try {
+        const pRes = await api.get<any>('/problems?size=1000');
+        if (pRes.data && pRes.data.problems) {
+          list = pRes.data.problems;
+          setAllProblemsList(list);
+        }
+      } catch {}
+    }
 
+    let targetProblem: Problem | null = null;
     if (list.length > 0) {
-      const idx = list.findIndex(p => p.id === enrichedProblem.id);
+      const idx = list.findIndex(p => Number(p.id) === Number(enrichedProblem.id));
       if (direction === 'next') {
         const nextIdx = idx >= 0 ? (idx + 1) % list.length : 0;
         targetProblem = list[nextIdx];
@@ -297,6 +306,22 @@ export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, o
       setRunResult(null);
       setSubmitResult(null);
       setSelectedSubmissionRecord(null);
+    } else {
+      const curId = Number(enrichedProblem.id) || 1;
+      let nextId = curId;
+      if (direction === 'next') nextId = curId + 1;
+      else if (direction === 'prev') nextId = Math.max(1, curId - 1);
+      else nextId = Math.floor(Math.random() * 380) + 1;
+
+      try {
+        const res = await api.get<Problem>(`/problems/${nextId}`);
+        if (res.data && res.data.id) {
+          setEnrichedProblem(res.data);
+          setRunResult(null);
+          setSubmitResult(null);
+          setSelectedSubmissionRecord(null);
+        }
+      } catch {}
     }
   };
 
