@@ -6,18 +6,52 @@
 ![PostgreSQL](https://img.shields.io/badge/Neon_PostgreSQL-Cloud-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
 
-**CodeForge** is an advanced, high-performance web platform designed for software engineers and DSA warriors to practice Data Structures & Algorithms, explore company-specific interview questions, track real-time progress analytics, and execute code instantly with isolated sandboxed runners.
+**CodeForge** is an advanced, high-performance web platform designed for software engineers, computer science students, and competitive programmers to master Data Structures & Algorithms (DSA), explore company-specific interview questions, track real-time progress analytics, and execute code instantly inside an isolated sandboxed execution environment.
 
 ---
 
 ## 📋 Table of Contents
-1. [🌟 Key Features](#-key-features)
-2. [💻 Tech Stack (A-Z)](#-tech-stack-a-z)
-3. [⚙️ Code Execution Architecture](#%EF%B8%8F-code-execution-architecture)
-4. [🌐 External APIs & Integrations](#-external-apis--integrations)
-5. [🗄️ Database Schema & Data Models](#%EF%B8%8F-database-schema--data-models)
-6. [🚀 Installation & Setup Guide](#-installation--setup-guide)
-7. [📡 Complete REST API Documentation](#-complete-rest-api-documentation)
+1. [🎯 What is CodeForge?](#-what-is-codeforge)
+2. [💡 Why CodeForge? (The Need & Value Proposition)](#-why-codeforge-the-need--value-proposition)
+3. [🌟 Key Features](#-key-features)
+4. [💻 Tech Stack (A-Z)](#-tech-stack-a-z)
+5. [⚙️ Code Execution Architecture](#%EF%B8%8F-code-execution-architecture)
+6. [🌐 External APIs & Integrations](#-external-apis--integrations)
+7. [🗄️ Database Schema & Data Models](#%EF%B8%8F-database-schema--data-models)
+8. [🚀 Installation & Setup Guide](#-installation--setup-guide)
+9. [📡 Complete REST API Documentation](#-complete-rest-api-documentation)
+
+---
+
+## 🎯 What is CodeForge?
+
+**CodeForge** is a centralized, interactive coding and interview preparation ecosystem built to bridge the gap between theoretical computer science concepts and practical technical interview success. 
+
+Unlike conventional static learning tools, CodeForge combines:
+- **An Embedded VS Code-like Environment**: Powered by Monaco Editor with multi-language support (Java 17, Python 3, C++ 17), automatic code formatting, last-submission retrieval, and full-screen exam simulation.
+- **Curated Company-Wise Problem Archives**: Real-world interview questions tagged by Tier-1 product tech companies like **Google**, **Amazon**, **Microsoft**, **Meta**, **Uber**, and **Atlassian**.
+- **Comprehensive Explanations & Hints**: Multi-paragraph walkthroughs, structured input/output examples, constraints, and revealable step-by-step hints.
+- **3D Interactive Analytics Dashboard**: Real-time solved statistics, difficulty distribution breakdowns (Easy, Medium, Hard), contest performance charts, active streak counters, and annual submission contribution heatmaps.
+
+---
+
+## 💡 Why CodeForge? (The Need & Value Proposition)
+
+### 🚨 The Problem in Modern Interview Prep
+Software engineering candidates preparing for technical interviews at modern tech companies face several critical friction points:
+
+1. **Fragmented Learning Resources**: Candidates often jump between multiple disjointed websites—one for problem statements, another for company tagged questions, and external IDEs for writing and debugging code.
+2. **Lack of Actionable Performance Analytics**: Most platforms only report pass/fail without giving candidates insight into their solve speed percentiles, memory consumption benchmarks, or difficulty coverage.
+3. **Cluttered & Uninspiring User Interfaces**: Generic coding portals lack modern visual aesthetics, making daily practice feel monotonous rather than engaging.
+4. **Slow Execution Feedback Loops**: Remote code execution engines on traditional platforms frequently queue requests for several seconds, slowing down candidate productivity.
+
+### 🛡️ How CodeForge Solves It
+CodeForge was engineered specifically to solve these industry challenges through a unified, developer-first architecture:
+
+- **All-in-One Integrated Environment**: Solve problems, read multi-line explanations, reveal hints, take personal solution notes, and view LeetCode-style performance distribution bar charts—all inside a single high-tech 3D glassmorphic workspace.
+- **Sub-Second Local & Cloud Execution**: Features an isolated sandboxed process runner that compiles and executes Java, Python, and C++ solutions with sub-second feedback, catching infinite loops with strict 3.0s timeouts.
+- **Structured Roadmap & Topic Categorization**: Organizes 382+ problems systematically across core data structures (Arrays, Linked Lists, Trees, Graphs, Dynamic Programming) so candidates can focus on weak areas systematically.
+- **Gamified Consistency Tracking**: Includes active daily streak tracking and annual contribution heatmaps to motivate developers to maintain daily coding habits.
 
 ---
 
