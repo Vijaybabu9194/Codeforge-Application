@@ -13,6 +13,8 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
 
     Optional<Submission> findByUserIdAndProblemId(Long userId, Long problemId);
 
+    List<Submission> findByUserIdAndProblemIdOrderBySubmittedAtDesc(Long userId, Long problemId);
+
     @Query("SELECT COUNT(s) FROM Submission s WHERE s.user.id = :userId AND s.solved = true")
     long countSolvedByUserId(@Param("userId") Long userId);
 

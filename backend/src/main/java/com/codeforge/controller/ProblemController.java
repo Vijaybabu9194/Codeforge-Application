@@ -86,4 +86,35 @@ public class ProblemController {
         User user = (User) auth.getPrincipal();
         return ResponseEntity.ok(problemService.runSampleTestCases(user, id, request.getSourceCode(), request.getLanguageId()));
     }
+
+    @GetMapping("/{id}/submissions")
+    public ResponseEntity<List<ProblemDto.SubmissionRecord>> getSubmissionHistory(
+            Authentication auth, @PathVariable Long id) {
+        User user = (User) auth.getPrincipal();
+        return ResponseEntity.ok(problemService.getSubmissionHistory(user, id));
+    }
+
+    @GetMapping("/{id}/last-submission")
+    public ResponseEntity<ProblemDto.CodeDto> getLastSubmittedCode(
+            Authentication auth, @PathVariable Long id) {
+        User user = (User) auth.getPrincipal();
+        return ResponseEntity.ok(problemService.getLastSubmittedCode(user, id));
+    }
+
+    @GetMapping("/{id}/note")
+    public ResponseEntity<ProblemDto.NoteDto> getProblemNote(
+            Authentication auth, @PathVariable Long id) {
+        User user = (User) auth.getPrincipal();
+        return ResponseEntity.ok(problemService.getProblemNote(user, id));
+    }
+
+    @PostMapping("/{id}/note")
+    public ResponseEntity<Void> saveProblemNote(
+            Authentication auth,
+            @PathVariable Long id,
+            @RequestBody ProblemDto.NoteDto request) {
+        User user = (User) auth.getPrincipal();
+        problemService.saveProblemNote(user, id, request.getContent());
+        return ResponseEntity.ok().build();
+    }
 }

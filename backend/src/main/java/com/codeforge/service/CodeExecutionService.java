@@ -61,6 +61,7 @@ public class CodeExecutionService {
             long endTime = startTime;
 
             int exitCode = 0;
+            boolean timedOut = false;
             if (lang.equals("java")) {
                 ProcessBuilder compileBuilder = new ProcessBuilder("javac", "Main.java");
                 compileBuilder.directory(tempDir.toFile());
@@ -89,10 +90,15 @@ public class CodeExecutionService {
                     }
                 }
 
-                stdout = readStream(runProcess.getInputStream());
-                stderr = readStream(runProcess.getErrorStream());
-                runProcess.waitFor(5, TimeUnit.SECONDS);
-                exitCode = runProcess.exitValue();
+                boolean finished = runProcess.waitFor(3, TimeUnit.SECONDS);
+                if (!finished) {
+                    runProcess.destroyForcibly();
+                    timedOut = true;
+                } else {
+                    stdout = readStream(runProcess.getInputStream());
+                    stderr = readStream(runProcess.getErrorStream());
+                    exitCode = runProcess.exitValue();
+                }
                 endTime = System.currentTimeMillis();
 
             } else if (lang.equals("cpp")) {
@@ -123,10 +129,15 @@ public class CodeExecutionService {
                     }
                 }
 
-                stdout = readStream(runProcess.getInputStream());
-                stderr = readStream(runProcess.getErrorStream());
-                runProcess.waitFor(5, TimeUnit.SECONDS);
-                exitCode = runProcess.exitValue();
+                boolean finished = runProcess.waitFor(3, TimeUnit.SECONDS);
+                if (!finished) {
+                    runProcess.destroyForcibly();
+                    timedOut = true;
+                } else {
+                    stdout = readStream(runProcess.getInputStream());
+                    stderr = readStream(runProcess.getErrorStream());
+                    exitCode = runProcess.exitValue();
+                }
                 endTime = System.currentTimeMillis();
 
             } else {
@@ -142,10 +153,15 @@ public class CodeExecutionService {
                     }
                 }
 
-                stdout = readStream(runProcess.getInputStream());
-                stderr = readStream(runProcess.getErrorStream());
-                runProcess.waitFor(5, TimeUnit.SECONDS);
-                exitCode = runProcess.exitValue();
+                boolean finished = runProcess.waitFor(3, TimeUnit.SECONDS);
+                if (!finished) {
+                    runProcess.destroyForcibly();
+                    timedOut = true;
+                } else {
+                    stdout = readStream(runProcess.getInputStream());
+                    stderr = readStream(runProcess.getErrorStream());
+                    exitCode = runProcess.exitValue();
+                }
                 endTime = System.currentTimeMillis();
             }
 
@@ -156,7 +172,9 @@ public class CodeExecutionService {
             String encodedStderr = Base64.getEncoder().encodeToString(stderr.getBytes(StandardCharsets.UTF_8));
 
             RunStatus status = RunStatus.builder().id(3).description("Accepted").build();
-            if (exitCode != 0) {
+            if (timedOut) {
+                status = RunStatus.builder().id(5).description("Time Limit Exceeded").build();
+            } else if (exitCode != 0) {
                 status = RunStatus.builder().id(11).description("Runtime Error (NZEC)").build();
             }
 

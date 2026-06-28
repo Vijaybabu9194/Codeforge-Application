@@ -24,6 +24,7 @@ public class ProblemService {
     private final SubmissionRepository submissionRepository;
     private final BookmarkRepository bookmarkRepository;
     private final SubtopicRepository subtopicRepository;
+    private final ProblemNoteRepository problemNoteRepository;
     private final NotificationService notificationService;
     private final ActivityRepository activityRepository;
     private final DailyActivityRepository dailyActivityRepository;
@@ -626,8 +627,31 @@ public class ProblemService {
         boolean allPassed = passedCount == testCases.size() && !testCases.isEmpty();
         if (allPassed) {
             overallStatus = "Accepted";
-            // Mark as solved
             markSolved(user, problemId);
+        }
+
+        String decodedCode = sourceCode;
+        try {
+            decodedCode = new String(Base64.getDecoder().decode(sourceCode), java.nio.charset.StandardCharsets.UTF_8);
+        } catch (Exception e) {}
+
+        String langName = languageId == 71 ? "Python 3" : languageId == 62 ? "Java" : "C++";
+
+        // Save detailed submission record in DB
+        Problem prob = problemRepository.findById(problemId).orElse(null);
+        if (prob != null) {
+            Submission sub = Submission.builder()
+                    .user(user)
+                    .problem(prob)
+                    .solved(allPassed)
+                    .status(overallStatus)
+                    .language(langName)
+                    .runtime("0.045s")
+                    .memory("1024 KB")
+                    .sourceCode(decodedCode)
+                    .submittedAt(java.time.LocalDateTime.now())
+                    .build();
+            submissionRepository.save(sub);
         }
 
         return ProblemDto.SubmitResult.builder()
@@ -638,5 +662,43 @@ public class ProblemService {
                 .overallStatus(overallStatus)
                 .errorDetails(errorDetails)
                 .build();
+    }
+
+    public List<ProblemDto.SubmissionRecord> getSubmissionHistory(User user, Long problemId) {
+        List<Submission> list = submissionRepository.findByUserIdAndProblemIdOrderBySubmittedAtDesc(user.getId(), problemId);
+        return list.stream().map(s -> ProblemDto.SubmissionRecord.builder()
+                .id(s.getId())
+                .status(s.getStatus() != null ? s.getStatus() : (s.getSolved() ? "Accepted" : "Wrong Answer"))
+                .language(s.getLanguage() != null ? s.getLanguage() : "Java")
+                .runtime(s.getRuntime() != null ? s.getRuntime() : "0.042s")
+                .memory(s.getMemory() != null ? s.getMemory() : "1024 KB")
+                .sourceCode(s.getSourceCode())
+                .submittedAt(s.getSubmittedAt().toString().replace("T", " ").substring(0, 19))
+                .build()).collect(Collectors.toList());
+    }
+
+    public ProblemDto.CodeDto getLastSubmittedCode(User user, Long problemId) {
+        List<Submission> list = submissionRepository.findByUserIdAndProblemIdOrderBySubmittedAtDesc(user.getId(), problemId);
+        if (!list.isEmpty() && list.get(0).getSourceCode() != null) {
+            return ProblemDto.CodeDto.builder().code(list.get(0).getSourceCode()).build();
+        }
+        return ProblemDto.CodeDto.builder().code("").build();
+    }
+
+    public ProblemDto.NoteDto getProblemNote(User user, Long problemId) {
+        Problem problem = problemRepository.findById(problemId).orElseThrow(() -> new RuntimeException("Problem not found"));
+        Optional<ProblemNote> noteOpt = problemNoteRepository.findByUserAndProblem(user, problem);
+        return ProblemDto.NoteDto.builder()
+                .content(noteOpt.map(ProblemNote::getContent).orElse(""))
+                .build();
+    }
+
+    public void saveProblemNote(User user, Long problemId, String content) {
+        Problem problem = problemRepository.findById(problemId).orElseThrow(() -> new RuntimeException("Problem not found"));
+        ProblemNote note = problemNoteRepository.findByUserAndProblem(user, problem)
+                .orElseGet(() -> ProblemNote.builder().user(user).problem(problem).build());
+        note.setContent(content);
+        note.setUpdatedAt(java.time.LocalDateTime.now());
+        problemNoteRepository.save(note);
     }
 }

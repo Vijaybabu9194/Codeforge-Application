@@ -122,14 +122,15 @@ public class DashboardService {
         }
 
         List<DashboardDto.TopicProgress> topicMastery = topics.stream()
-                .filter(t -> t.getProblemCount() > 0)
+                .filter(t -> t.getProblemCount() != null && t.getProblemCount() > 0)
                 .map(t -> {
                     long solved = topicSolvedMap.getOrDefault(t.getId(), 0L);
-                    double percentage = Math.round(100.0 * solved / t.getProblemCount() * 10) / 10.0;
+                    int total = t.getProblemCount() != null ? t.getProblemCount() : 1;
+                    double percentage = Math.round(100.0 * solved / total * 10) / 10.0;
                     return DashboardDto.TopicProgress.builder()
                             .topic(t.getName())
                             .solved((int) solved)
-                            .total(t.getProblemCount())
+                            .total(total)
                             .percentage(percentage)
                             .build();
                 })

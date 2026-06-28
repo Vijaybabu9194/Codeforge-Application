@@ -5,9 +5,9 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "submissions")
+@Table(name = "problem_notes")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
-public class Submission {
+public class ProblemNote {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -20,17 +20,9 @@ public class Submission {
     @JoinColumn(name = "problem_id", nullable = false)
     private Problem problem;
 
-    @Builder.Default
-    private Boolean solved = false;
-
-    private String status; // e.g. Accepted, Wrong Answer, Time Limit Exceeded
-    private String language; // e.g. Java, Python 3, C++
-    private String runtime; // e.g. 0.042s
-    private String memory; // e.g. 1024 KB
-
     @Column(columnDefinition = "TEXT")
-    private String sourceCode;
+    private String content;
 
     @Builder.Default
-    private LocalDateTime submittedAt = LocalDateTime.now();
+    private LocalDateTime updatedAt = LocalDateTime.now();
 }

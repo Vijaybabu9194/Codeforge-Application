@@ -95,4 +95,25 @@ public class ProblemDto {
         private String overallStatus; // "Accepted", "Wrong Answer", "Runtime Error", etc.
         private String errorDetails;
     }
+
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    public static class SubmissionRecord {
+        private Long id;
+        private String status;
+        private String language;
+        private String runtime;
+        private String memory;
+        private String sourceCode;
+        private String submittedAt;
+    }
+
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    public static class NoteDto {
+        private String content;
+    }
+
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    public static class CodeDto {
+        private String code;
+    }
 }

@@ -25,6 +25,7 @@
 /Users/avijaybabu/Desktop/CodeForge-1/backend/src/main/java/com/codeforge/entity/Notification.java
 /Users/avijaybabu/Desktop/CodeForge-1/backend/src/main/java/com/codeforge/entity/PlatformProfile.java
 /Users/avijaybabu/Desktop/CodeForge-1/backend/src/main/java/com/codeforge/entity/Problem.java
+/Users/avijaybabu/Desktop/CodeForge-1/backend/src/main/java/com/codeforge/entity/ProblemNote.java
 /Users/avijaybabu/Desktop/CodeForge-1/backend/src/main/java/com/codeforge/entity/Submission.java
 /Users/avijaybabu/Desktop/CodeForge-1/backend/src/main/java/com/codeforge/entity/Subtopic.java
 /Users/avijaybabu/Desktop/CodeForge-1/backend/src/main/java/com/codeforge/entity/Topic.java
@@ -36,6 +37,7 @@
 /Users/avijaybabu/Desktop/CodeForge-1/backend/src/main/java/com/codeforge/repository/DailyActivityRepository.java
 /Users/avijaybabu/Desktop/CodeForge-1/backend/src/main/java/com/codeforge/repository/NotificationRepository.java
 /Users/avijaybabu/Desktop/CodeForge-1/backend/src/main/java/com/codeforge/repository/PlatformProfileRepository.java
+/Users/avijaybabu/Desktop/CodeForge-1/backend/src/main/java/com/codeforge/repository/ProblemNoteRepository.java
 /Users/avijaybabu/Desktop/CodeForge-1/backend/src/main/java/com/codeforge/repository/ProblemRepository.java
 /Users/avijaybabu/Desktop/CodeForge-1/backend/src/main/java/com/codeforge/repository/SubmissionRepository.java
 /Users/avijaybabu/Desktop/CodeForge-1/backend/src/main/java/com/codeforge/repository/SubtopicRepository.java

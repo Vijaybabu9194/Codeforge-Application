@@ -61,7 +61,6 @@ com/codeforge/entity/Bookmark.class
 com/codeforge/dto/AuthDto$LoginRequest.class
 com/codeforge/dto/ProblemDto$TopicResponse$TopicResponseBuilder.class
 com/codeforge/repository/CompanyProblemRepository.class
-com/codeforge/service/CodeExecutionService$1.class
 com/codeforge/repository/BookmarkRepository.class
 com/codeforge/dto/SubmissionRequestDto$RunStatus.class
 com/codeforge/repository/CompanyRepository.class
