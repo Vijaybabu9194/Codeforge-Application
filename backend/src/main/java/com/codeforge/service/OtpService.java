@@ -4,6 +4,7 @@ import com.codeforge.dto.AuthDto;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public class OtpService {
 
     private final JavaMailSender mailSender;
+    
+    @Value("${spring.mail.username:vijaybabuarumilli99@gmail.com}")
+    private String fromEmail;
+
     private final Map<String, OtpData> otpStorage = new ConcurrentHashMap<>();
     private final SecureRandom random = new SecureRandom();
 
@@ -52,23 +57,28 @@ public class OtpService {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            
+            // Set explicit From address to prevent 'can't determine local email address'
+            helper.setFrom(fromEmail, "CodeForge Platform");
             helper.setTo(email);
             helper.setSubject("⚡ CodeForge — Your Verification OTP Code");
             
-            String htmlContent = "div style='font-family: Arial, sans-serif; max-w: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px;'>"
-                    + "<h2 style='color: #0284c7; margin-bottom: 8px;'>Welcome to CodeForge!</h2>"
-                    + "<p style='color: #475569; font-size: 14px;'>Please use the following 6-digit verification code to complete your registration:</p>"
-                    + "<div style='background-color: #f0f9ff; border: 1px solid #bae6fd; padding: 16px; text-align: center; border-radius: 8px; margin: 20px 0;'>"
-                    + "<span style='font-size: 32px; font-weight: 900; letter-spacing: 6px; color: #0369a1;'>" + otpStr + "</span>"
+            String htmlContent = "<div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff;'>"
+                    + "<h2 style='color: #0284c7; margin-bottom: 12px; font-size: 24px; font-weight: 800;'>Welcome to CodeForge! ⚡</h2>"
+                    + "<p style='color: #475569; font-size: 15px; line-height: 1.6;'>Thank you for signing up. Please use the following 6-digit verification code to complete your registration:</p>"
+                    + "<div style='background-color: #f0f9ff; border: 2px border-dashed #38bdf8; padding: 20px; text-align: center; border-radius: 12px; margin: 24px 0;'>"
+                    + "<span style='font-size: 36px; font-weight: 900; letter-spacing: 8px; color: #0284c7; font-family: monospace;'>" + otpStr + "</span>"
                     + "</div>"
-                    + "<p style='color: #64748b; font-size: 12px;'>This OTP code is valid for 10 minutes. If you did not request this, please ignore this email.</p>"
+                    + "<p style='color: #64748b; font-size: 13px; line-height: 1.5;'>This verification code is valid for 10 minutes. If you did not request this code, please disregard this email.</p>"
+                    + "<hr style='border: 0; border-top: 1px solid #f1f5f9; margin: 24px 0;' />"
+                    + "<p style='color: #94a3b8; font-size: 11px; text-align: center;'>© 2026 CodeForge Application. All rights reserved.</p>"
                     + "</div>";
             
             helper.setText(htmlContent, true);
             mailSender.send(message);
-            log.info("Physical mail successfully dispatched to {}", email);
+            log.info("PHYSICAL MAIL SUCCESSFULLY DISPATCHED TO {}", email);
         } catch (Exception e) {
-            log.warn("SMTP physical mail dispatch failed (Dev fallback mode active): {}", e.getMessage());
+            log.error("SMTP physical mail dispatch error: {}", e.getMessage(), e);
         }
 
         return AuthDto.OtpResponse.builder()
