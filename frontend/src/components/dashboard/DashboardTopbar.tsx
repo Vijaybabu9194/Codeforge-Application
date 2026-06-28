@@ -1,9 +1,11 @@
 import React from 'react';
-import { Search, Bell, Command, Menu, Sun, Moon } from 'lucide-react';
+import { Search, Bell, Command, Menu, Sun, Moon, LogOut } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 
 export const DashboardTopbar: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
+  const { user, logout } = useAuth();
 
   return (
     <header className="h-[68px] bg-dash-sidebar border-b border-dash-border flex items-center justify-between px-8 sticky top-0 z-20 select-none">
@@ -66,9 +68,19 @@ export const DashboardTopbar: React.FC = () => {
             </svg>
           </div>
           <div className="text-left">
-            <div className="text-[13px] font-bold text-white leading-tight">Vijay_07</div>
+            <div className="text-[13px] font-bold text-white leading-tight">{user?.name || 'Vijay_07'}</div>
             <div className="text-[10px] text-dash-amber font-semibold">Premium</div>
           </div>
+
+          {/* Dedicated Logout Button */}
+          <button
+            onClick={logout}
+            className="ml-2 px-3 py-1.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 border border-red-500/20 flex items-center gap-1.5 text-[12px] font-extrabold transition-all cursor-pointer"
+            title="Log Out of CodeForge"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Logout</span>
+          </button>
         </div>
       </div>
     </header>

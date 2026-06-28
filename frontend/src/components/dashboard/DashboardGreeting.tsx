@@ -29,7 +29,7 @@ export const DashboardGreeting: React.FC<DashboardGreetingProps> = ({ name = 'Vi
       {/* Developer illustration (glassy floating layout with balanced edge blends) */}
       <div className="hidden md:block absolute right-0 top-[-100px] w-[420px] h-[420px] rounded-2xl overflow-hidden pointer-events-none z-0">
         <img
-          src={isLight ? "/images/dashboard_developer_light_seamless.png" : "/images/dashboard_developer_transparent.png"}
+          src={isLight ? "/images/dashboard_developer_light_hero.png?v=30" : "/images/dashboard_developer_transparent.png?v=30"}
           alt="Developer working"
           className="w-full h-full object-cover object-center"
         />
