@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { Code2, ArrowRight, Sun, Moon, Lock, Mail, Sparkles, ShieldCheck } from 'lucide-react';
+import { Code2, ArrowRight, Sun, Moon, Lock, Mail, Sparkles } from 'lucide-react';
 
 interface LoginPageProps {
   onSwitchToSignup: () => void;
@@ -118,11 +118,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToSignup, onBackTo
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
-
-          <div className="pt-6 flex items-center gap-2 justify-center text-xs text-slate-500">
-            <ShieldCheck className="w-4 h-4 text-emerald-500" />
-            <span>256-bit SSL Encrypted Connection</span>
-          </div>
         </div>
       </main>
 

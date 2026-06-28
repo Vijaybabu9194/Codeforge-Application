@@ -17,6 +17,24 @@ public class AuthDto {
         private String password;
     }
 
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor
+    public static class SendOtpRequest {
+        private String email;
+    }
+
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor
+    public static class VerifyOtpRequest {
+        private String email;
+        private String otp;
+    }
+
+    @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+    public static class OtpResponse {
+        private String message;
+        private boolean success;
+        private String otp; // Returned so client can display or verify real OTP!
+    }
+
     @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
     public static class AuthResponse {
         private String token;

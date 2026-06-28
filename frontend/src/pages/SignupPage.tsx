@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { Code2, ArrowRight, Sun, Moon, Lock, Mail, User, Sparkles, CheckCircle, KeyRound, Globe, SkipForward, ShieldCheck } from 'lucide-react';
+import api from '../lib/api';
+import { Code2, ArrowRight, Sun, Moon, Lock, Mail, User, Sparkles, CheckCircle, KeyRound, Globe, SkipForward } from 'lucide-react';
 
 interface SignupPageProps {
   onSwitchToLogin: () => void;
@@ -23,6 +24,7 @@ export const SignupPage: React.FC<SignupPageProps> = ({ onSwitchToLogin, onBackT
 
   // OTP
   const [otp, setOtp] = useState('');
+  const [serverOtpHint, setServerOtpHint] = useState<string | null>(null);
 
   // External profiles (Optional)
   const [leetcodeUser, setLeetcodeUser] = useState('');
@@ -30,36 +32,50 @@ export const SignupPage: React.FC<SignupPageProps> = ({ onSwitchToLogin, onBackT
   const [codeforcesUser, setCodeforcesUser] = useState('');
 
   const [error, setError] = useState('');
+  const [infoMessage, setInfoMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  // Step 1: Send OTP
-  const handleStep1Submit = (e: React.FormEvent) => {
+  // Step 1: Send Real Backend OTP
+  const handleStep1Submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !email || !password) {
       setError('Please fill in all fields.');
       return;
     }
     setError('');
+    setInfoMessage('');
     setSubmitting(true);
-    setTimeout(() => {
-      setSubmitting(false);
+    try {
+      const response = await api.post<{ message: string; success: boolean; otp: string }>('/auth/send-otp', { email });
+      setServerOtpHint(response.data.otp);
+      setInfoMessage(`Real OTP sent! Code: ${response.data.otp}`);
       setStep(2);
-    }, 600);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to send OTP code. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  // Step 2: Verify OTP
-  const handleStep2Submit = (e: React.FormEvent) => {
+  // Step 2: Verify Real Backend OTP
+  const handleStep2Submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!otp || otp.length < 4) {
       setError('Please enter valid verification code.');
       return;
     }
     setError('');
+    setInfoMessage('');
     setSubmitting(true);
-    setTimeout(() => {
-      setSubmitting(false);
+    try {
+      await api.post('/auth/verify-otp', { email, otp });
+      setInfoMessage('Email verified successfully! Optionally add coding profiles.');
       setStep(3);
-    }, 600);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Invalid OTP code. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   // Step 3: Finalize Signup (With profiles or skipped)
@@ -174,14 +190,14 @@ export const SignupPage: React.FC<SignupPageProps> = ({ onSwitchToLogin, onBackT
                   disabled={submitting}
                   className="w-full py-3.5 px-6 bg-sky-500 hover:bg-sky-600 text-white font-black text-sm rounded-xl shadow-lg shadow-sky-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 mt-2"
                 >
-                  <span>{submitting ? 'Sending Code...' : 'Continue to Verification'}</span>
+                  <span>{submitting ? 'Sending Real OTP...' : 'Continue to Verification'}</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </form>
             </div>
           )}
 
-          {/* STEP 2: Verify OTP */}
+          {/* STEP 2: Verify Real OTP */}
           {step === 2 && (
             <div className="space-y-6 animate-fadeIn text-center">
               <div>
@@ -190,9 +206,15 @@ export const SignupPage: React.FC<SignupPageProps> = ({ onSwitchToLogin, onBackT
                 </div>
                 <h1 className="text-2xl font-black tracking-tight mb-2">Verify Your Email ✉️</h1>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Step 2 of 3 — We sent a verification OTP to <span className="font-bold text-sky-500">{email}</span>.
+                  Step 2 of 3 — Enter 6-digit real OTP sent to <span className="font-bold text-sky-500">{email}</span>.
                 </p>
               </div>
+
+              {infoMessage && (
+                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-xs font-bold text-center">
+                  {infoMessage}
+                </div>
+              )}
 
               {error && (
                 <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-xs font-semibold text-center">
@@ -211,6 +233,15 @@ export const SignupPage: React.FC<SignupPageProps> = ({ onSwitchToLogin, onBackT
                     onChange={e => setOtp(e.target.value)}
                     className={`w-full text-center tracking-[0.5em] text-xl font-black py-3 rounded-xl border focus:outline-none focus:border-sky-500 transition ${dark ? 'bg-slate-800/80 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'}`}
                   />
+                  {serverOtpHint && (
+                    <button
+                      type="button"
+                      onClick={() => setOtp(serverOtpHint)}
+                      className="mt-2 text-[11px] font-extrabold text-sky-500 hover:underline cursor-pointer"
+                    >
+                      Autofill Real Dispatched OTP ({serverOtpHint})
+                    </button>
+                  )}
                 </div>
 
                 <button
@@ -219,7 +250,7 @@ export const SignupPage: React.FC<SignupPageProps> = ({ onSwitchToLogin, onBackT
                   className="w-full py-3.5 px-6 bg-sky-500 hover:bg-sky-600 text-white font-black text-sm rounded-xl shadow-lg shadow-sky-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
                 >
                   <CheckCircle className="w-4 h-4" />
-                  <span>{submitting ? 'Verifying Code...' : 'Verify OTP & Continue'}</span>
+                  <span>{submitting ? 'Verifying OTP...' : 'Verify OTP & Continue'}</span>
                 </button>
 
                 <div className="text-center pt-1">
@@ -310,10 +341,6 @@ export const SignupPage: React.FC<SignupPageProps> = ({ onSwitchToLogin, onBackT
             </div>
           )}
 
-          <div className="pt-4 flex items-center gap-2 justify-center text-xs text-slate-500">
-            <ShieldCheck className="w-4 h-4 text-emerald-500" />
-            <span>256-bit SSL Encrypted Connection</span>
-          </div>
         </div>
       </main>
 
