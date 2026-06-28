@@ -182,12 +182,8 @@ export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, o
 
   const diff = DIFFICULTY_CONFIG[enrichedProblem.difficulty] || DIFFICULTY_CONFIG.EASY;
 
-  // Fetch enriched problem details, submission history, and persistent DB note on mount or problem change
+  // Fetch submission history and persistent DB note on problem change
   useEffect(() => {
-    api.get<Problem>(`/problems/${enrichedProblem.id}`)
-      .then(res => setEnrichedProblem(res.data))
-      .catch(() => {});
-
     fetchSubmissionHistory(enrichedProblem.id);
     fetchNoteFromDB(enrichedProblem.id);
   }, [enrichedProblem.id]);
@@ -199,7 +195,7 @@ export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, o
     const def = DEFAULT_CODE[language];
     setCode(def);
     if (editorRef.current) editorRef.current.setValue(def);
-  }, [enrichedProblem.id, language, enrichedProblem.starterCode]);
+  }, [enrichedProblem.id, language]);
 
   // Handle Drag Resizing for Panels
   useEffect(() => {
@@ -289,13 +285,6 @@ export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, o
       setRunResult(null);
       setSubmitResult(null);
       setSelectedSubmissionRecord(null);
-      
-      // Asynchronously fetch extra details in background if needed
-      api.get<Problem>(`/problems/${targetProblem.id}`)
-        .then(res => {
-          if (res.data && res.data.id) setEnrichedProblem(res.data);
-        })
-        .catch(() => {});
     }
   };
 
