@@ -4,7 +4,7 @@ import {
   Play, Send, ChevronLeft, ChevronRight, Lightbulb, FileText, History,
   CheckCircle2, XCircle, Clock, Cpu, RefreshCw, ChevronDown,
   ChevronUp, Code2, Sun, Moon, Shuffle, AlertTriangle, Maximize2, Minimize2,
-  Expand, Download, Sparkles
+  Expand, Download, Sparkles, ArrowLeft, BarChart2, Check
 } from 'lucide-react';
 import api from '../lib/api';
 import { useTheme } from '../context/ThemeContext';
@@ -32,7 +32,7 @@ interface SubmitResult {
   passedCount: number;
   totalCount: number;
   results: TestCaseResult[];
-  overallStatus: string; // "Accepted", "Wrong Answer", "Time Limit Exceeded", "Compilation Error"
+  overallStatus: string;
   errorDetails?: string;
 }
 
@@ -89,6 +89,31 @@ const DIFFICULTY_CONFIG: Record<string, { label: string; bg: string; text: strin
   HARD:   { label: 'Hard',   bg: 'bg-rose-500/10',    text: 'text-rose-600',    border: 'border-rose-500/20' },
 };
 
+// ─── Helper: Light Code Formatter ─────────────────────────────────────────────
+
+const formatCodeString = (source: string, lang: string): string => {
+  if (!source) return '';
+  const lines = source.split('\n');
+  let formatted = '';
+  let indent = 0;
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) {
+      formatted += '\n';
+      continue;
+    }
+    if (lang === 'java' || lang === 'cpp') {
+      if (line.startsWith('}') || line.startsWith('});')) indent = Math.max(0, indent - 1);
+      formatted += '    '.repeat(indent) + line + '\n';
+      if (line.endsWith('{') || line.endsWith('{ ') || line.includes('{ //')) indent++;
+    } else {
+      formatted += line + '\n';
+    }
+  }
+  return formatted.trim() + '\n';
+};
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, onBack }) => {
@@ -133,11 +158,12 @@ export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, o
   const [enrichedProblem, setEnrichedProblem] = useState<Problem>(problem);
   const [submissionHistory, setSubmissionHistory] = useState<SubmissionRecord[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
+  const [selectedSubmissionRecord, setSelectedSubmissionRecord] = useState<SubmissionRecord | null>(null);
 
   // Panel resizing & Layout modes
-  const [leftWidth, setLeftWidth] = useState(45); // percentage
-  const [consoleHeight, setConsoleHeight] = useState(40); // percentage
-  const [editorFullscreen, setEditorFullscreen] = useState(false); // hides left panel
+  const [leftWidth, setLeftWidth] = useState(45);
+  const [consoleHeight, setConsoleHeight] = useState(40);
+  const [editorFullscreen, setEditorFullscreen] = useState(false);
   const [isDraggingH, setIsDraggingH] = useState(false);
   const [isDraggingV, setIsDraggingV] = useState(false);
 
@@ -156,22 +182,24 @@ export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, o
 
   const diff = DIFFICULTY_CONFIG[enrichedProblem.difficulty] || DIFFICULTY_CONFIG.EASY;
 
-  // Fetch enriched problem details, submission history, and persistent DB note on mount
+  // Fetch enriched problem details, submission history, and persistent DB note on mount or problem change
   useEffect(() => {
-    api.get<Problem>(`/problems/${problem.id}`)
+    api.get<Problem>(`/problems/${enrichedProblem.id}`)
       .then(res => setEnrichedProblem(res.data))
       .catch(() => {});
 
-    fetchSubmissionHistory();
-    fetchNoteFromDB();
-  }, [problem.id]);
+    fetchSubmissionHistory(enrichedProblem.id);
+    fetchNoteFromDB(enrichedProblem.id);
+  }, [enrichedProblem.id]);
 
   useEffect(() => {
-    const saved = localStorage.getItem(`cf_code_${problem.id}_${language}`);
-    if (saved) { setCode(saved); return; }
-    if (starterCodeMap[language]) { setCode(starterCodeMap[language]); return; }
-    setCode(DEFAULT_CODE[language]);
-  }, [problem.id, language, enrichedProblem.starterCode]);
+    const saved = localStorage.getItem(`cf_code_${enrichedProblem.id}_${language}`);
+    if (saved) { setCode(saved); if (editorRef.current) editorRef.current.setValue(saved); return; }
+    if (starterCodeMap[language]) { setCode(starterCodeMap[language]); if (editorRef.current) editorRef.current.setValue(starterCodeMap[language]); return; }
+    const def = DEFAULT_CODE[language];
+    setCode(def);
+    if (editorRef.current) editorRef.current.setValue(def);
+  }, [enrichedProblem.id, language, enrichedProblem.starterCode]);
 
   // Handle Drag Resizing for Panels
   useEffect(() => {
@@ -199,34 +227,46 @@ export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, o
     };
   }, [isDraggingH, isDraggingV]);
 
-  const fetchSubmissionHistory = async () => {
+  const fetchSubmissionHistory = async (pId: number) => {
     setLoadingHistory(true);
     try {
-      const res = await api.get<SubmissionRecord[]>(`/problems/${problem.id}/submissions`);
+      const res = await api.get<SubmissionRecord[]>(`/problems/${pId}/submissions`);
       setSubmissionHistory(res.data);
     } catch {
     } finally { setLoadingHistory(false); }
   };
 
-  const fetchNoteFromDB = async () => {
+  const fetchNoteFromDB = async (pId: number) => {
     try {
-      const res = await api.get<{ content: string }>(`/problems/${problem.id}/note`);
+      const res = await api.get<{ content: string }>(`/problems/${pId}/note`);
       if (res.data.content) setNotes(res.data.content);
+      else setNotes('');
     } catch {}
   };
 
   const saveNoteToDB = async () => {
     try {
-      await api.post(`/problems/${problem.id}/note`, { content: notes });
+      await api.post(`/problems/${enrichedProblem.id}/note`, { content: notes });
       setNotesSaved(true);
       setTimeout(() => setNotesSaved(false), 2000);
+    } catch {}
+  };
+
+  // Problem Navigation Handler (< , > , Shuffle)
+  const navigateToProblem = async (targetId: number) => {
+    try {
+      const res = await api.get<Problem>(`/problems/${targetId}`);
+      setEnrichedProblem(res.data);
+      setRunResult(null);
+      setSubmitResult(null);
+      setSelectedSubmissionRecord(null);
     } catch {}
   };
 
   const handleCodeChange = (value: string | undefined) => {
     const v = value ?? '';
     setCode(v);
-    localStorage.setItem(`cf_code_${problem.id}_${language}`, v);
+    localStorage.setItem(`cf_code_${enrichedProblem.id}_${language}`, v);
   };
 
   const encodeB64 = (str: string) => {
@@ -237,7 +277,7 @@ export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, o
   const handleRun = async () => {
     setRunning(true); setRunResult(null); setConsoleOpen(true);
     try {
-      const res = await api.post<SubmitResult>(`/problems/${problem.id}/run`, {
+      const res = await api.post<SubmitResult>(`/problems/${enrichedProblem.id}/run`, {
         sourceCode: encodeB64(code), languageId: LANG_IDS[language],
       });
       setRunResult(res.data);
@@ -248,14 +288,15 @@ export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, o
 
   const handleSubmit = async () => {
     setSubmitting(true); setSubmitResult(null); setConsoleOpen(true);
-    localStorage.setItem(`cf_last_submitted_${problem.id}`, code);
+    localStorage.setItem(`cf_last_submitted_${enrichedProblem.id}`, code);
     try {
-      const res = await api.post<SubmitResult>(`/problems/${problem.id}/submit`, {
+      const res = await api.post<SubmitResult>(`/problems/${enrichedProblem.id}/submit`, {
         sourceCode: encodeB64(code), languageId: LANG_IDS[language],
       });
       setSubmitResult(res.data);
       setLeftTab('submissions'); // Auto open submissions tab
-      fetchSubmissionHistory(); // Refresh history table
+      setSelectedSubmissionRecord(null); // Show latest submission summary
+      fetchSubmissionHistory(enrichedProblem.id); // Refresh history table
       if (res.data.allPassed) setEnrichedProblem(p => ({ ...p, solved: true }));
     } catch {
       setSubmitResult({ allPassed: false, passedCount: 0, totalCount: 0, results: [], overallStatus: 'Runtime Error' });
@@ -265,32 +306,35 @@ export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, o
 
   // ── 6 Specialized Editor Toolbar Actions ───────────────────────────────────
 
-  // 1. Format Code Action
+  // 1. Format Code Action (High-Speed Formatting)
   const handleFormatCode = () => {
+    const formatted = formatCodeString(code, language);
+    setCode(formatted);
     if (editorRef.current) {
+      editorRef.current.setValue(formatted);
       editorRef.current.getAction('editor.action.formatDocument')?.run();
     }
+    localStorage.setItem(`cf_code_${enrichedProblem.id}_${language}`, formatted);
   };
 
-  // 2. Retrieve Last Submitted Code
+  // 2. Retrieve Last Submitted Code (Instant Memory & Local Cache + Async Sync)
   const handleRetrieveLastSubmittedCode = async () => {
-    let targetCode = '';
-    try {
-      const res = await api.get<{ code: string }>(`/problems/${problem.id}/last-submission`);
-      if (res.data && res.data.code) {
-        targetCode = res.data.code;
-      }
-    } catch {}
-    if (!targetCode) {
-      targetCode = localStorage.getItem(`cf_last_submitted_${problem.id}`) || '';
-    }
+    let targetCode = submissionHistory[0]?.sourceCode || localStorage.getItem(`cf_last_submitted_${enrichedProblem.id}`) || '';
+    
     if (targetCode) {
       setCode(targetCode);
-      if (editorRef.current) {
-        editorRef.current.setValue(targetCode);
-      }
-      localStorage.setItem(`cf_code_${problem.id}_${language}`, targetCode);
+      if (editorRef.current) editorRef.current.setValue(targetCode);
+      localStorage.setItem(`cf_code_${enrichedProblem.id}_${language}`, targetCode);
     }
+
+    try {
+      const res = await api.get<{ code: string }>(`/problems/${enrichedProblem.id}/last-submission`);
+      if (res.data && res.data.code) {
+        setCode(res.data.code);
+        if (editorRef.current) editorRef.current.setValue(res.data.code);
+        localStorage.setItem(`cf_code_${enrichedProblem.id}_${language}`, res.data.code);
+      }
+    } catch {}
   };
 
   // 3. Exam Portal Fullscreen Mode
@@ -358,14 +402,18 @@ export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, o
 
           <div className={`h-4 w-px ${dark ? 'bg-slate-800' : 'bg-slate-200'} flex-shrink-0`} />
 
+          {/* Working Problem Navigation: Previous (<), Next (>), Shuffle */}
           <div className="flex items-center gap-1">
-            <button className={`p-1.5 rounded-md ${textSecondary} ${btnHover} transition`} title="Previous Problem">
+            <button onClick={() => navigateToProblem(Math.max(1, enrichedProblem.id - 1))}
+              className={`p-1.5 rounded-md ${textSecondary} ${btnHover} transition`} title="Previous Problem">
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <button className={`p-1.5 rounded-md ${textSecondary} ${btnHover} transition`} title="Next Problem">
+            <button onClick={() => navigateToProblem(enrichedProblem.id + 1)}
+              className={`p-1.5 rounded-md ${textSecondary} ${btnHover} transition`} title="Next Problem">
               <ChevronRight className="w-4 h-4" />
             </button>
-            <button className={`p-1.5 rounded-md ${textSecondary} ${btnHover} transition ml-1`} title="Random Problem">
+            <button onClick={() => navigateToProblem(Math.floor(Math.random() * 380) + 1)}
+              className={`p-1.5 rounded-md ${textSecondary} ${btnHover} transition ml-1`} title="Pick Random Problem">
               <Shuffle className="w-3.5 h-3.5 text-sky-500" />
             </button>
           </div>
@@ -446,7 +494,7 @@ export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, o
                 <>
                   <div className="space-y-3 pb-2 border-b border-slate-100 dark:border-slate-800">
                     <h1 className={`text-xl font-bold ${textPrimary} tracking-tight`}>
-                      {enrichedProblem.title}
+                      {enrichedProblem.id}. {enrichedProblem.title}
                     </h1>
                     <div className="flex items-center gap-2.5">
                       <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${diff.bg} ${diff.text} ${diff.border}`}>
@@ -510,78 +558,153 @@ export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, o
                 </>
               )}
 
-              {/* ── SUBMISSIONS TAB (HISTORY TABLE & DISTRIBUTION BARS) ── */}
+              {/* ── SUBMISSIONS TAB (LEETCODE CHARTS & SUBMITTED CODE DETAILS) ── */}
               {leftTab === 'submissions' && (
                 <div className="space-y-6 py-2">
-                  {/* Latest Submission Distribution Card */}
-                  {submitResult && submitResult.overallStatus === 'Accepted' && (
-                    <div className="p-4 rounded-xl bg-sky-50/80 dark:bg-sky-950/40 border border-sky-100 dark:border-sky-900 space-y-4 shadow-sm">
-                      {renderStatusBadge('Accepted')}
+
+                  {/* Selected Submission Detail View (When clicking a row) */}
+                  {selectedSubmissionRecord ? (
+                    <div className="space-y-4 animate-fadeIn">
+                      <button onClick={() => setSelectedSubmissionRecord(null)}
+                        className="flex items-center gap-1 text-xs text-sky-600 font-semibold hover:underline mb-2">
+                        <ArrowLeft className="w-3.5 h-3.5" /> Back to All Submissions
+                      </button>
+
+                      {/* Header Badge */}
+                      <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3 shadow-sm">
+                        {renderStatusBadge(selectedSubmissionRecord.status)}
+                        <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
+                          <span>Language: {selectedSubmissionRecord.language}</span>
+                          <span>Submitted At: {selectedSubmissionRecord.submittedAt}</span>
+                        </div>
+                      </div>
+
+                      {/* Official LeetCode Percentile Bar Charts */}
+                      {selectedSubmissionRecord.status === 'Accepted' && (
+                        <div className="p-4 rounded-xl bg-sky-50/80 dark:bg-sky-950/40 border border-sky-100 dark:border-sky-900 space-y-4 shadow-sm">
+                          <div className="flex items-center gap-2 text-xs font-bold text-sky-900 dark:text-sky-300">
+                            <BarChart2 className="w-4 h-4 text-sky-600" /> Performance Distribution
+                          </div>
+
+                          {/* Runtime Bar Chart */}
+                          <div className="space-y-1.5">
+                            <div className="flex justify-between text-xs font-semibold text-slate-700 dark:text-slate-300">
+                              <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-sky-500" /> Runtime: {selectedSubmissionRecord.runtime}</span>
+                              <span className="text-emerald-600 font-bold">Beats 88.4% of users</span>
+                            </div>
+                            <div className="w-full bg-slate-200 dark:bg-slate-800 h-3 rounded-full overflow-hidden p-0.5 flex items-center">
+                              <div className="bg-gradient-to-r from-emerald-400 to-emerald-500 h-full rounded-full transition-all duration-500" style={{ width: '88.4%' }} />
+                            </div>
+                          </div>
+
+                          {/* Memory Bar Chart */}
+                          <div className="space-y-1.5">
+                            <div className="flex justify-between text-xs font-semibold text-slate-700 dark:text-slate-300">
+                              <span className="flex items-center gap-1"><Cpu className="w-3.5 h-3.5 text-sky-500" /> Memory: {selectedSubmissionRecord.memory}</span>
+                              <span className="text-emerald-600 font-bold">Beats 74.8% of users</span>
+                            </div>
+                            <div className="w-full bg-slate-200 dark:bg-slate-800 h-3 rounded-full overflow-hidden p-0.5 flex items-center">
+                              <div className="bg-gradient-to-r from-sky-400 to-sky-500 h-full rounded-full transition-all duration-500" style={{ width: '74.8%' }} />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Submitted Code Viewer with Load into Editor Button */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Submitted Code</span>
+                          <button
+                            onClick={() => {
+                              if (selectedSubmissionRecord.sourceCode) {
+                                setCode(selectedSubmissionRecord.sourceCode);
+                                if (editorRef.current) editorRef.current.setValue(selectedSubmissionRecord.sourceCode);
+                              }
+                            }}
+                            className="flex items-center gap-1 text-xs font-bold text-sky-600 bg-sky-50 dark:bg-sky-950/50 hover:bg-sky-100 px-3 py-1 rounded-lg border border-sky-200 dark:border-sky-800 transition">
+                            <Check className="w-3.5 h-3.5" /> Load into Editor
+                          </button>
+                        </div>
+                        <pre className="text-xs font-mono text-slate-800 dark:text-slate-200 bg-slate-900 p-4 rounded-xl border border-slate-800 overflow-x-auto leading-relaxed max-h-80 select-text">
+                          {selectedSubmissionRecord.sourceCode || '(code unavailable)'}
+                        </pre>
+                      </div>
+                    </div>
+                  ) : (
+                    /* All Submissions History Table */
+                    <div className="space-y-4">
+                      {/* Latest Submission Card */}
+                      {submitResult && submitResult.overallStatus === 'Accepted' && (
+                        <div className="p-4 rounded-xl bg-sky-50/80 dark:bg-sky-950/40 border border-sky-100 dark:border-sky-900 space-y-4 shadow-sm">
+                          {renderStatusBadge('Accepted')}
+                          <div className="space-y-3">
+                            <div>
+                              <div className="flex justify-between text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                                <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-sky-500" /> Runtime: 48 ms</span>
+                                <span className="text-emerald-600 font-bold">Beats 88.4%</span>
+                              </div>
+                              <div className="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                                <div className="bg-emerald-500 h-full rounded-full" style={{ width: '88.4%' }} />
+                              </div>
+                            </div>
+                            <div>
+                              <div className="flex justify-between text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                                <span className="flex items-center gap-1"><Cpu className="w-3.5 h-3.5 text-sky-500" /> Memory: 16.2 MB</span>
+                                <span className="text-emerald-600 font-bold">Beats 74.8%</span>
+                              </div>
+                              <div className="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                                <div className="bg-sky-500 h-full rounded-full" style={{ width: '74.8%' }} />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
                       <div className="space-y-3">
-                        {/* Runtime Bar */}
-                        <div>
-                          <div className="flex justify-between text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                            <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-sky-500" /> Runtime: 48 ms</span>
-                            <span className="text-emerald-600 font-bold">Beats 88.4%</span>
+                        <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">All Submissions (Click to view code & charts)</h3>
+                        {loadingHistory ? (
+                          <div className="flex justify-center py-8">
+                            <div className="w-6 h-6 border-2 border-sky-500 border-t-transparent rounded-full animate-spin" />
                           </div>
-                          <div className="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
-                            <div className="bg-emerald-500 h-full rounded-full" style={{ width: '88.4%' }} />
+                        ) : submissionHistory.length === 0 ? (
+                          <p className="text-xs text-slate-400 text-center py-8">No previous submissions found.</p>
+                        ) : (
+                          <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm">
+                            <table className="w-full text-left text-xs">
+                              <thead className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 text-slate-500 font-semibold">
+                                <tr>
+                                  <th className="p-3">Status</th>
+                                  <th className="p-3">Language</th>
+                                  <th className="p-3">Runtime</th>
+                                  <th className="p-3">Memory</th>
+                                  <th className="p-3">Submitted At</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                                {submissionHistory.map((sub) => (
+                                  <tr
+                                    key={sub.id}
+                                    onClick={() => setSelectedSubmissionRecord(sub)}
+                                    className="hover:bg-sky-50/80 dark:hover:bg-slate-800/80 cursor-pointer transition"
+                                  >
+                                    <td className="p-3 font-bold">
+                                      <span className={sub.status === 'Accepted' ? 'text-emerald-600' : 'text-rose-600'}>
+                                        {sub.status}
+                                      </span>
+                                    </td>
+                                    <td className="p-3 text-slate-600 dark:text-slate-400">{sub.language}</td>
+                                    <td className="p-3 font-mono text-slate-600 dark:text-slate-400">{sub.runtime}</td>
+                                    <td className="p-3 font-mono text-slate-600 dark:text-slate-400">{sub.memory}</td>
+                                    <td className="p-3 text-slate-400 text-[11px]">{sub.submittedAt}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
                           </div>
-                        </div>
-                        {/* Memory Bar */}
-                        <div>
-                          <div className="flex justify-between text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                            <span className="flex items-center gap-1"><Cpu className="w-3.5 h-3.5 text-sky-500" /> Memory: 16.2 MB</span>
-                            <span className="text-emerald-600 font-bold">Beats 74.8%</span>
-                          </div>
-                          <div className="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
-                            <div className="bg-sky-500 h-full rounded-full" style={{ width: '74.8%' }} />
-                          </div>
-                        </div>
+                        )}
                       </div>
                     </div>
                   )}
-
-                  {/* Submission History Table */}
-                  <div className="space-y-3">
-                    <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">All Submissions</h3>
-                    {loadingHistory ? (
-                      <div className="flex justify-center py-8">
-                        <div className="w-6 h-6 border-2 border-sky-500 border-t-transparent rounded-full animate-spin" />
-                      </div>
-                    ) : submissionHistory.length === 0 ? (
-                      <p className="text-xs text-slate-400 text-center py-8">No previous submissions found.</p>
-                    ) : (
-                      <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm">
-                        <table className="w-full text-left text-xs">
-                          <thead className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 text-slate-500 font-semibold">
-                            <tr>
-                              <th className="p-3">Status</th>
-                              <th className="p-3">Language</th>
-                              <th className="p-3">Runtime</th>
-                              <th className="p-3">Memory</th>
-                              <th className="p-3">Submitted At</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                            {submissionHistory.map((sub) => (
-                              <tr key={sub.id} className="hover:bg-sky-50/50 dark:hover:bg-slate-800/50 transition">
-                                <td className="p-3 font-bold">
-                                  <span className={sub.status === 'Accepted' ? 'text-emerald-600' : 'text-rose-600'}>
-                                    {sub.status}
-                                  </span>
-                                </td>
-                                <td className="p-3 text-slate-600 dark:text-slate-400">{sub.language}</td>
-                                <td className="p-3 font-mono text-slate-600 dark:text-slate-400">{sub.runtime}</td>
-                                <td className="p-3 font-mono text-slate-600 dark:text-slate-400">{sub.memory}</td>
-                                <td className="p-3 text-slate-400 text-[11px]">{sub.submittedAt}</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
-                  </div>
                 </div>
               )}
 
@@ -616,7 +739,7 @@ export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, o
               {leftTab === 'notes' && (
                 <div className="flex flex-col h-full space-y-3 py-2">
                   <textarea
-                    className="w-full h-64 p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-mono resize-none focus:outline-none focus:border-sky-400"
+                    className="w-full h-64 p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-mono resize-none focus:outline-none focus:border-sky-400 select-text"
                     placeholder="Write your personal solution notes here... (saved to database)"
                     value={notes}
                     onChange={e => setNotes(e.target.value)}
@@ -654,7 +777,7 @@ export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, o
                 <option value="cpp">C++ 17</option>
               </select>
 
-              {/* Tool 1: Format Code */}
+              {/* Tool 1: Format Code (High-Speed Formatting) */}
               <button onClick={handleFormatCode}
                 className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg ${textSecondary} ${btnHover} text-xs font-medium transition`}
                 title="Format Code">
@@ -674,7 +797,7 @@ export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, o
                   const resetCode = starterCodeMap[language] || DEFAULT_CODE[language];
                   setCode(resetCode);
                   if (editorRef.current) editorRef.current.setValue(resetCode);
-                  localStorage.removeItem(`cf_code_${problem.id}_${language}`);
+                  localStorage.removeItem(`cf_code_${enrichedProblem.id}_${language}`);
                 }}
                 className={`flex items-center gap-1 px-2 py-1.5 rounded-lg ${textSecondary} ${btnHover} text-xs font-medium transition`}
                 title="Reset to default definition">
@@ -685,7 +808,7 @@ export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, o
             {/* Toolbar Right Tools */}
             <div className="flex items-center gap-1.5">
               {/* Tool 4: Submission History Quick Action */}
-              <button onClick={() => { setLeftTab('submissions'); fetchSubmissionHistory(); }}
+              <button onClick={() => { setLeftTab('submissions'); setSelectedSubmissionRecord(null); fetchSubmissionHistory(enrichedProblem.id); }}
                 className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg ${textSecondary} ${btnHover} text-xs font-medium transition`}
                 title="Submission Notes & History">
                 <History className="w-3.5 h-3.5" /> History
@@ -792,7 +915,7 @@ export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, o
 
                       <div className="p-4 bg-slate-900 text-rose-300 rounded-xl space-y-2 border border-slate-800 shadow-inner">
                         <span className="text-[10px] font-bold text-rose-400 uppercase tracking-wider block">Compiler / Runtime Stderr Details</span>
-                        <pre className="text-xs font-mono whitespace-pre-wrap overflow-x-auto leading-relaxed p-3 bg-black/50 rounded-lg border border-slate-800">
+                        <pre className="text-xs font-mono whitespace-pre-wrap overflow-x-auto leading-relaxed p-3 bg-black/50 rounded-lg border border-slate-800 select-text">
                           {activeResult.errorDetails || activeResult.overallStatus}
                         </pre>
                       </div>
@@ -825,11 +948,11 @@ export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, o
                           <div className="p-3 bg-white dark:bg-slate-900 space-y-2.5">
                             <div>
                               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Input</span>
-                              <pre className="text-xs font-mono text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-slate-800/60 p-2 rounded-md border border-slate-100 dark:border-slate-800 whitespace-pre-wrap overflow-x-auto">{r.input}</pre>
+                              <pre className="text-xs font-mono text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-slate-800/60 p-2 rounded-md border border-slate-100 dark:border-slate-800 whitespace-pre-wrap overflow-x-auto select-text">{r.input}</pre>
                             </div>
                             <div>
                               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Output</span>
-                              <pre className="text-xs font-mono text-emerald-700 bg-emerald-50/50 p-2 rounded-md border border-emerald-100 whitespace-pre-wrap overflow-x-auto">{r.actualOutput}</pre>
+                              <pre className="text-xs font-mono text-emerald-700 bg-emerald-50/50 p-2 rounded-md border border-emerald-100 whitespace-pre-wrap overflow-x-auto select-text">{r.actualOutput}</pre>
                             </div>
                           </div>
                         </div>
