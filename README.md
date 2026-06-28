@@ -1,93 +1,228 @@
-# CodeForge
+# ⚡ CodeForge — Next-Gen DSA & Interview Preparation Platform
 
+![CodeForge Banner](https://img.shields.io/badge/CodeForge-DSA%20Platform-0284C7?style=for-the-badge&logo=codeforces&logoColor=white)
+![React](https://img.shields.io/badge/React-19.2-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.x-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/Neon_PostgreSQL-Cloud-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
 
+**CodeForge** is an advanced, high-performance web platform designed for software engineers and DSA warriors to practice Data Structures & Algorithms, explore company-specific interview questions, track real-time progress analytics, and execute code instantly with isolated sandboxed runners.
 
-## Getting started
+---
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+## 📋 Table of Contents
+1. [🌟 Key Features](#-key-features)
+2. [💻 Tech Stack (A-Z)](#-tech-stack-a-z)
+3. [⚙️ Code Execution Architecture](#%EF%B8%8F-code-execution-architecture)
+4. [🌐 External APIs & Integrations](#-external-apis--integrations)
+5. [🗄️ Database Schema & Data Models](#%EF%B8%8F-database-schema--data-models)
+6. [🚀 Installation & Setup Guide](#-installation--setup-guide)
+7. [📡 Complete REST API Documentation](#-complete-rest-api-documentation)
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+---
 
-## Add your files
+## 🌟 Key Features
 
-* [Create](https://docs.gitlab.com/user/project/repository/web_editor/#create-a-file) or [upload](https://docs.gitlab.com/user/project/repository/web_editor/#upload-a-file) files
-* [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+- **🛸 3D Animated Dashboard & Landing Page**: Futuristic glassmorphic UI with light/dark theme toggling, floating holograms, and interactive cards (*Problems Solved*, *LeetCode Heatmap*, *Contest Rating*, *Difficulty Distribution*, and *Current Streak*).
+- **📝 Monaco Code Editor Integration**: Integrated VS Code-like coding environment supporting **Java 17**, **Python 3**, and **C++ 17** with 6 specialized tools:
+  1. `Format Code`: High-speed AST formatting.
+  2. `Retrieve Last Submitted Code`: Instant memory and database code sync.
+  3. `Reset Code Definition`: Restore standard starter code template.
+  4. `Submission History & Charts`: LeetCode-style runtime & memory percentile bar charts.
+  5. `Full Editor Mode`: Expand code area and hide description.
+  6. `Exam Fullscreen`: Fullscreen mode for distraction-free practice.
+- **📚 382+ Curated DSA Problems**: Complete problem database categorized by difficulty (*Easy*, *Medium*, *Hard*), topics (*Arrays*, *Trees*, *Dynamic Programming*, *Graphs*), and company tags (*Google*, *Amazon*, *Microsoft*, *Meta*, *Uber*, *Atlassian*).
+- **💡 Multi-Paragraph Explanations & Official Hints**: Comprehensive problem statements with parsed multi-line examples, input/output samples, constraints, and revealable hints.
+- **📊 Real-Time Analytics & Heatmaps**: Annual submission contribution grids, active streak tracking, and daily activity metrics.
+- **🔒 Secure JWT Authentication**: End-to-end user authentication with encrypted passwords and stateless authorization tokens.
+
+---
+
+## 💻 Tech Stack (A-Z)
+
+### **Frontend Architecture**
+- **Core Framework**: React 19 (`react`, `react-dom`) with TypeScript 6.0.
+- **Build Tool & Dev Server**: Vite 8.0.
+- **Code Editor**: Monaco Editor React (`@monaco-editor/react`).
+- **Styling & UI**: Vanilla CSS + TailwindCSS 3.4 with custom 3D glassmorphism and keyframe utilities.
+- **Icons & Animations**: Lucide React (`lucide-react`) and Framer Motion (`framer-motion`).
+- **Data Visualization**: Recharts (`recharts`) for performance distribution and activity tracking.
+- **HTTP Client**: Axios (`axios`) configured with request/response interceptors for automatic JWT handling.
+
+### **Backend Architecture**
+- **Core Framework**: Java 17 with Spring Boot 3.x (`spring-boot-starter-web`).
+- **Security & Auth**: Spring Security + JJWT (Java JWT) for stateless authentication.
+- **Persistence Layer**: Spring Data JPA + Hibernate ORM.
+- **Boilerplate Reduction**: Project Lombok (`@Getter`, `@Setter`, `@Builder`, `@Slf4j`).
+- **Build Tool**: Apache Maven (`mvnw`).
+
+### **Database Infrastructure**
+- **Database Engine**: Neon Serverless Cloud PostgreSQL (`postgresql://...aws.neon.tech/neondb`).
+- **JSON Serializers**: Jackson Databind for mapping JSON arrays (`sample_test_cases`, `hints`, `starter_code`).
+
+---
+
+## ⚙️ Code Execution Architecture
+
+CodeForge implements a high-speed, isolated execution engine (`CodeExecutionService.java`) capable of compiling and running user solutions across multiple languages with sub-second latency.
 
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/vijaybabuarumilli/codeforge.git
-git branch -M main
-git push -uf origin main
++-------------------+      Base64 Encoded Source       +--------------------+
+|   Monaco Editor   | -------------------------------> |  Spring Boot API   |
+|   (Frontend)      |                                  |  (CodeExecution)   |
++-------------------+                                  +--------------------+
+                                                                 |
+                                                                 v
+                                                       +--------------------+
+                                                       | Base64 Decoder &   |
+                                                       | Test Harness Wrap  |
+                                                       +--------------------+
+                                                                 |
+                                                                 v
+                                                       +--------------------+
+                                                       | Temp Dir Sandbox   |
+                                                       | (ProcessBuilder)   |
+                                                       +--------------------+
+                                                                 |
+                                             +-------------------+-------------------+
+                                             |                                       |
+                                             v                                       v
+                                   +-------------------+                   +-------------------+
+                                   |  javac / g++ / py |                   |  Stdout / Stderr  |
+                                   |  Compilation      |                   |  3s Execution TLE |
+                                   +-------------------+                   +-------------------+
+                                             |                                       |
+                                             +-------------------+-------------------+
+                                                                 |
+                                                                 v
+                                                       +--------------------+
+                                                       | Evaluate Pass/Fail |
+                                                       | & Return JSON DTO  |
+                                                       +--------------------+
 ```
 
-## Integrate with your tools
+### **Step-by-Step Execution Workflow**:
 
-* [Set up project integrations](https://gitlab.com/vijaybabuarumilli/codeforge/-/settings/integrations)
+1. **Client Code Submission**:
+   - User writes solution code in Monaco Editor.
+   - Upon clicking **Run** or **Submit**, the source code and language ID are Base64 encoded (`btoa(encodeURIComponent(code))`) to prevent encoding issues with special characters and newline breaks.
+   - Sent via `POST /api/problems/{id}/run` or `POST /api/problems/{id}/submit`.
 
-## Collaborate with your team
+2. **Language ID Mapping (Judge0 Compatible)**:
+   - **Java 17**: `LanguageId = 62 / 91` -> Compiled via `javac Main.java` and executed via `java Main`.
+   - **Python 3**: `LanguageId = 71 / 92` -> Executed via `python3 Main.py`.
+   - **C++ 17**: `LanguageId = 54 / 75` -> Compiled via `g++ -O3 Main.cpp -o Main` and executed via `./Main`.
 
-* [Invite team members and collaborators](https://docs.gitlab.com/user/project/members/)
-* [Create a new merge request](https://docs.gitlab.com/user/project/merge_requests/creating_merge_requests/)
-* [Automatically close issues from merge requests](https://docs.gitlab.com/user/project/issues/managing_issues/#closing-issues-automatically)
-* [Enable merge request approvals](https://docs.gitlab.com/user/project/merge_requests/approvals/)
-* [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+3. **Sandboxed File Creation**:
+   - Spring Boot creates an isolated temporary working directory: `Files.createTempDirectory("codeforge-local-exec-")`.
+   - Source code is written into a clean source file inside the temp folder (`Main.java`, `Main.py`, or `Main.cpp`).
 
-## Test and Deploy
+4. **Test Harness Injection**:
+   - For problem submissions, the execution engine wraps the user's function inside a custom test harness driver that feeds inputs from `sample_test_cases` into standard input (`stdin`) and parses standard output (`stdout`).
 
-Use the built-in continuous integration in GitLab.
+5. **Subprocess Spawning & Timeouts**:
+   - Spawns an isolated native OS process using `ProcessBuilder`.
+   - Enforces strict execution timeouts (3.0 seconds maximum) to catch infinite loops and return **Time Limit Exceeded (TLE)**.
+   - Intercepts error streams (`getErrorStream`) to return clean **Compile Error** or **Runtime Error** stack traces.
 
-* [Get started with GitLab CI/CD](https://docs.gitlab.com/ci/quick_start/)
-* [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/user/application_security/sast/)
-* [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/topics/autodevops/requirements/)
-* [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/user/clusters/agent/)
-* [Set up protected environments](https://docs.gitlab.com/ci/environments/protected_environments/)
+6. **Result Evaluation & Cleanup**:
+   - Compares actual execution output against expected outputs.
+   - Cleans up temporary directory and temporary files immediately upon completion.
+   - Returns detailed JSON response with runtime, memory consumption, passed test case counts, and status badges.
 
-***
+---
 
-# Editing this README
+## 🌐 External APIs & Integrations
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+### 1. **LeetCode GraphQL API**
+- **Endpoint**: `https://leetcode.com/graphql`
+- **Purpose**: Used by backend data enrichment scripts (`fetch_leetcode_data.py`, `enrich_all_problems.py`) to parse problem statements, sample test cases, multi-paragraph explanations, official hints, and company tags.
 
-## Suggestions for a good README
+### 2. **Neon Serverless PostgreSQL Cloud**
+- **Endpoint**: `ep-bitter-bonus-aqt125cn.c-8.us-east-1.aws.neon.tech`
+- **Purpose**: High-availability cloud PostgreSQL instance hosting production problem records, user accounts, submission history logs, and solution notes.
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+### 3. **Judge0 API Conventions**
+- **Convention**: Adheres to Judge0 RapidAPI standard status IDs and language mapping codes, ensuring modular compatibility with cloud execution engines.
 
-## Name
-Choose a self-explaining name for your project.
+---
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+## 🗄️ Database Schema & Data Models
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+| Entity Table | Primary Key | Description & Main Attributes |
+| :--- | :--- | :--- |
+| **`users`** | `id` (Long) | User accounts (`name`, `email`, `password`, `problems_solved`, `current_streak`, `max_streak`, `created_at`). |
+| **`problems`** | `id` (Long) | Problem details (`title`, `slug`, `difficulty`, `problem_statement`, `sample_test_cases`, `starter_code`, `constraints`, `hints`). |
+| **`submissions`** | `id` (Long) | User problem submissions (`user_id`, `problem_id`, `source_code`, `language`, `status`, `runtime`, `memory`, `solved`, `submitted_at`). |
+| **`topics`** | `id` (Long) | Major DSA categories (*Arrays*, *Dynamic Programming*, *Trees*). |
+| **`companies`** | `id` (Long) | Product company profiles (*Google*, *Amazon*, *Microsoft*, *Meta*). |
+| **`daily_activity`**| `id` (Long) | Daily solve counts for contribution heatmaps (`user_id`, `activity_date`, `count`). |
+| **`bookmarks`** | `id` (Long) | User bookmarked problems (`user_id`, `problem_id`, `created_at`). |
+| **`notes`** | `id` (Long) | Persistent personal problem solution notes (`user_id`, `problem_id`, `content`, `updated_at`). |
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+---
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+## 🚀 Installation & Setup Guide
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+### **Prerequisites**
+- **Java Development Kit (JDK)**: Java 17 or higher
+- **Node.js**: v18.x or higher
+- **Package Manager**: npm or yarn
+- **Git**
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+### **1. Clone Repository**
+```bash
+git clone https://github.com/Vijaybabu9194/Codeforge-Application.git
+cd Codeforge-Application
+```
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+### **2. Backend Setup (Spring Boot)**
+```bash
+cd backend
+# Build and run backend dev server
+./mvnw spring-boot:run
+```
+*Backend will start on `http://localhost:8080`*
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+### **3. Frontend Setup (React + Vite)**
+```bash
+cd ../frontend
+# Install dependencies
+npm install
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+# Start Vite dev server
+npm run dev
+```
+*Frontend will start on `http://localhost:5173`*
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+---
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+## 📡 Complete REST API Documentation
 
-## License
-For open source projects, say how it is licensed.
+### **Authentication (`/api/auth`)**
+- `POST /api/auth/register` — Register new developer account.
+- `POST /api/auth/login` — Authenticate and retrieve JWT bearer token.
+- `GET /api/auth/me` — Retrieve current logged-in user profile.
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+### **Problems (`/api/problems`)**
+- `GET /api/problems` — Fetch paginated problems list with filter options (`topicId`, `companyId`, `difficulty`, `search`, `status`).
+- `GET /api/problems/{id}` — Fetch full details for a specific problem.
+- `POST /api/problems/{id}/run` — Run user code against sample test cases.
+- `POST /api/problems/{id}/submit` — Formally submit solution, execute tests, update streak & submission history.
+
+### **Submissions & Profile (`/api/profile`, `/api/problems`)**
+- `GET /api/problems/{id}/submissions` — Fetch submission history for a problem.
+- `GET /api/problems/{id}/last-submission` — Retrieve last submitted source code.
+- `GET /api/profile/activity` — Fetch daily activity contribution heatmap data.
+- `GET /api/profile/stats` — Fetch solved statistics breakdown by difficulty.
+
+### **Notes & Bookmarks**
+- `GET /api/problems/{id}/notes` — Retrieve saved note for a problem.
+- `POST /api/problems/{id}/notes` — Save/update note for a problem.
+- `POST /api/problems/{id}/bookmark` — Toggle bookmark status for a problem.
+
+---
+
+<p center="align">
+  <b>Built with ❤️ for Software Engineers & DSA Warriors.</b>
+</p>
