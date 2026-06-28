@@ -209,21 +209,21 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
   items,
   illustration,
 }) => (
-  <div className="feature-card flex flex-col h-full select-none">
+  <div className="p-6 rounded-2xl border flex flex-col h-full select-none transition-all duration-300 dark:bg-slate-900/60 dark:border-slate-800 dark:hover:border-sky-500/40 bg-white border-slate-200 hover:border-sky-400/50 shadow-md hover:shadow-xl">
     {/* Icon */}
     <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-5" style={{ background: iconBg, color: iconColor }}>
       {icon}
     </div>
     {/* Title */}
-    <h3 className="text-[18px] font-bold text-white mb-2.5">{title}</h3>
+    <h3 className="text-[18px] font-extrabold text-slate-900 dark:text-white mb-2.5">{title}</h3>
     {/* Description */}
-    <p className="text-[14px] text-[#7B8AB8] leading-relaxed mb-5">{description}</p>
+    <p className="text-[14px] text-slate-600 dark:text-slate-400 leading-relaxed mb-5">{description}</p>
     {/* Checklist */}
     <div className="space-y-2.5 mb-6">
       {items.map((item) => (
         <div key={item} className="flex items-center gap-2.5">
-          <CheckCircle className="w-4 h-4 text-[#4A6CF7] flex-shrink-0" />
-          <span className="text-[13px] text-[#A8B8E0] font-medium">{item}</span>
+          <CheckCircle className="w-4 h-4 text-sky-500 flex-shrink-0" />
+          <span className="text-[13px] text-slate-700 dark:text-slate-300 font-semibold">{item}</span>
         </div>
       ))}
     </div>
@@ -299,9 +299,9 @@ export const FeaturesSection: React.FC = () => {
       <div className="max-w-[1440px] mx-auto px-8 lg:px-12">
         {/* Section Heading */}
         <div className="text-center mb-14">
-          <h2 className="text-[30px] lg:text-[36px] font-bold text-white tracking-tight">
+          <h2 className="text-[30px] lg:text-[36px] font-black text-slate-900 dark:text-white tracking-tight">
             Everything you need to{' '}
-            <span className="bg-gradient-to-r from-[#4A6CF7] to-[#6B8AFF] bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-sky-500 to-indigo-600 bg-clip-text text-transparent">
               ace your next interview
             </span>
           </h2>
