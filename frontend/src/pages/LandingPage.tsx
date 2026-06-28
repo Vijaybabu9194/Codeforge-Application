@@ -45,7 +45,7 @@ export const LandingPage: React.FC = () => {
   }
 
   return (
-    <div className={`min-h-screen ${dark ? 'bg-[#020205] text-white' : 'bg-[#F8FAFC] text-slate-900'} relative overflow-hidden select-none transition-colors duration-300`}>
+    <div className={`min-h-screen ${dark ? 'bg-[#020205] text-white' : 'bg-white text-slate-900'} relative overflow-hidden select-none transition-colors duration-300`}>
       {/* ====== AMBIENT BACKGROUND EFFECTS ====== */}
       <div className={`fixed top-[-10%] right-[-5%] w-[700px] h-[700px] rounded-full blur-[120px] pointer-events-none ${dark ? 'bg-sky-500/[0.05]' : 'bg-sky-500/[0.08]'}`} />
       <div className={`fixed top-[30%] left-[20%] w-[500px] h-[500px] rounded-full blur-[100px] pointer-events-none ${dark ? 'bg-indigo-500/[0.03]' : 'bg-indigo-500/[0.05]'}`} />
