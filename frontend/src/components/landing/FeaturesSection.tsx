@@ -1,190 +1,119 @@
 import React from 'react';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, Code, Building2, BarChart3, Trophy, ArrowUpRight } from 'lucide-react';
 
 /* =========================================================
-   FEATURE ILLUSTRATIONS — Render the high-fidelity design image assets
+   AUTHENTIC MINI UI MOCK ILLUSTRATIONS (Glassmorphic Design)
    ========================================================= */
 
-const FeatureIllustration: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <div className="relative w-full h-[145px] flex items-end justify-center overflow-hidden pointer-events-none select-none">
-    {/* Soft glow behind the illustration */}
-    <div className="absolute bottom-[-10px] w-[130px] h-[35px] rounded-full bg-[#4A6CF7]/20 blur-md" />
-    <div className="relative z-10 w-full h-full flex items-center justify-center transition-transform duration-500 hover:scale-105">
+const FeatureIllustrationContainer: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <div className="relative w-full h-[150px] flex items-center justify-center overflow-hidden pointer-events-none select-none rounded-xl bg-slate-950/20 dark:bg-slate-950/40 border border-slate-200/50 dark:border-slate-800/60 p-3">
+    <div className="relative z-10 w-full h-full flex items-center justify-center transition-transform duration-500 group-hover:scale-105">
       {children}
     </div>
   </div>
 );
 
-const TopicIllustration: React.FC = () => (
-  <svg viewBox="0 0 160 145" className="w-full h-full max-h-[135px]" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <linearGradient id="nodeGlow" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stopColor="#4A6CF7" />
-        <stop offset="100%" stopColor="#6B8AFF" />
-      </linearGradient>
-      <linearGradient id="activeNode" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stopColor="#22D3EE" />
-        <stop offset="100%" stopColor="#3B82F6" />
-      </linearGradient>
-    </defs>
-    
-    <path d="M 30 105 L 60 70 M 60 70 L 100 50 M 60 70 L 80 105 M 100 50 L 130 85 M 100 50 L 130 25" stroke="#4A6CF7" strokeWidth="2.5" strokeOpacity="0.3" strokeDasharray="3 3" />
-    <path d="M 30 105 L 60 70 L 100 50 L 130 25" stroke="url(#nodeGlow)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-
-    <circle cx="30" cy="105" r="9" fill="#0A0F24" stroke="url(#nodeGlow)" strokeWidth="2" />
-    <path d="M 27 105 L 29 107 L 33 103" stroke="#22D3EE" strokeWidth="2" strokeLinecap="round" />
-
-    <circle cx="60" cy="70" r="11" fill="#0A0F24" stroke="url(#nodeGlow)" strokeWidth="2" />
-    <path d="M 57 70 L 59 72 L 63 68" stroke="#22D3EE" strokeWidth="2" strokeLinecap="round" />
-
-    <circle cx="100" cy="50" r="13" fill="#030712" stroke="url(#activeNode)" strokeWidth="2.5" className="animate-pulse" />
-    <circle cx="100" cy="50" r="5" fill="#22D3EE" />
-
-    <circle cx="80" cy="105" r="8" fill="#050A18" stroke="#334155" strokeWidth="2" />
-    <circle cx="130" cy="85" r="8" fill="#050A18" stroke="#334155" strokeWidth="2" />
-    <circle cx="130" cy="25" r="9" fill="#050A18" stroke="#334155" strokeWidth="2" />
-
-    <rect x="15" y="122" width="30" height="11" rx="3" fill="#111827" stroke="#4A6CF7" strokeWidth="0.5" strokeOpacity="0.5" />
-    <text x="30" y="130" fill="#A8B8E0" fontSize="7" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">BASIC</text>
-
-    <rect x="85" y="15" width="30" height="11" rx="3" fill="#111827" stroke="#22D3EE" strokeWidth="0.5" strokeOpacity="0.5" />
-    <text x="100" y="23" fill="#22D3EE" fontSize="7" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">ACTIVE</text>
-  </svg>
+/* Card 1 UI Mock: Topic-wise Practice */
+const TopicUIMock: React.FC = () => (
+  <div className="w-full h-full flex flex-col justify-between p-1">
+    <div className="flex items-center justify-between">
+      <span className="text-[11px] font-extrabold text-sky-400 flex items-center gap-1">
+        <Code className="w-3 h-3" /> Topic Mastery
+      </span>
+      <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20">4 Modules</span>
+    </div>
+    <div className="space-y-1.5 my-auto">
+      <div className="flex items-center justify-between p-1.5 rounded-lg bg-slate-900/80 border border-slate-800 text-[11px]">
+        <span className="font-semibold text-slate-200">Arrays & Hashing</span>
+        <span className="text-[10px] font-bold text-emerald-400">100% Solved</span>
+      </div>
+      <div className="flex items-center justify-between p-1.5 rounded-lg bg-slate-900/80 border border-slate-800 text-[11px]">
+        <span className="font-semibold text-slate-200">Dynamic Programming</span>
+        <span className="text-[10px] font-bold text-sky-400">42 / 50</span>
+      </div>
+    </div>
+  </div>
 );
 
-const CompanyIllustration: React.FC = () => (
-  <svg viewBox="0 0 160 145" className="w-full h-full max-h-[135px]" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <linearGradient id="cardGlowGoogle" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stopColor="#EA4335" />
-        <stop offset="50%" stopColor="#FBBC05" />
-        <stop offset="100%" stopColor="#34A853" />
-      </linearGradient>
-      <linearGradient id="cardGlowMeta" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stopColor="#0668E1" />
-        <stop offset="100%" stopColor="#00F2FE" />
-      </linearGradient>
-    </defs>
-
-    <g transform="translate(15, 65) rotate(-6)">
-      <rect width="62" height="40" rx="6" fill="#0A0F24" stroke="#334155" strokeWidth="1" />
-      <g transform="translate(6, 12)">
-        <rect x="0" y="0" width="8" height="8" fill="#F25022" />
-        <rect x="10" y="0" width="8" height="8" fill="#7FBA00" />
-        <rect x="0" y="10" width="8" height="8" fill="#00A4EF" />
-        <rect x="10" y="10" width="8" height="8" fill="#FFB900" />
-      </g>
-      <text x="28" y="20" fill="#A8B8E0" fontSize="7.5" fontWeight="bold" fontFamily="sans-serif">MSFT</text>
-      <text x="28" y="29" fill="#4ADE80" fontSize="6.5" fontWeight="bold" fontFamily="sans-serif">45 Qs</text>
-    </g>
-
-    <g transform="translate(82, 52) rotate(6)">
-      <rect width="62" height="40" rx="6" fill="#0A0F24" stroke="url(#cardGlowGoogle)" strokeWidth="1" />
-      <circle cx="14" cy="20" r="7" fill="#1F2937" />
-      <text x="14" y="23" fill="#EA4335" fontSize="10" fontWeight="extrabold" textAnchor="middle" fontFamily="sans-serif">G</text>
-      <text x="26" y="18" fill="#FFFFFF" fontSize="7.5" fontWeight="bold" fontFamily="sans-serif">Google</text>
-      <text x="26" y="27" fill="#FBBC05" fontSize="6.5" fontWeight="bold" fontFamily="sans-serif">120+ Qs</text>
-    </g>
-
-    <g transform="translate(44, 22) rotate(-2)">
-      <rect width="72" height="44" rx="8" fill="#050B1E" stroke="url(#cardGlowMeta)" strokeWidth="1.5" style={{ filter: 'drop-shadow(0 4px 10px rgba(6, 104, 225, 0.25))' }} />
-      <path d="M 12 24 C 16 16, 23 16, 23 24 C 23 32, 16 32, 12 24" stroke="#0668E1" strokeWidth="2" fill="none" />
-      <path d="M 28 24 C 24 16, 17 16, 17 24 C 17 32, 24 32, 28 24" stroke="#00F2FE" strokeWidth="2" fill="none" />
-      
-      <text x="35" y="20" fill="#FFFFFF" fontSize="8.5" fontWeight="bold" fontFamily="sans-serif">Meta</text>
-      <text x="35" y="29" fill="#00F2FE" fontSize="6.5" fontWeight="semibold" fontFamily="sans-serif">Top Rated</text>
-      <rect x="35" y="32" width="28" height="6" rx="2" fill="#0668E1" fillOpacity="0.2" />
-      <text x="49" y="37" fill="#00F2FE" fontSize="4.5" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">HOT</text>
-    </g>
-  </svg>
+/* Card 2 UI Mock: Company Questions */
+const CompanyUIMock: React.FC = () => (
+  <div className="w-full h-full flex flex-col justify-between p-1">
+    <div className="flex items-center justify-between">
+      <span className="text-[11px] font-extrabold text-indigo-400 flex items-center gap-1">
+        <Building2 className="w-3 h-3" /> Top Companies
+      </span>
+      <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">Real Questions</span>
+    </div>
+    <div className="grid grid-cols-2 gap-1.5 my-auto">
+      <div className="p-1.5 rounded-lg bg-slate-900/80 border border-slate-800 flex items-center justify-between">
+        <span className="text-[10px] font-extrabold text-red-400">Google</span>
+        <span className="text-[9px] font-bold text-slate-400">140+ Qs</span>
+      </div>
+      <div className="p-1.5 rounded-lg bg-slate-900/80 border border-slate-800 flex items-center justify-between">
+        <span className="text-[10px] font-extrabold text-amber-400">Amazon</span>
+        <span className="text-[9px] font-bold text-slate-400">210+ Qs</span>
+      </div>
+      <div className="p-1.5 rounded-lg bg-slate-900/80 border border-slate-800 flex items-center justify-between">
+        <span className="text-[10px] font-extrabold text-sky-400">Meta</span>
+        <span className="text-[9px] font-bold text-slate-400">95+ Qs</span>
+      </div>
+      <div className="p-1.5 rounded-lg bg-slate-900/80 border border-slate-800 flex items-center justify-between">
+        <span className="text-[10px] font-extrabold text-emerald-400">Uber</span>
+        <span className="text-[9px] font-bold text-slate-400">65+ Qs</span>
+      </div>
+    </div>
+  </div>
 );
 
-const AnalyticsIllustration: React.FC = () => (
-  <svg viewBox="0 0 160 145" className="w-full h-full max-h-[135px]" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#22D3EE" stopOpacity="0.35" />
-        <stop offset="100%" stopColor="#22D3EE" stopOpacity="0" />
-      </linearGradient>
-    </defs>
-
-    <g transform="translate(15, 12)">
-      <text x="0" y="0" fill="#6B8AFF" fontSize="7" fontWeight="bold" fontFamily="sans-serif">SOLVED HEATMAP</text>
-      {Array.from({ length: 4 }).map((_, r) =>
-        Array.from({ length: 9 }).map((_, c) => {
-          const vals = [0.1, 0.4, 0.8, 0.9, 0.2, 0.7, 0.1, 0.3, 0.6, 0.9, 0.2, 0.5, 0.8, 0.1, 0.4, 0.7, 0.9, 0.3, 0.2, 0.5, 0.8, 0.1, 0.6, 0.9, 0.2, 0.4, 0.7, 0.3];
-          const opacity = vals[(r * 9 + c) % vals.length];
-          const color = opacity > 0.7 ? '#22D3EE' : opacity > 0.3 ? '#4A6CF7' : '#1F2937';
-          return (
-            <rect
-              key={`${r}-${c}`}
-              x={c * 9}
-              y={r * 9 + 4}
-              width="6.5"
-              height="6.5"
-              rx="1.5"
-              fill={color}
-              fillOpacity={color === '#1F2937' ? 0.3 : 1}
-              stroke={color === '#1F2937' ? 'none' : '#22D3EE'}
-              strokeWidth="0.25"
-              strokeOpacity="0.2"
-            />
-          );
-        })
-      )}
-    </g>
-
-    <g transform="translate(15, 75)">
-      <path d="M 0 42 L 130 42" stroke="#334155" strokeWidth="1" />
-      <path d="M 0 42 Q 25 15, 45 30 T 90 10 T 130 5" stroke="#A78BFA" strokeWidth="2.5" strokeLinecap="round" />
-      <path d="M 0 42 Q 25 15, 45 30 T 90 10 T 130 5 L 130 42 L 0 42 Z" fill="url(#chartGradient)" />
-      
-      <circle cx="90" cy="10" r="4.5" fill="#22D3EE" className="animate-pulse" />
-      <circle cx="90" cy="10" r="2.2" fill="#FFFFFF" />
-
-      <rect x="73" y="-12" width="34" height="11" rx="3" fill="#0C1024" stroke="#22D3EE" strokeWidth="0.75" />
-      <text x="90" y="-4.5" fill="#22D3EE" fontSize="6" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">85% Accuracy</text>
-    </g>
-  </svg>
+/* Card 3 UI Mock: Track & Analyze */
+const AnalyticsUIMock: React.FC = () => (
+  <div className="w-full h-full flex flex-col justify-between p-1">
+    <div className="flex items-center justify-between">
+      <span className="text-[11px] font-extrabold text-cyan-400 flex items-center gap-1">
+        <BarChart3 className="w-3 h-3" /> Performance Insights
+      </span>
+      <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">Live Sync</span>
+    </div>
+    <div className="flex items-center justify-between gap-2 my-auto p-2 rounded-lg bg-slate-900/80 border border-slate-800">
+      <div className="flex-1">
+        <p className="text-[9px] font-bold text-slate-400 uppercase">Accuracy Rate</p>
+        <p className="text-[14px] font-black text-white">88.4% <span className="text-[9px] text-emerald-400 font-bold">+4.2%</span></p>
+      </div>
+      <div className="flex gap-1 items-end h-7">
+        <div className="w-2 bg-sky-500/40 rounded-t h-3" />
+        <div className="w-2 bg-sky-500/60 rounded-t h-5" />
+        <div className="w-2 bg-cyan-400 rounded-t h-7 animate-pulse" />
+      </div>
+    </div>
+  </div>
 );
 
-const ContestIllustration: React.FC = () => (
-  <svg viewBox="0 0 160 145" className="w-full h-full max-h-[135px]" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <linearGradient id="trophyGlow" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stopColor="#F59E0B" />
-        <stop offset="100%" stopColor="#D97706" />
-      </linearGradient>
-    </defs>
-
-    <circle cx="80" cy="65" r="28" fill="#F59E0B" fillOpacity="0.08" className="blur-xl" />
-
-    <g transform="translate(18, 62) rotate(-8)">
-      <circle cx="15" cy="15" r="15" fill="#0F172A" stroke="#94A3B8" strokeWidth="1" />
-      <text x="15" y="19" fill="#94A3B8" fontSize="10" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">#2</text>
-    </g>
-
-    <g transform="translate(112, 66) rotate(10)">
-      <circle cx="15" cy="15" r="15" fill="#0F172A" stroke="#B45309" strokeWidth="1" />
-      <text x="15" y="19" fill="#B45309" fontSize="10" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">#3</text>
-    </g>
-
-    <g transform="translate(52, 28)">
-      <path d="M 12 52 L 44 52 L 38 48 L 18 48 Z" fill="#475569" />
-      <rect x="14" y="52" width="28" height="7" rx="2" fill="#1E293B" stroke="#475569" strokeWidth="1" />
-      
-      <path d="M 26 34 L 30 34 L 30 48 L 26 48 Z" fill="url(#trophyGlow)" />
-      
-      <path d="M 14 14 C 4 14 4 32 14 32 Z" stroke="url(#trophyGlow)" strokeWidth="2" fill="none" />
-      <path d="M 42 14 C 52 14 52 32 42 32 Z" stroke="url(#trophyGlow)" strokeWidth="2" fill="none" />
-
-      <path d="M 14 9 L 42 9 L 38 36 C 35 43, 21 43, 18 36 Z" fill="url(#trophyGlow)" stroke="#FBBF24" strokeWidth="0.5" />
-      
-      <text x="28" y="26" fill="#FFFFFF" fontSize="14" fontWeight="extrabold" textAnchor="middle" fontFamily="sans-serif">1</text>
-      
-      <polygon points="28,2 29.5,5 33,5.5 30.5,8 31.5,11.5 28,9.5 24.5,11.5 25.5,8 23,5.5 26.5,5" fill="#FDE047" transform="translate(0, -10)" />
-    </g>
-  </svg>
+/* Card 4 UI Mock: Contest & Compete */
+const ContestUIMock: React.FC = () => (
+  <div className="w-full h-full flex flex-col justify-between p-1">
+    <div className="flex items-center justify-between">
+      <span className="text-[11px] font-extrabold text-amber-400 flex items-center gap-1">
+        <Trophy className="w-3 h-3" /> Global Leaderboard
+      </span>
+      <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">Weekly #42</span>
+    </div>
+    <div className="space-y-1.5 my-auto">
+      <div className="flex items-center justify-between p-1.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-[10px]">
+        <div className="flex items-center gap-1.5">
+          <span className="w-4 h-4 rounded-full bg-amber-400 text-slate-950 font-black text-[9px] flex items-center justify-center">1</span>
+          <span className="font-extrabold text-amber-200">Alex_Dev</span>
+        </div>
+        <span className="font-bold text-amber-400">2,450 pts</span>
+      </div>
+      <div className="flex items-center justify-between p-1.5 rounded-lg bg-slate-900/80 border border-slate-800 text-[10px]">
+        <div className="flex items-center gap-1.5">
+          <span className="w-4 h-4 rounded-full bg-slate-700 text-slate-300 font-bold text-[9px] flex items-center justify-center">2</span>
+          <span className="font-semibold text-slate-300">CodeNinja</span>
+        </div>
+        <span className="font-bold text-slate-400">2,180 pts</span>
+      </div>
+    </div>
+  </div>
 );
 
 /* =========================================================
@@ -209,7 +138,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
   items,
   illustration,
 }) => (
-  <div className="p-6 rounded-2xl border flex flex-col h-full select-none transition-all duration-300 dark:bg-slate-900/60 dark:border-slate-800 dark:hover:border-sky-500/40 bg-white border-slate-200 hover:border-sky-400/50 shadow-md hover:shadow-xl">
+  <div className="group p-6 rounded-2xl border flex flex-col h-full select-none transition-all duration-300 dark:bg-slate-900/60 dark:border-slate-800 dark:hover:border-sky-500/40 bg-white border-slate-200 hover:border-sky-400/50 shadow-md hover:shadow-xl">
     {/* Icon */}
     <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-5" style={{ background: iconBg, color: iconColor }}>
       {icon}
@@ -227,7 +156,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
         </div>
       ))}
     </div>
-    {/* Illustration */}
+    {/* Mini UI Illustration */}
     <div className="mt-auto pt-2">{illustration}</div>
   </div>
 );
@@ -238,8 +167,8 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
 export const FeaturesSection: React.FC = () => {
   const features: FeatureCardProps[] = [
     {
-      iconColor: '#4A6CF7',
-      iconBg: 'rgba(74, 108, 247, 0.12)',
+      iconColor: '#38BDF8',
+      iconBg: 'rgba(56, 189, 248, 0.12)',
       icon: (
         <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="10"/><path d="M8 12l2 2 4-4"/>
@@ -248,11 +177,11 @@ export const FeaturesSection: React.FC = () => {
       title: 'Topic-wise Practice',
       description: 'Structured DSA topics from basic to advanced with a beautiful learning experience.',
       items: ['Arrays', 'Linked List', 'Dynamic Programming', 'Graphs & more'],
-      illustration: <FeatureIllustration><TopicIllustration /></FeatureIllustration>,
+      illustration: <FeatureIllustrationContainer><TopicUIMock /></FeatureIllustrationContainer>,
     },
     {
-      iconColor: '#22D3EE',
-      iconBg: 'rgba(34, 211, 238, 0.1)',
+      iconColor: '#818CF8',
+      iconBg: 'rgba(129, 140, 248, 0.12)',
       icon: (
         <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
@@ -262,11 +191,11 @@ export const FeaturesSection: React.FC = () => {
       title: 'Company Questions',
       description: 'Access previous year interview questions from top product companies.',
       items: ['Google', 'Amazon', 'Microsoft', 'Meta & more'],
-      illustration: <FeatureIllustration><CompanyIllustration /></FeatureIllustration>,
+      illustration: <FeatureIllustrationContainer><CompanyUIMock /></FeatureIllustrationContainer>,
     },
     {
-      iconColor: '#A78BFA',
-      iconBg: 'rgba(167, 139, 250, 0.1)',
+      iconColor: '#38BDF8',
+      iconBg: 'rgba(56, 189, 248, 0.12)',
       icon: (
         <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/>
@@ -275,11 +204,11 @@ export const FeaturesSection: React.FC = () => {
       title: 'Track & Analyze',
       description: 'Track your progress, solve rate, accuracy and identify your strengths & weaknesses.',
       items: ['Detailed Analytics', 'Contest Performance', 'Progress Heatmaps', 'Smart Insights'],
-      illustration: <FeatureIllustration><AnalyticsIllustration /></FeatureIllustration>,
+      illustration: <FeatureIllustrationContainer><AnalyticsUIMock /></FeatureIllustrationContainer>,
     },
     {
-      iconColor: '#F59E0B',
-      iconBg: 'rgba(245, 158, 11, 0.1)',
+      iconColor: '#818CF8',
+      iconBg: 'rgba(129, 140, 248, 0.12)',
       icon: (
         <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C7 4 7 7 7 7"/>
@@ -290,19 +219,18 @@ export const FeaturesSection: React.FC = () => {
       title: 'Contest & Compete',
       description: 'Participate in contests, climb rankings and compete with thousands of developers.',
       items: ['Weekly Contests', 'Global Rankings', 'Real-time Leaderboard', 'Exciting Rewards'],
-      illustration: <FeatureIllustration><ContestIllustration /></FeatureIllustration>,
+      illustration: <FeatureIllustrationContainer><ContestUIMock /></FeatureIllustrationContainer>,
     },
   ];
 
   return (
-    <section id="features" className="py-16 relative z-10">
+    <section id="features" className="py-16 relative z-10 select-none">
       <div className="max-w-[1440px] mx-auto px-8 lg:px-12">
-        {/* Section Heading */}
+        {/* Section Heading — 100% Highlighted Entire Line */}
         <div className="text-center mb-14">
-          <h2 className="text-[30px] lg:text-[36px] font-black text-slate-900 dark:text-white tracking-tight">
-            Everything you need to{' '}
-            <span className="bg-gradient-to-r from-sky-500 to-indigo-600 bg-clip-text text-transparent">
-              ace your next interview
+          <h2 className="text-[30px] lg:text-[38px] font-black tracking-tight">
+            <span className="bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              Everything you need to ace your next interview
             </span>
           </h2>
         </div>

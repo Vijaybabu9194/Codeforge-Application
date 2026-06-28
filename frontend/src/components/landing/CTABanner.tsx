@@ -53,10 +53,10 @@ export const CTABanner: React.FC<CTABannerProps> = ({ onSignupClick }) => {
               </svg>
             </div>
             <div>
-              <h3 className={`font-extrabold text-[22px] md:text-[26px] leading-tight select-none ${dark ? 'text-white' : 'text-white'}`}>
+              <h3 className={`font-extrabold text-[17px] md:text-[20px] leading-tight select-none ${dark ? 'text-white' : 'text-white'}`}>
                 Ready to forge your coding journey?
               </h3>
-              <p className={`text-[15px] mt-2 select-none font-medium ${dark ? 'text-slate-400' : 'text-sky-100'}`}>
+              <p className={`text-[13px] mt-1 select-none font-medium ${dark ? 'text-slate-400' : 'text-sky-100'}`}>
                 Join thousands of developers and start your transformation today.
               </p>
             </div>

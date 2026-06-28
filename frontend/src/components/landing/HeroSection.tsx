@@ -67,22 +67,22 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         <div className="flex items-center gap-4 pt-1">
           <button 
             onClick={onSignupClick}
-            className="px-8 py-4 bg-sky-500 hover:bg-sky-600 text-white font-bold text-base rounded-2xl shadow-lg shadow-sky-500/30 flex items-center gap-3 transition-all transform hover:-translate-y-0.5 select-none"
+            className="px-5 py-2.5 bg-sky-500 hover:bg-sky-600 text-white font-bold text-sm rounded-xl shadow-md shadow-sky-500/25 flex items-center gap-2 transition-all transform hover:-translate-y-0.5 select-none"
           >
             <span>Start Practicing</span>
-            <ArrowRight className="w-5 h-5" />
+            <ArrowRight className="w-4 h-4" />
           </button>
           <button 
             onClick={onDemoClick}
-            className={`px-6 py-4 font-bold text-base rounded-2xl border flex items-center gap-3 transition-all select-none ${
+            className={`px-4 py-2.5 font-bold text-sm rounded-xl border flex items-center gap-2 transition-all select-none ${
               dark 
                 ? 'border-slate-800 text-white hover:bg-slate-900/60' 
                 : 'border-slate-200 text-slate-800 hover:bg-slate-100/80 bg-white shadow-sm'
             }`}
           >
             <span>Explore Features</span>
-            <div className={`w-7 h-7 rounded-full flex items-center justify-center ${dark ? 'bg-white/10 text-white' : 'bg-slate-100 text-slate-700'}`}>
-              <Play className="w-3 h-3 fill-current ml-0.5" />
+            <div className={`w-5 h-5 rounded-full flex items-center justify-center ${dark ? 'bg-white/10 text-white' : 'bg-slate-100 text-slate-700'}`}>
+              <Play className="w-2.5 h-2.5 fill-current ml-0.5" />
             </div>
           </button>
         </div>
