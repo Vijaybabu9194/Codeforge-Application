@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../lib/api';
-import { X, User, Lock, Trash2, KeyRound, CheckCircle, AlertTriangle, ArrowRight } from 'lucide-react';
+import { X, User, Lock, Trash2, KeyRound, CheckCircle, AlertTriangle } from 'lucide-react';
 
 interface AccountSettingsModalProps {
   isOpen: boolean;
