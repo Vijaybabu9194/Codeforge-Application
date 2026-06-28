@@ -274,48 +274,31 @@ export const ProblemEditorPage: React.FC<ProblemEditorPageProps> = ({ problem, o
       .catch(() => {});
   }, []);
 
-  // Problem Navigation Handler ('prev' | 'next' | 'random')
-  const navigateToProblem = async (direction: 'next' | 'prev' | 'random') => {
+  // Problem Navigation Handler ('prev' | 'next' | 'random') — Instant 0ms Memory Switching
+  const navigateToProblem = (direction: 'next' | 'prev' | 'random') => {
     let list = allProblemsList;
-    if (list.length === 0) {
-      try {
-        const pRes = await api.get<any>('/problems?size=1000');
-        const extracted = pRes.data?.problems || pRes.data?.content || (Array.isArray(pRes.data) ? pRes.data : []);
-        if (extracted.length > 0) {
-          list = extracted;
-          setAllProblemsList(list);
-        }
-      } catch {}
-    }
+    let targetProblem: Problem | null = null;
 
-    let targetId = Number(enrichedProblem.id) || 1;
     if (list.length > 0) {
       const idx = list.findIndex(p => Number(p.id) === Number(enrichedProblem.id));
       if (direction === 'next') {
         const nextIdx = idx >= 0 ? (idx + 1) % list.length : 0;
-        targetId = Number(list[nextIdx].id);
+        targetProblem = list[nextIdx];
       } else if (direction === 'prev') {
         const prevIdx = idx >= 0 ? (idx - 1 + list.length) % list.length : list.length - 1;
-        targetId = Number(list[prevIdx].id);
+        targetProblem = list[prevIdx];
       } else {
         const randIdx = Math.floor(Math.random() * list.length);
-        targetId = Number(list[randIdx].id);
+        targetProblem = list[randIdx];
       }
-    } else {
-      if (direction === 'next') targetId = targetId + 1;
-      else if (direction === 'prev') targetId = Math.max(1, targetId - 1);
-      else targetId = Math.floor(Math.random() * 380) + 1;
     }
 
-    try {
-      const res = await api.get<Problem>(`/problems/${targetId}`);
-      if (res.data && res.data.id) {
-        setEnrichedProblem(res.data);
-        setRunResult(null);
-        setSubmitResult(null);
-        setSelectedSubmissionRecord(null);
-      }
-    } catch {}
+    if (targetProblem) {
+      setEnrichedProblem(targetProblem);
+      setRunResult(null);
+      setSubmitResult(null);
+      setSelectedSubmissionRecord(null);
+    }
   };
 
   const handleCodeChange = (value: string | undefined) => {
