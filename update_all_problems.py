@@ -58,15 +58,12 @@ def parse_html_content(html):
     for pre in soup.find_all('pre'):
         text = pre.get_text()
         ex = {}
-        for line in text.split('\n'):
-            line = line.strip()
-            if not line: continue
-            m_in = re.search(r'Input:\s*(.*)', line, re.I)
-            m_out = re.search(r'Output:\s*(.*)', line, re.I)
-            m_exp = re.search(r'Explanation:\s*(.*)', line, re.I)
-            if m_in: ex['input'] = m_in.group(1).strip()
-            if m_out: ex['output'] = m_out.group(1).strip()
-            if m_exp: ex['explanation'] = m_exp.group(1).strip()
+        m_in = re.search(r'Input:\s*(.*?)(?=\n?\s*(?:Output:|Explanation:|$))', text, re.DOTALL | re.I)
+        m_out = re.search(r'Output:\s*(.*?)(?=\n?\s*(?:Explanation:|$))', text, re.DOTALL | re.I)
+        m_exp = re.search(r'Explanation:\s*(.*)', text, re.DOTALL | re.I)
+        if m_in: ex['input'] = m_in.group(1).strip()
+        if m_out: ex['output'] = m_out.group(1).strip()
+        if m_exp: ex['explanation'] = m_exp.group(1).strip()
         if 'input' in ex and 'output' in ex:
             examples.append(ex)
 
