@@ -1,5 +1,5 @@
 import React from 'react';
-import { Star, Quote, CheckCircle2 } from 'lucide-react';
+import { Star, CheckCircle2 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 
 export const TestimonialsSection: React.FC = () => {
