@@ -797,15 +797,21 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onOpenAccountModal }) 
                   }
                 }
 
+                const isActiveTab = selectedPlatformTab === pName.toUpperCase();
+
                 return (
                   <button
                     key={pName}
                     onClick={() => {
-                      setLinkingPlatform(pName);
-                      setLinkingError('');
-                      setUsernameInput(plat.username || '');
+                      setSelectedPlatformTab(pName.toUpperCase());
+                      if (!isLinked) {
+                        setLinkingPlatform(pName);
+                        setLinkingError('');
+                        setUsernameInput(plat.username || '');
+                      }
                     }}
-                    className={`${theme} px-2.5 py-1 rounded-xl text-[10px] font-extrabold flex items-center gap-1.5 border transition cursor-pointer`}
+                    className={`${theme} px-2.5 py-1 rounded-xl text-[10px] font-extrabold flex items-center gap-1.5 border transition cursor-pointer ${isActiveTab ? 'ring-2 ring-sky-500/50 scale-[1.04]' : ''}`}
+                    title={isLinked ? `Click to view ${pName} analytics` : `Click to connect ${pName}`}
                   >
                     <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />
                     <span>{isLinked ? plat.username : `+ Connect ${pName.toLowerCase()}`}</span>
@@ -871,48 +877,56 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onOpenAccountModal }) 
           </div>
         </div>
 
-        {/* Contest Rating */}
+        {/* Card 3: Contest Rating / GitHub Followers */}
         <div className={`border rounded-2xl p-3 md:p-4.5 flex items-center gap-2.5 md:gap-3.5 min-w-0 ${dark ? 'bg-[#090D1A]/60 border-white/[0.04]' : 'bg-white border-slate-200 shadow-sm'}`}>
           <div className="w-9 h-9 md:w-11 md:h-11 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center flex-shrink-0">
             <Star className="w-4 h-4 md:w-5 md:h-5 text-purple-500 fill-purple-500/20" />
           </div>
           <div className="space-y-0.5 min-w-0 flex-1">
-            <span className={`text-[8.5px] md:text-[10px] font-bold uppercase tracking-wider block truncate ${dark ? 'text-slate-400' : 'text-slate-600'}`}>Contest Rating</span>
+            <span className={`text-[8.5px] md:text-[10px] font-bold uppercase tracking-wider block truncate ${dark ? 'text-slate-400' : 'text-slate-600'}`}>
+              {selectedPlatformTab === 'GITHUB' ? 'Followers' : 'Contest Rating'}
+            </span>
             <div className={`text-[15px] md:text-[18px] font-extrabold tracking-tight leading-tight truncate ${dark ? 'text-white' : 'text-slate-900'}`}>
-              {activeRating > 0 ? activeRating : '—'}
+              {selectedPlatformTab === 'GITHUB' ? activeRating : (activeRating > 0 ? activeRating : '—')}
             </div>
             <span className={`text-[8.5px] md:text-[10px] font-semibold block truncate ${dark ? 'text-slate-400' : 'text-slate-500'}`}>
-              {getRatingTier(activeRating)}
+              {selectedPlatformTab === 'GITHUB' ? 'GitHub Network' : getRatingTier(activeRating)}
             </span>
           </div>
         </div>
 
-        {/* Problems Solved */}
+        {/* Card 4: Problems Solved / GitHub Public Repos */}
         <div className={`border rounded-2xl p-3 md:p-4.5 flex items-center gap-2.5 md:gap-3.5 min-w-0 ${dark ? 'bg-[#090D1A]/60 border-white/[0.04]' : 'bg-white border-slate-200 shadow-sm'}`}>
           <div className="w-9 h-9 md:w-11 md:h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
             <Check className="w-4 h-4 md:w-5 md:h-5 text-emerald-500" />
           </div>
           <div className="space-y-0.5 min-w-0 flex-1">
-            <span className={`text-[8.5px] md:text-[10px] font-bold uppercase tracking-wider block truncate ${dark ? 'text-slate-400' : 'text-slate-600'}`}>Problems Solved</span>
+            <span className={`text-[8.5px] md:text-[10px] font-bold uppercase tracking-wider block truncate ${dark ? 'text-slate-400' : 'text-slate-600'}`}>
+              {selectedPlatformTab === 'GITHUB' ? 'Public Repos' : 'Problems Solved'}
+            </span>
             <div className={`text-[15px] md:text-[18px] font-extrabold tracking-tight leading-tight truncate ${dark ? 'text-white' : 'text-slate-900'}`}>{activeProblemsSolved}</div>
             <span className={`text-[8.5px] md:text-[10px] font-semibold block truncate ${dark ? 'text-slate-400' : 'text-slate-500'}`}>
-              {getSolvedMilestone(activeProblemsSolved)}
+              {selectedPlatformTab === 'GITHUB' ? 'Repositories' : getSolvedMilestone(activeProblemsSolved)}
             </span>
           </div>
         </div>
 
-        {/* Acceptance */}
+        {/* Card 5: Acceptance / GitHub Total Commits */}
         <div className={`border rounded-2xl p-3 md:p-4.5 flex items-center gap-2.5 md:gap-3.5 col-span-2 md:col-span-1 min-w-0 ${dark ? 'bg-[#090D1A]/60 border-white/[0.04]' : 'bg-white border-slate-200 shadow-sm'}`}>
           <div className="w-9 h-9 md:w-11 md:h-11 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center flex-shrink-0">
-            <span className="text-amber-500 font-extrabold text-sm md:text-base">%</span>
+            <span className="text-amber-500 font-extrabold text-sm md:text-base">
+              {selectedPlatformTab === 'GITHUB' ? '⚡' : '%'}
+            </span>
           </div>
           <div className="space-y-0.5 min-w-0 flex-1">
-            <span className={`text-[8.5px] md:text-[10px] font-bold uppercase tracking-wider block truncate ${dark ? 'text-slate-400' : 'text-slate-600'}`}>Acceptance</span>
+            <span className={`text-[8.5px] md:text-[10px] font-bold uppercase tracking-wider block truncate ${dark ? 'text-slate-400' : 'text-slate-600'}`}>
+              {selectedPlatformTab === 'GITHUB' ? 'Total Commits' : 'Acceptance'}
+            </span>
             <div className={`text-[15px] md:text-[18px] font-extrabold tracking-tight leading-tight truncate ${dark ? 'text-white' : 'text-slate-900'}`}>
-              {selectedPlatformTab === 'CODEFORGE' ? `${acceptanceRate}%` : '—'}
+              {selectedPlatformTab === 'GITHUB' ? activeHeatmapList.reduce((acc, entry) => acc + entry.count, 0) : (selectedPlatformTab === 'CODEFORGE' ? `${acceptanceRate}%` : '—')}
             </div>
             <span className={`text-[8.5px] md:text-[10px] font-semibold block truncate ${dark ? 'text-slate-400' : 'text-slate-500'}`}>
-              {selectedPlatformTab === 'CODEFORGE' ? getAccuracyTier(acceptanceRate) : 'N/A'}
+              {selectedPlatformTab === 'GITHUB' ? 'Yearly Commits' : (selectedPlatformTab === 'CODEFORGE' ? getAccuracyTier(acceptanceRate) : 'N/A')}
             </span>
           </div>
         </div>
@@ -921,7 +935,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onOpenAccountModal }) 
 
       {/* PLATFORM FILTERS */}
       <div className={`border rounded-2xl p-3 flex flex-wrap gap-2 items-center ${dark ? 'bg-[#090D1A]/60 border-white/[0.04]' : 'bg-white border-slate-200 shadow-sm'}`}>
-        <span className={`text-[10px] font-extrabold uppercase tracking-wider pl-2 mr-2 ${dark ? 'text-slate-400' : 'text-slate-700'}`}>View Analytics for:</span>
+        <span className={`text-[10px] font-extrabold uppercase tracking-wider pl-2 mr-2 ${dark ? 'text-slate-400' : 'text-slate-700'}`}>Platform Analytics Tabs:</span>
         <div className="flex flex-wrap gap-2">
           {[
             { id: 'CODEFORGE', label: 'Codeforge', icon: '🔵', color: 'border-indigo-500 text-indigo-400 bg-indigo-500/10' },

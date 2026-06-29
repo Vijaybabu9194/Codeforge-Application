@@ -693,10 +693,10 @@ public class ProfileService {
             }
 
             profile.setProblemsSolved(publicRepos);
-            profile.setEasySolved((int)(publicRepos * 0.5));
-            profile.setMediumSolved((int)(publicRepos * 0.35));
-            profile.setHardSolved((int)(publicRepos * 0.15));
-            profile.setContestRating(followers * 10 + publicRepos * 5);
+            profile.setEasySolved(0);
+            profile.setMediumSolved(0);
+            profile.setHardSolved(0);
+            profile.setContestRating(followers);
             profile.setBadgesCount(followers > 5 ? 3 : 1);
 
             if (profile.getUser() != null && avatar != null && !avatar.isEmpty()) {
@@ -705,17 +705,13 @@ public class ProfileService {
                 userRepository.save(u);
             }
 
-            // Build deterministic 365-day heatmap using real commits or fallback distribution
+            // Build 365-day commit heatmap strictly from GitHub events data
             StringBuilder heatmapBuilder = new StringBuilder("[");
             java.time.LocalDate today = java.time.LocalDate.now();
-            java.util.Random r = new java.util.Random((long) username.hashCode() * 17 + publicRepos);
             for (int i = 364; i >= 0; i--) {
                 java.time.LocalDate date = today.minusDays(i);
                 String dStr = date.toString();
                 int count = commitCounts.getOrDefault(dStr, 0);
-                if (count == 0 && r.nextDouble() > 0.6) {
-                    count = r.nextInt(5) + 1;
-                }
                 if (i < 364) heatmapBuilder.append(",");
                 heatmapBuilder.append(String.format("{\"date\":\"%s\",\"count\":%d}", dStr, count));
             }
