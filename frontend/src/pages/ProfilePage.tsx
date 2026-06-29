@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import api from '../lib/api';
 import type {
   ActivityItem,
@@ -47,6 +48,8 @@ interface ProfilePageProps {
 
 export const ProfilePage: React.FC<ProfilePageProps> = ({ onOpenAccountModal }) => {
   const { user } = useAuth();
+  const { theme } = useTheme();
+  const dark = theme === 'dark';
   const heatmapScrollRef = React.useRef<HTMLDivElement>(null);
 
   // Fixed-position tooltip state for heatmap cells
@@ -716,17 +719,17 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onOpenAccountModal }) 
   }
 
   return (
-    <div className="space-y-6 bg-[#030712] min-h-screen text-[#C8D1E8] pb-12 select-none">
+    <div className={`space-y-6 min-h-screen pb-12 select-none ${dark ? 'bg-[#030712] text-[#C8D1E8]' : 'bg-slate-50 text-slate-800'}`}>
       
       {/* 1. PROFILE HEADER CARD */}
-      <div className="bg-[#090D1A]/60 border border-white/[0.04] rounded-2xl p-6 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className={`border rounded-2xl p-6 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 ${dark ? 'bg-[#090D1A]/60 border-white/[0.04]' : 'bg-white border-slate-200 shadow-sm'}`}>
         <div className="absolute -top-16 -left-16 w-48 h-48 bg-[#4A6CF7]/10 rounded-full blur-[80px] pointer-events-none" />
 
         <div className="flex items-center space-x-6 relative z-10">
           <div className="relative">
             <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-[#4A6CF7] to-[#A78BFA] blur-[6px] opacity-40 animate-pulse" />
             <div className="w-24 h-24 rounded-full p-[2.5px] bg-gradient-to-tr from-[#4A6CF7] to-[#A78BFA] relative">
-              <div className="w-full h-full rounded-full bg-[#090D1A] flex items-center justify-center overflow-hidden">
+              <div className={`w-full h-full rounded-full flex items-center justify-center overflow-hidden ${dark ? 'bg-[#090D1A]' : 'bg-white'}`}>
                 {user?.avatarUrl ? (
                   <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
@@ -742,52 +745,54 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onOpenAccountModal }) 
 
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-extrabold text-white tracking-tight">{user?.name || 'Vijay_07'}</h1>
+              <h1 className={`text-xl font-extrabold tracking-tight ${dark ? 'text-white' : 'text-slate-900'}`}>{user?.name || 'Vijay_07'}</h1>
               <ShieldCheck className="w-4 h-4 text-[#4A6CF7] fill-[#4A6CF7]/20" />
             </div>
             
-            <p className="text-xs text-[#7B8AB8] font-medium italic">
+            <p className={`text-xs font-medium italic ${dark ? 'text-slate-400' : 'text-slate-600'}`}>
               "{bio}"
             </p>
 
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-[#4A5580] font-semibold pt-1">
+            <div className={`flex flex-wrap gap-x-4 gap-y-1 text-[11px] font-semibold pt-1 ${dark ? 'text-slate-400' : 'text-slate-600'}`}>
               <span className="flex items-center gap-1">
-                <MapPin className="w-3.5 h-3.5 text-[#7B8AB8]" /> {location}
+                <MapPin className={`w-3.5 h-3.5 ${dark ? 'text-slate-400' : 'text-slate-500'}`} /> {location}
               </span>
               <span className="flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5 text-[#7B8AB8]" /> Joined Dec 2021
+                <Calendar className={`w-3.5 h-3.5 ${dark ? 'text-slate-400' : 'text-slate-500'}`} /> Joined Dec 2021
               </span>
             </div>
 
             {/* Platform connection chips */}
             <div className="flex flex-wrap items-center gap-2 pt-2">
-              <span className="text-[9px] font-extrabold text-[#4A5580] uppercase tracking-wider mr-1">Linked Profiles:</span>
+              <span className={`text-[10px] font-extrabold uppercase tracking-wider mr-1 ${dark ? 'text-slate-400' : 'text-slate-700'}`}>Linked Profiles:</span>
               
               {platforms.map((plat) => {
                 const isLinked = plat.connected;
                 const pName = plat.platform;
                 
-                let theme = 'bg-[#1E293B] text-[#7B8AB8] border-white/[0.05] hover:border-[#4A6CF7]/40';
-                let dotColor = 'bg-[#7B8AB8]';
+                let theme = dark 
+                  ? 'bg-slate-800/60 text-slate-300 border-slate-700/60 hover:border-sky-500/40 hover:text-white' 
+                  : 'bg-slate-100 text-slate-700 border-slate-300 hover:border-sky-600/60 hover:bg-slate-200/80 hover:text-slate-900 font-bold';
+                let dotColor = dark ? 'bg-slate-400' : 'bg-slate-500';
                 
                 if (isLinked) {
                   if (pName.toUpperCase() === 'LEETCODE') {
-                    theme = 'bg-[#D97706]/10 text-[#D97706] border-[#D97706]/20 hover:bg-[#D97706]/20';
+                    theme = dark ? 'bg-[#D97706]/10 text-[#D97706] border-[#D97706]/20 hover:bg-[#D97706]/20' : 'bg-amber-50 text-amber-800 border-amber-300 font-bold';
                     dotColor = 'bg-[#D97706]';
                   } else if (pName.toUpperCase() === 'CODEFORCES') {
-                    theme = 'bg-[#3B82F6]/10 text-[#3B82F6] border-[#3B82F6]/20 hover:bg-[#3B82F6]/20';
+                    theme = dark ? 'bg-[#3B82F6]/10 text-[#3B82F6] border-[#3B82F6]/20 hover:bg-[#3B82F6]/20' : 'bg-blue-50 text-blue-800 border-blue-300 font-bold';
                     dotColor = 'bg-[#3B82F6]';
                   } else if (pName.toUpperCase() === 'CODECHEF') {
-                    theme = 'bg-[#F59E0B]/10 text-[#F59E0B] border-[#D97706]/20 hover:bg-[#F59E0B]/20';
+                    theme = dark ? 'bg-[#F59E0B]/10 text-[#F59E0B] border-[#D97706]/20 hover:bg-[#F59E0B]/20' : 'bg-amber-100 text-amber-900 border-amber-400 font-bold';
                     dotColor = 'bg-[#F59E0B]';
                   } else if (pName.toUpperCase() === 'GEEKSFORGEEKS') {
-                    theme = 'bg-[#10B981]/10 text-[#10B981] border-[#10B981]/20 hover:bg-[#10B981]/20';
+                    theme = dark ? 'bg-[#10B981]/10 text-[#10B981] border-[#10B981]/20 hover:bg-[#10B981]/20' : 'bg-emerald-50 text-emerald-800 border-emerald-300 font-bold';
                     dotColor = 'bg-[#10B981]';
                   } else if (pName.toUpperCase() === 'HACKERRANK') {
-                    theme = 'bg-[#14B8A6]/10 text-[#14B8A6] border-[#14B8A6]/20 hover:bg-[#14B8A6]/20';
+                    theme = dark ? 'bg-[#14B8A6]/10 text-[#14B8A6] border-[#14B8A6]/20 hover:bg-[#14B8A6]/20' : 'bg-teal-50 text-teal-800 border-teal-300 font-bold';
                     dotColor = 'bg-[#14B8A6]';
                   } else if (pName.toUpperCase() === 'GITHUB') {
-                    theme = 'bg-[#8B5CF6]/10 text-[#8B5CF6] border-[#8B5CF6]/20 hover:bg-[#8B5CF6]/20';
+                    theme = dark ? 'bg-[#8B5CF6]/10 text-[#8B5CF6] border-[#8B5CF6]/20 hover:bg-[#8B5CF6]/20' : 'bg-purple-50 text-purple-800 border-purple-300 font-bold';
                     dotColor = 'bg-[#8B5CF6]';
                   }
                 }
@@ -800,7 +805,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onOpenAccountModal }) 
                       setLinkingError('');
                       setUsernameInput(plat.username || '');
                     }}
-                    className={`${theme} px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1 border transition`}
+                    className={`${theme} px-2.5 py-1 rounded-xl text-[10px] font-extrabold flex items-center gap-1.5 border transition cursor-pointer`}
                   >
                     <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />
                     <span>{isLinked ? plat.username : `+ Connect ${pName.toLowerCase()}`}</span>
@@ -814,14 +819,14 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onOpenAccountModal }) 
         <div className="flex items-center space-x-2.5 self-start md:self-center relative z-10">
           <button 
             onClick={() => onOpenAccountModal?.('edit')}
-            className="flex items-center gap-1.5 px-4 py-2 bg-[#090D1A] border border-white/[0.08] hover:border-white/[0.15] text-[12px] font-extrabold text-white rounded-xl transition duration-200 cursor-pointer"
+            className={`flex items-center gap-1.5 px-4 py-2 border text-[12px] font-extrabold rounded-xl transition duration-200 cursor-pointer ${dark ? 'bg-[#090D1A] border-white/[0.08] hover:border-white/[0.15] text-white' : 'bg-white border-slate-200 hover:border-slate-300 text-slate-800 shadow-sm'}`}
           >
-            <Edit3 className="w-3.5 h-3.5 text-[#7B8AB8]" /> Edit Profile
+            <Edit3 className={`w-3.5 h-3.5 ${dark ? 'text-[#7B8AB8]' : 'text-slate-500'}`} /> Edit Profile
           </button>
           
           <button 
             onClick={handleShare}
-            className="p-2.5 bg-[#090D1A] border border-white/[0.08] hover:border-white/[0.15] text-[#7B8AB8] hover:text-white rounded-xl transition duration-200 relative group"
+            className={`p-2.5 border rounded-xl transition duration-200 relative group cursor-pointer ${dark ? 'bg-[#090D1A] border-white/[0.08] text-[#7B8AB8] hover:text-white' : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900 shadow-sm'}`}
           >
             {isCopied ? <Check className="w-4 h-4 text-green-500" /> : <Share2 className="w-4 h-4" />}
             <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-black text-[9px] text-white rounded opacity-0 pointer-events-none group-hover:opacity-100 transition whitespace-nowrap">
@@ -835,78 +840,78 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onOpenAccountModal }) 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
         
         {/* Global Ranking */}
-        <div className="bg-[#090D1A]/60 border border-white/[0.04] rounded-2xl p-3 md:p-4.5 flex items-center gap-2.5 md:gap-3.5 min-w-0">
+        <div className={`border rounded-2xl p-3 md:p-4.5 flex items-center gap-2.5 md:gap-3.5 min-w-0 ${dark ? 'bg-[#090D1A]/60 border-white/[0.04]' : 'bg-white border-slate-200 shadow-sm'}`}>
           <div className="w-9 h-9 md:w-11 md:h-11 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center flex-shrink-0">
             <TrendingUp className="w-4 h-4 md:w-5 md:h-5 text-blue-500" />
           </div>
           <div className="space-y-0.5 min-w-0 flex-1">
-            <span className="text-[8.5px] md:text-[10px] font-bold text-[#4A5580] uppercase tracking-wider block truncate">Global Ranking</span>
-            <div className="text-[15px] md:text-[18px] font-extrabold text-white tracking-tight leading-tight truncate">
+            <span className={`text-[8.5px] md:text-[10px] font-bold uppercase tracking-wider block truncate ${dark ? 'text-slate-400' : 'text-slate-600'}`}>Global Ranking</span>
+            <div className={`text-[15px] md:text-[18px] font-extrabold tracking-tight leading-tight truncate ${dark ? 'text-white' : 'text-slate-900'}`}>
               {activeRank.global !== 'N/A' ? `#${Number(activeRank.global).toLocaleString()}` : 'N/A'}
             </div>
-            <span className="text-[8.5px] md:text-[10px] font-semibold text-[#7B8AB8] block truncate">
+            <span className={`text-[8.5px] md:text-[10px] font-semibold block truncate ${dark ? 'text-slate-400' : 'text-slate-500'}`}>
               {getGlobalSubtitle()}
             </span>
           </div>
         </div>
 
         {/* Country Ranking */}
-        <div className="bg-[#090D1A]/60 border border-white/[0.04] rounded-2xl p-3 md:p-4.5 flex items-center gap-2.5 md:gap-3.5 min-w-0">
+        <div className={`border rounded-2xl p-3 md:p-4.5 flex items-center gap-2.5 md:gap-3.5 min-w-0 ${dark ? 'bg-[#090D1A]/60 border-white/[0.04]' : 'bg-white border-slate-200 shadow-sm'}`}>
           <div className="w-9 h-9 md:w-11 md:h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
             <Flag className="w-4 h-4 md:w-5 md:h-5 text-emerald-500 fill-emerald-500/10" />
           </div>
           <div className="space-y-0.5 min-w-0 flex-1">
-            <span className="text-[8.5px] md:text-[10px] font-bold text-[#4A5580] uppercase tracking-wider block truncate">Country Ranking</span>
-            <div className="text-[15px] md:text-[18px] font-extrabold text-white tracking-tight leading-tight truncate">
+            <span className={`text-[8.5px] md:text-[10px] font-bold uppercase tracking-wider block truncate ${dark ? 'text-slate-400' : 'text-slate-600'}`}>Country Ranking</span>
+            <div className={`text-[15px] md:text-[18px] font-extrabold tracking-tight leading-tight truncate ${dark ? 'text-white' : 'text-slate-900'}`}>
               {activeRank.country !== 'N/A' ? `#${Number(activeRank.country).toLocaleString()}` : 'N/A'}
             </div>
-            <span className="text-[8.5px] md:text-[10px] font-semibold text-[#7B8AB8] block truncate">
+            <span className={`text-[8.5px] md:text-[10px] font-semibold block truncate ${dark ? 'text-slate-400' : 'text-slate-500'}`}>
               {getCountrySubtitle()}
             </span>
           </div>
         </div>
 
         {/* Contest Rating */}
-        <div className="bg-[#090D1A]/60 border border-white/[0.04] rounded-2xl p-3 md:p-4.5 flex items-center gap-2.5 md:gap-3.5 min-w-0">
+        <div className={`border rounded-2xl p-3 md:p-4.5 flex items-center gap-2.5 md:gap-3.5 min-w-0 ${dark ? 'bg-[#090D1A]/60 border-white/[0.04]' : 'bg-white border-slate-200 shadow-sm'}`}>
           <div className="w-9 h-9 md:w-11 md:h-11 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center flex-shrink-0">
             <Star className="w-4 h-4 md:w-5 md:h-5 text-purple-500 fill-purple-500/20" />
           </div>
           <div className="space-y-0.5 min-w-0 flex-1">
-            <span className="text-[8.5px] md:text-[10px] font-bold text-[#4A5580] uppercase tracking-wider block truncate">Contest Rating</span>
-            <div className="text-[15px] md:text-[18px] font-extrabold text-white tracking-tight leading-tight truncate">
+            <span className={`text-[8.5px] md:text-[10px] font-bold uppercase tracking-wider block truncate ${dark ? 'text-slate-400' : 'text-slate-600'}`}>Contest Rating</span>
+            <div className={`text-[15px] md:text-[18px] font-extrabold tracking-tight leading-tight truncate ${dark ? 'text-white' : 'text-slate-900'}`}>
               {activeRating > 0 ? activeRating : '—'}
             </div>
-            <span className="text-[8.5px] md:text-[10px] font-semibold text-[#7B8AB8] block truncate">
+            <span className={`text-[8.5px] md:text-[10px] font-semibold block truncate ${dark ? 'text-slate-400' : 'text-slate-500'}`}>
               {getRatingTier(activeRating)}
             </span>
           </div>
         </div>
 
         {/* Problems Solved */}
-        <div className="bg-[#090D1A]/60 border border-white/[0.04] rounded-2xl p-3 md:p-4.5 flex items-center gap-2.5 md:gap-3.5 min-w-0">
+        <div className={`border rounded-2xl p-3 md:p-4.5 flex items-center gap-2.5 md:gap-3.5 min-w-0 ${dark ? 'bg-[#090D1A]/60 border-white/[0.04]' : 'bg-white border-slate-200 shadow-sm'}`}>
           <div className="w-9 h-9 md:w-11 md:h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
             <Check className="w-4 h-4 md:w-5 md:h-5 text-emerald-500" />
           </div>
           <div className="space-y-0.5 min-w-0 flex-1">
-            <span className="text-[8.5px] md:text-[10px] font-bold text-[#4A5580] uppercase tracking-wider block truncate">Problems Solved</span>
-            <div className="text-[15px] md:text-[18px] font-extrabold text-white tracking-tight leading-tight truncate">{activeProblemsSolved}</div>
-            <span className="text-[8.5px] md:text-[10px] font-semibold text-[#7B8AB8] block truncate">
+            <span className={`text-[8.5px] md:text-[10px] font-bold uppercase tracking-wider block truncate ${dark ? 'text-slate-400' : 'text-slate-600'}`}>Problems Solved</span>
+            <div className={`text-[15px] md:text-[18px] font-extrabold tracking-tight leading-tight truncate ${dark ? 'text-white' : 'text-slate-900'}`}>{activeProblemsSolved}</div>
+            <span className={`text-[8.5px] md:text-[10px] font-semibold block truncate ${dark ? 'text-slate-400' : 'text-slate-500'}`}>
               {getSolvedMilestone(activeProblemsSolved)}
             </span>
           </div>
         </div>
 
         {/* Acceptance */}
-        <div className="bg-[#090D1A]/60 border border-white/[0.04] rounded-2xl p-3 md:p-4.5 flex items-center gap-2.5 md:gap-3.5 col-span-2 md:col-span-1 min-w-0">
+        <div className={`border rounded-2xl p-3 md:p-4.5 flex items-center gap-2.5 md:gap-3.5 col-span-2 md:col-span-1 min-w-0 ${dark ? 'bg-[#090D1A]/60 border-white/[0.04]' : 'bg-white border-slate-200 shadow-sm'}`}>
           <div className="w-9 h-9 md:w-11 md:h-11 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center flex-shrink-0">
             <span className="text-amber-500 font-extrabold text-sm md:text-base">%</span>
           </div>
           <div className="space-y-0.5 min-w-0 flex-1">
-            <span className="text-[8.5px] md:text-[10px] font-bold text-[#4A5580] uppercase tracking-wider block truncate">Acceptance</span>
-            <div className="text-[15px] md:text-[18px] font-extrabold text-white tracking-tight leading-tight truncate text-white">
+            <span className={`text-[8.5px] md:text-[10px] font-bold uppercase tracking-wider block truncate ${dark ? 'text-slate-400' : 'text-slate-600'}`}>Acceptance</span>
+            <div className={`text-[15px] md:text-[18px] font-extrabold tracking-tight leading-tight truncate ${dark ? 'text-white' : 'text-slate-900'}`}>
               {selectedPlatformTab === 'CODEFORGE' ? `${acceptanceRate}%` : '—'}
             </div>
-            <span className="text-[8.5px] md:text-[10px] font-semibold text-[#7B8AB8] block truncate">
+            <span className={`text-[8.5px] md:text-[10px] font-semibold block truncate ${dark ? 'text-slate-400' : 'text-slate-500'}`}>
               {selectedPlatformTab === 'CODEFORGE' ? getAccuracyTier(acceptanceRate) : 'N/A'}
             </span>
           </div>
@@ -915,8 +920,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onOpenAccountModal }) 
       </div>
 
       {/* PLATFORM FILTERS */}
-      <div className="bg-[#090D1A]/60 border border-white/[0.04] rounded-2xl p-3 flex flex-wrap gap-2 items-center">
-        <span className="text-[10px] font-extrabold text-[#4A5580] uppercase tracking-wider pl-2 mr-2">View Analytics for:</span>
+      <div className={`border rounded-2xl p-3 flex flex-wrap gap-2 items-center ${dark ? 'bg-[#090D1A]/60 border-white/[0.04]' : 'bg-white border-slate-200 shadow-sm'}`}>
+        <span className={`text-[10px] font-extrabold uppercase tracking-wider pl-2 mr-2 ${dark ? 'text-slate-400' : 'text-slate-700'}`}>View Analytics for:</span>
         <div className="flex flex-wrap gap-2">
           {[
             { id: 'CODEFORGE', label: 'Codeforge', icon: '🔵', color: 'border-indigo-500 text-indigo-400 bg-indigo-500/10' },
@@ -932,10 +937,12 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onOpenAccountModal }) 
               <button
                 key={tab.id}
                 onClick={() => setSelectedPlatformTab(tab.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold transition-all duration-200 ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold transition-all duration-200 cursor-pointer ${
                   isActive 
                     ? `${tab.color} border-white/[0.15] scale-[1.03]`
-                    : 'bg-[#090D1A] border-white/[0.04] text-[#7B8AB8] hover:text-white hover:border-white/[0.08]'
+                    : dark 
+                      ? 'bg-[#090D1A] border-white/[0.04] text-slate-400 hover:text-white hover:border-white/[0.08]' 
+                      : 'bg-slate-100 border-slate-200 text-slate-700 hover:text-slate-900 hover:border-slate-300'
                 }`}
               >
                 <span>{tab.icon}</span>
