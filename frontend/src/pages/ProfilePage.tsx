@@ -41,7 +41,11 @@ interface ProfileStatsResponse extends StatsResponse {
 
 const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-export const ProfilePage: React.FC = () => {
+interface ProfilePageProps {
+  onOpenAccountModal?: (tab: 'edit' | 'settings') => void;
+}
+
+export const ProfilePage: React.FC<ProfilePageProps> = ({ onOpenAccountModal }) => {
   const { user } = useAuth();
   const heatmapScrollRef = React.useRef<HTMLDivElement>(null);
 
@@ -92,9 +96,15 @@ export const ProfilePage: React.FC = () => {
   // Edit Bio & Location local persistent state
   const [bio, setBio] = useState(() => localStorage.getItem('cf_bio') || 'Consistency is the forge. Discipline is the fuel.');
   const [location, setLocation] = useState(() => localStorage.getItem('cf_location') || 'India');
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editBio, setEditBio] = useState(bio);
-  const [editLocation, setEditLocation] = useState(location);
+
+  useEffect(() => {
+    const syncProfile = () => {
+      setBio(localStorage.getItem('cf_bio') || 'Consistency is the forge. Discipline is the fuel.');
+      setLocation(localStorage.getItem('cf_location') || 'India');
+    };
+    window.addEventListener('cf_profile_updated', syncProfile);
+    return () => window.removeEventListener('cf_profile_updated', syncProfile);
+  }, []);
 
   // Platform link connection states
   const [linkingPlatform, setLinkingPlatform] = useState<string | null>(null);
@@ -204,14 +214,7 @@ export const ProfilePage: React.FC = () => {
     setTimeout(() => setIsCopied(false), 2000);
   };
 
-  const handleSaveProfile = (e: React.FormEvent) => {
-    e.preventDefault();
-    setBio(editBio);
-    setLocation(editLocation);
-    localStorage.setItem('cf_bio', editBio);
-    localStorage.setItem('cf_location', editLocation);
-    setIsEditModalOpen(false);
-  };
+
 
   const handleLinkPlatform = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -803,12 +806,8 @@ export const ProfilePage: React.FC = () => {
 
         <div className="flex items-center space-x-2.5 self-start md:self-center relative z-10">
           <button 
-            onClick={() => {
-              setEditBio(bio);
-              setEditLocation(location);
-              setIsEditModalOpen(true);
-            }}
-            className="flex items-center gap-1.5 px-4 py-2 bg-[#090D1A] border border-white/[0.08] hover:border-white/[0.15] text-[12px] font-extrabold text-white rounded-xl transition duration-200"
+            onClick={() => onOpenAccountModal?.('edit')}
+            className="flex items-center gap-1.5 px-4 py-2 bg-[#090D1A] border border-white/[0.08] hover:border-white/[0.15] text-[12px] font-extrabold text-white rounded-xl transition duration-200 cursor-pointer"
           >
             <Edit3 className="w-3.5 h-3.5 text-[#7B8AB8]" /> Edit Profile
           </button>
@@ -1330,66 +1329,6 @@ export const ProfilePage: React.FC = () => {
             </div>
           </div>
 
-        </div>
-      )}
-
-      {/* EDIT PROFILE MODAL */}
-      {isEditModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 select-none">
-          <div 
-            onClick={() => setIsEditModalOpen(false)} 
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-          />
-
-          <div className="bg-[#090D1A] border border-white/[0.08] w-full max-w-lg rounded-2xl relative z-10 overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
-            <header className="px-6 py-4.5 border-b border-white/[0.05] flex items-center justify-between">
-              <h3 className="text-sm font-extrabold text-white uppercase tracking-wider">Edit Profile Details</h3>
-              <button 
-                onClick={() => setIsEditModalOpen(false)}
-                className="p-1 rounded-lg bg-white/[0.03] hover:bg-white/[0.08] text-[#7B8AB8] hover:text-white transition"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </header>
-
-            <form onSubmit={handleSaveProfile} className="p-6 overflow-y-auto space-y-4 text-xs font-semibold text-[#7B8AB8] scrollbar-thin">
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-[#4A5580]">Bio Statement</label>
-                <textarea 
-                  value={editBio}
-                  onChange={(e) => setEditBio(e.target.value)}
-                  rows={2}
-                  className="w-full p-4 rounded-xl bg-[#030712] border border-white/[0.06] text-white focus:outline-none focus:border-[#4A6CF7]/50 transition resize-none"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-[#4A5580]">Location</label>
-                <input 
-                  type="text" 
-                  value={editLocation}
-                  onChange={(e) => setEditLocation(e.target.value)}
-                  className="w-full h-10 px-4 rounded-xl bg-[#030712] border border-white/[0.06] text-white focus:outline-none focus:border-[#4A6CF7]/50 transition"
-                />
-              </div>
-
-              <footer className="flex items-center justify-end gap-3 pt-4 border-t border-white/[0.04] mt-2">
-                <button 
-                  type="button" 
-                  onClick={() => setIsEditModalOpen(false)}
-                  className="px-4 py-2.5 bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.06] text-white rounded-xl transition duration-200"
-                >
-                  Cancel
-                </button>
-                <button 
-                  type="submit" 
-                  className="px-5 py-2.5 bg-[#4A6CF7] hover:bg-[#3B5BEB] text-white rounded-xl shadow-glow transition duration-200"
-                >
-                  Save Changes
-                </button>
-              </footer>
-            </form>
-          </div>
         </div>
       )}
 

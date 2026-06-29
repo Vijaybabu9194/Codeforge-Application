@@ -49,7 +49,7 @@ const DashboardContent: React.FC = () => {
       case 'potd':
         return <ProblemOfTheDayPage />;
       case 'profile':
-        return <ProfilePage />;
+        return <ProfilePage onOpenAccountModal={handleOpenAccountModal} />;
       case 'contests':
         return <ContestsPage />;
       case 'discuss':
