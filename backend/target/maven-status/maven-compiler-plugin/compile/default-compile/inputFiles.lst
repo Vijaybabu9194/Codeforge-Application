@@ -30,6 +30,7 @@
 /Users/avijaybabu/Desktop/CodeForge-1/backend/src/main/java/com/codeforge/entity/Subtopic.java
 /Users/avijaybabu/Desktop/CodeForge-1/backend/src/main/java/com/codeforge/entity/Topic.java
 /Users/avijaybabu/Desktop/CodeForge-1/backend/src/main/java/com/codeforge/entity/User.java
+/Users/avijaybabu/Desktop/CodeForge-1/backend/src/main/java/com/codeforge/exception/GlobalExceptionHandler.java
 /Users/avijaybabu/Desktop/CodeForge-1/backend/src/main/java/com/codeforge/repository/ActivityRepository.java
 /Users/avijaybabu/Desktop/CodeForge-1/backend/src/main/java/com/codeforge/repository/BookmarkRepository.java
 /Users/avijaybabu/Desktop/CodeForge-1/backend/src/main/java/com/codeforge/repository/CompanyProblemRepository.java

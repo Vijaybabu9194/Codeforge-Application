@@ -62,7 +62,7 @@ const DashboardContent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-dash-bg text-white font-sans select-none flex">
+    <div className="min-h-screen bg-dash-bg text-white font-sans flex">
       {/* Left Sidebar — Fixed */}
       <DashboardSidebar activeTab={activeTab} onTabChange={(tab) => { setActiveTab(tab); setSelectedProblem(null); }} />
 

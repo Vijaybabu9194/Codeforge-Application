@@ -169,7 +169,7 @@ export const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({
       setPlatformMsg(`Successfully connected ${platform} handle!`);
       window.dispatchEvent(new Event('cf_profile_updated'));
     } catch (err: any) {
-      setPlatformMsg(err.response?.data?.message || `Failed to connect ${platform}.`);
+      setPlatformMsg(err.response?.data?.message || err.response?.data?.detail || `Failed to connect ${platform}.`);
     } finally {
       setPlatformLoading(null);
     }

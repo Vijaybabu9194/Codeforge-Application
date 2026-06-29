@@ -719,7 +719,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onOpenAccountModal }) 
   }
 
   return (
-    <div className={`space-y-6 min-h-screen pb-12 select-none ${dark ? 'bg-[#030712] text-[#C8D1E8]' : 'bg-slate-50 text-slate-800'}`}>
+    <div className={`space-y-6 min-h-screen pb-12 ${dark ? 'bg-[#030712] text-[#C8D1E8]' : 'bg-slate-50 text-slate-800'}`}>
       
       {/* 1. PROFILE HEADER CARD */}
       <div className={`border rounded-2xl p-6 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 ${dark ? 'bg-[#090D1A]/60 border-white/[0.04]' : 'bg-white border-slate-200 shadow-sm'}`}>

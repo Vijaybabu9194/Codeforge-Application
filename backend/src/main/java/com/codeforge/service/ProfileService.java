@@ -68,8 +68,39 @@ public class ProfileService {
                 .build();
     }
 
+    private String cleanUsername(String username) {
+        if (username == null) return "";
+        String cleaned = username.trim();
+        if (cleaned.startsWith("@")) {
+            cleaned = cleaned.substring(1).trim();
+        }
+        if (cleaned.contains("github.com/")) {
+            cleaned = cleaned.substring(cleaned.indexOf("github.com/") + 11);
+        } else if (cleaned.contains("leetcode.com/")) {
+            cleaned = cleaned.substring(cleaned.indexOf("leetcode.com/") + 13);
+        } else if (cleaned.contains("codeforces.com/profile/")) {
+            cleaned = cleaned.substring(cleaned.indexOf("codeforces.com/profile/") + 23);
+        } else if (cleaned.contains("geeksforgeeks.org/user/")) {
+            cleaned = cleaned.substring(cleaned.indexOf("geeksforgeeks.org/user/") + 23);
+        } else if (cleaned.contains("hackerrank.com/profile/")) {
+            cleaned = cleaned.substring(cleaned.indexOf("hackerrank.com/profile/") + 23);
+        } else if (cleaned.contains("codechef.com/users/")) {
+            cleaned = cleaned.substring(cleaned.indexOf("codechef.com/users/") + 19);
+        }
+        int slashIdx = cleaned.indexOf("/");
+        if (slashIdx != -1) {
+            cleaned = cleaned.substring(0, slashIdx);
+        }
+        int queryIdx = cleaned.indexOf("?");
+        if (queryIdx != -1) {
+            cleaned = cleaned.substring(0, queryIdx);
+        }
+        return cleaned.trim();
+    }
+
     public ProfileDto.PlatformListItem linkPlatform(User user, ProfileDto.LinkPlatformRequest request) {
         PlatformProfile.Platform platform = PlatformProfile.Platform.valueOf(request.getPlatform().toUpperCase());
+        String handle = cleanUsername(request.getUsername());
         
         PlatformProfile profile = platformProfileRepository.findByUserIdAndPlatform(user.getId(), platform)
                 .orElse(PlatformProfile.builder()
@@ -77,7 +108,7 @@ public class ProfileService {
                         .platform(platform)
                         .build());
         
-        profile.setUsername(request.getUsername());
+        profile.setUsername(handle);
         
         Random random = new Random();
         profile.setProblemsSolved(0);
@@ -94,17 +125,17 @@ public class ProfileService {
 
         // Fetch real stats dynamically
         if (platform == PlatformProfile.Platform.LEETCODE) {
-            fetchLeetCodeStats(profile, request.getUsername());
+            fetchLeetCodeStats(profile, handle);
         } else if (platform == PlatformProfile.Platform.CODEFORCES) {
-            fetchCodeforcesStats(profile, request.getUsername());
+            fetchCodeforcesStats(profile, handle);
         } else if (platform == PlatformProfile.Platform.GEEKSFORGEEKS) {
-            fetchGFGStats(profile, request.getUsername());
+            fetchGFGStats(profile, handle);
         } else if (platform == PlatformProfile.Platform.HACKERRANK) {
-            fetchHackerRankStats(profile, request.getUsername());
+            fetchHackerRankStats(profile, handle);
         } else if (platform == PlatformProfile.Platform.CODECHEF) {
-            fetchCodeChefStats(profile, request.getUsername());
+            fetchCodeChefStats(profile, handle);
         } else if (platform == PlatformProfile.Platform.GITHUB) {
-            fetchGitHubStats(profile, request.getUsername());
+            fetchGitHubStats(profile, handle);
         }
         
         profile.setContestHistory("[" +
