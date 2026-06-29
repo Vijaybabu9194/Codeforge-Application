@@ -101,6 +101,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onOpenAccountModal }) 
     const syncProfile = () => {
       setBio(localStorage.getItem('cf_bio') || 'Consistency is the forge. Discipline is the fuel.');
       setLocation(localStorage.getItem('cf_location') || 'India');
+      fetchProfileData();
     };
     window.addEventListener('cf_profile_updated', syncProfile);
     return () => window.removeEventListener('cf_profile_updated', syncProfile);
@@ -782,6 +783,12 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onOpenAccountModal }) 
                   } else if (pName.toUpperCase() === 'GEEKSFORGEEKS') {
                     theme = 'bg-[#10B981]/10 text-[#10B981] border-[#10B981]/20 hover:bg-[#10B981]/20';
                     dotColor = 'bg-[#10B981]';
+                  } else if (pName.toUpperCase() === 'HACKERRANK') {
+                    theme = 'bg-[#14B8A6]/10 text-[#14B8A6] border-[#14B8A6]/20 hover:bg-[#14B8A6]/20';
+                    dotColor = 'bg-[#14B8A6]';
+                  } else if (pName.toUpperCase() === 'GITHUB') {
+                    theme = 'bg-[#8B5CF6]/10 text-[#8B5CF6] border-[#8B5CF6]/20 hover:bg-[#8B5CF6]/20';
+                    dotColor = 'bg-[#8B5CF6]';
                   }
                 }
 
@@ -914,9 +921,11 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onOpenAccountModal }) 
           {[
             { id: 'CODEFORGE', label: 'Codeforge', icon: '🔵', color: 'border-indigo-500 text-indigo-400 bg-indigo-500/10' },
             { id: 'LEETCODE', label: 'LeetCode', icon: '🟡', color: 'border-amber-500 text-amber-400 bg-amber-500/10' },
-            { id: 'CODEFORCES', label: 'Codeforces', icon: '🔵', color: 'border-blue-500 text-blue-400 bg-blue-500/10' },
+            { id: 'CODEFORCES', label: 'Codeforces', color: 'border-blue-500 text-blue-400 bg-blue-500/10', icon: '🔷' },
+            { id: 'GEEKSFORGEEKS', label: 'GeeksForGeeks', icon: '🟢', color: 'border-green-500 text-green-400 bg-green-500/10' },
+            { id: 'HACKERRANK', label: 'HackerRank', icon: '🟢', color: 'border-teal-500 text-teal-400 bg-teal-500/10' },
             { id: 'CODECHEF', label: 'CodeChef', icon: '🟤', color: 'border-amber-700 text-amber-600 bg-amber-700/10' },
-            { id: 'GEEKSFORGEEKS', label: 'GeeksForGeeks', icon: '🟢', color: 'border-green-500 text-green-400 bg-green-500/10' }
+            { id: 'GITHUB', label: 'GitHub', icon: '🐙', color: 'border-purple-500 text-purple-400 bg-purple-500/10' }
           ].map((tab) => {
             const isActive = selectedPlatformTab === tab.id;
             return (

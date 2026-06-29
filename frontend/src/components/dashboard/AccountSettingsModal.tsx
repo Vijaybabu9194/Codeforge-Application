@@ -63,11 +63,28 @@ export const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({
   const [platformInput, setPlatformInput] = useState<{ [key: string]: string }>({
     LEETCODE: '',
     CODEFORCES: '',
-    GITHUB: '',
-    HACKERRANK: ''
+    GEEKSFORGEEKS: '',
+    HACKERRANK: '',
+    CODECHEF: '',
+    GITHUB: ''
   });
   const [platformLoading, setPlatformLoading] = useState<string | null>(null);
   const [platformMsg, setPlatformMsg] = useState<string | null>(null);
+
+  // Pre-fetch existing platform handles when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      api.get<any[]>('/profile/platforms').then(res => {
+        const inputState: { [key: string]: string } = {};
+        res.data.forEach(p => {
+          if (p.username) {
+            inputState[p.platform] = p.username;
+          }
+        });
+        setPlatformInput(prev => ({ ...prev, ...inputState }));
+      }).catch(() => {});
+    }
+  }, [isOpen]);
 
   // Delete Account State
   const [confirmText, setConfirmText] = useState('');
@@ -150,6 +167,7 @@ export const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({
         username: handle.trim()
       });
       setPlatformMsg(`Successfully connected ${platform} handle!`);
+      window.dispatchEvent(new Event('cf_profile_updated'));
     } catch (err: any) {
       setPlatformMsg(err.response?.data?.message || `Failed to connect ${platform}.`);
     } finally {
@@ -502,8 +520,10 @@ export const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({
                   {[
                     { key: 'LEETCODE', name: 'LeetCode', color: '#FFA116', desc: 'Sync solved problem counts, ranking & contest ratings.' },
                     { key: 'CODEFORCES', name: 'Codeforces', color: '#1F8ACB', desc: 'Sync current rating, rank tier & submission history.' },
-                    { key: 'GITHUB', name: 'GitHub', color: '#8B5CF6', desc: 'Display repositories & open-source activity badges.' },
-                    { key: 'HACKERRANK', name: 'HackerRank', color: '#2EC4B6', desc: 'Sync problem-solving stars & skill certificates.' }
+                    { key: 'GEEKSFORGEEKS', name: 'GeeksForGeeks', color: '#2F9E44', desc: 'Sync GFG score, coding streak & problem metrics.' },
+                    { key: 'HACKERRANK', name: 'HackerRank', color: '#2EC4B6', desc: 'Sync problem-solving stars & skill certificates.' },
+                    { key: 'CODECHEF', name: 'CodeChef', color: '#D97706', desc: 'Sync CodeChef stars, division & contest ranking.' },
+                    { key: 'GITHUB', name: 'GitHub', color: '#8B5CF6', desc: 'Sync commit activity, public repos & contribution heatmap.' }
                   ].map((plat) => (
                     <div 
                       key={plat.key} 

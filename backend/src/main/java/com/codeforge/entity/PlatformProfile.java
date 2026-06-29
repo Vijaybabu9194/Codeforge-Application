@@ -58,6 +58,6 @@ public class PlatformProfile {
     private String recentActivity; // JSON string
 
     public enum Platform {
-        LEETCODE, GEEKSFORGEEKS, CODECHEF, HACKERRANK, CODEFORCES
+        LEETCODE, GEEKSFORGEEKS, CODECHEF, HACKERRANK, CODEFORCES, GITHUB
     }
 }
