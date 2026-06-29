@@ -640,7 +640,7 @@ public class ProfileService {
             // 1. Get user profile details
             java.net.http.HttpRequest userReq = java.net.http.HttpRequest.newBuilder()
                     .uri(java.net.URI.create("https://api.github.com/users/" + username))
-                    .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                    .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
                     .header("Accept", "application/vnd.github.v3+json")
                     .GET()
                     .build();
@@ -655,41 +655,46 @@ public class ProfileService {
                 publicRepos = userNode.path("public_repos").asInt(0);
                 followers = userNode.path("followers").asInt(0);
                 avatar = userNode.path("avatar_url").asText("");
+            }
 
-                // 2. Query GitHub Public Events for commit heatmap calculation
-                try {
-                    java.net.http.HttpRequest eventsReq = java.net.http.HttpRequest.newBuilder()
-                            .uri(java.net.URI.create("https://api.github.com/users/" + username + "/events/public?per_page=100"))
-                            .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
-                            .header("Accept", "application/vnd.github.v3+json")
-                            .GET()
-                            .build();
+            // 2. Fetch official 365-day GitHub contribution graph HTML
+            try {
+                java.net.http.HttpRequest contribReq = java.net.http.HttpRequest.newBuilder()
+                        .uri(java.net.URI.create("https://github.com/users/" + username + "/contributions"))
+                        .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
+                        .GET()
+                        .build();
 
-                    java.net.http.HttpResponse<String> eventsRes = client.send(eventsReq, java.net.http.HttpResponse.BodyHandlers.ofString());
-                    if (eventsRes.statusCode() == 200) {
-                        com.fasterxml.jackson.databind.JsonNode eventsNode = mapper.readTree(eventsRes.body());
-                        if (eventsNode.isArray()) {
-                            for (com.fasterxml.jackson.databind.JsonNode event : eventsNode) {
-                                String type = event.path("type").asText("");
-                                String createdAt = event.path("created_at").asText("");
-                                if (!createdAt.isEmpty() && createdAt.length() >= 10) {
-                                    String dateStr = createdAt.substring(0, 10);
-                                    int addCommits = 1;
-                                    if ("PushEvent".equalsIgnoreCase(type)) {
-                                        int size = event.path("payload").path("size").asInt(1);
-                                        addCommits = Math.max(1, size);
-                                    }
-                                    commitCounts.put(dateStr, commitCounts.getOrDefault(dateStr, 0) + addCommits);
+                java.net.http.HttpResponse<String> contribRes = client.send(contribReq, java.net.http.HttpResponse.BodyHandlers.ofString());
+                if (contribRes.statusCode() == 200) {
+                    String html = contribRes.body();
+                    java.util.Map<String, String> idToDate = new java.util.HashMap<>();
+                    java.util.regex.Pattern cellPattern = java.util.regex.Pattern.compile("data-date=\"(\\d{4}-\\d{2}-\\d{2})\"[^>]*id=\"([^\"]+)\"");
+                    java.util.regex.Matcher cellMatcher = cellPattern.matcher(html);
+                    while (cellMatcher.find()) {
+                        idToDate.put(cellMatcher.group(2), cellMatcher.group(1));
+                    }
+
+                    java.util.regex.Pattern tipPattern = java.util.regex.Pattern.compile("<tool-tip[^>]*for=\"([^\"]+)\"[^>]*>([^<]+)</tool-tip>");
+                    java.util.regex.Matcher tipMatcher = tipPattern.matcher(html);
+                    while (tipMatcher.find()) {
+                        String id = tipMatcher.group(1);
+                        String text = tipMatcher.group(2).trim();
+                        String date = idToDate.get(id);
+                        if (date != null) {
+                            int count = 0;
+                            if (!text.startsWith("No contributions")) {
+                                java.util.regex.Matcher numMatcher = java.util.regex.Pattern.compile("^(\\d+)").matcher(text);
+                                if (numMatcher.find()) {
+                                    count = Integer.parseInt(numMatcher.group(1));
                                 }
                             }
+                            commitCounts.put(date, count);
                         }
                     }
-                } catch (Exception ignored) {}
-            } else {
-                // If API rate limited, fallback gracefully
-                java.util.Random r = new java.util.Random((long) username.hashCode() * 31);
-                publicRepos = r.nextInt(40) + 10;
-                followers = r.nextInt(25) + 5;
+                }
+            } catch (Exception e) {
+                System.err.println("Error parsing GitHub contributions HTML: " + e.getMessage());
             }
 
             profile.setProblemsSolved(publicRepos);
@@ -705,7 +710,7 @@ public class ProfileService {
                 userRepository.save(u);
             }
 
-            // Build 365-day commit heatmap strictly from GitHub events data
+            // Build exact 365-day commit heatmap JSON from official GitHub contribution calendar
             StringBuilder heatmapBuilder = new StringBuilder("[");
             java.time.LocalDate today = java.time.LocalDate.now();
             for (int i = 364; i >= 0; i--) {
