@@ -237,7 +237,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onOpenAccountModal }) 
       fetchProfileData();
     } catch (err: any) {
       console.error('Failed to link platform profile:', err);
-      setLinkingError('Could not connect account. Please check the username and try again.');
+      setLinkingError(err.response?.data?.message || 'Could not connect account. Please check the username and try again.');
     } finally {
       setIsLinking(false);
     }
@@ -1356,39 +1356,39 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onOpenAccountModal }) 
             className="absolute inset-0 bg-black/70 backdrop-blur-sm"
           />
 
-          <div className="bg-[#090D1A] border border-white/[0.08] w-full max-w-sm rounded-2xl relative z-10 overflow-hidden shadow-2xl flex flex-col">
-            <header className="px-6 py-4.5 border-b border-white/[0.05] flex items-center justify-between">
-              <h3 className="text-sm font-extrabold text-white uppercase tracking-wider">Link {linkingPlatform}</h3>
+          <div className={`w-full max-w-sm rounded-2xl relative z-10 overflow-hidden shadow-2xl flex flex-col border ${dark ? 'bg-[#090D1A] border-white/[0.08] text-white' : 'bg-white border-slate-200 text-slate-900'}`}>
+            <header className={`px-6 py-4.5 border-b flex items-center justify-between ${dark ? 'border-white/[0.05]' : 'border-slate-100'}`}>
+              <h3 className={`text-sm font-extrabold uppercase tracking-wider ${dark ? 'text-white' : 'text-slate-900'}`}>Link {linkingPlatform}</h3>
               <button 
                 onClick={() => setLinkingPlatform(null)}
-                className="p-1 rounded-lg bg-white/[0.03] hover:bg-white/[0.08] text-[#7B8AB8] hover:text-white transition"
+                className={`p-1 rounded-lg transition cursor-pointer ${dark ? 'bg-white/[0.03] hover:bg-white/[0.08] text-slate-400 hover:text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900'}`}
               >
                 <X className="w-4 h-4" />
               </button>
             </header>
 
-            <form onSubmit={handleLinkPlatform} className="p-6 space-y-4 text-xs font-semibold text-[#7B8AB8]">
+            <form onSubmit={handleLinkPlatform} className="p-6 space-y-4 text-xs font-semibold">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-[#4A5580]">{linkingPlatform} Username</label>
+                <label className={`text-[10px] font-bold uppercase tracking-wider ${dark ? 'text-slate-400' : 'text-slate-600'}`}>{linkingPlatform} Username</label>
                 <input 
                   type="text" 
                   value={usernameInput}
                   onChange={(e) => setUsernameInput(e.target.value)}
-                  placeholder={`e.g. ${linkingPlatform.toLowerCase()}_user`}
+                  placeholder={`e.g. ${linkingPlatform?.toLowerCase()}_user`}
                   required
-                  className="w-full h-10 px-4 rounded-xl bg-[#030712] border border-white/[0.06] text-white focus:outline-none focus:border-[#4A6CF7]/50 transition"
+                  className={`w-full h-10 px-4 rounded-xl border text-xs font-semibold focus:outline-none transition ${dark ? 'bg-[#030712] border-white/[0.06] text-white focus:border-[#4A6CF7]/50' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-blue-500'}`}
                 />
               </div>
 
               {linkingError && (
-                <p className="text-[10px] text-rose-500 font-extrabold">{linkingError}</p>
+                <p className="text-[10px] text-rose-500 font-extrabold bg-rose-500/10 p-2 rounded-lg border border-rose-500/20">{linkingError}</p>
               )}
 
               <footer className="flex items-center justify-end gap-3 pt-2">
                 <button 
                   type="button" 
                   onClick={() => setLinkingPlatform(null)}
-                  className="px-4 py-2 bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.06] text-white rounded-xl transition duration-200"
+                  className={`px-4 py-2 border rounded-xl transition duration-200 cursor-pointer ${dark ? 'bg-white/[0.02] border-white/[0.06] hover:bg-white/[0.06] text-white' : 'bg-slate-100 border-slate-200 hover:bg-slate-200 text-slate-700'}`}
                 >
                   Cancel
                 </button>
